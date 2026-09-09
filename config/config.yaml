@@ -1,0 +1,84 @@
+# Single source of truth for the CSI data collection pipeline.
+# Every script (shell + Python) and the firmware (via scripts/push_config.sh -> NVS)
+# reads from THIS file. Do not duplicate any of these values elsewhere.
+
+# Who hosts the WiFi network is switchable (network.ap_source below) --
+# the RECEIVER board doesn't care who's hosting, it just joins whatever
+# network hotspot_ssid/hotspot_password name. Every collected session
+# records which source was actually in use at collection time (see
+# metadata.json's "ap_source" field / data/manifest.csv).
+#
+#   ap_source: "esp"       -- a second ESP32-S3 hosts the network itself
+#                              (AP mode, role=hotspot, no phone needed).
+#                              Push its config with: scripts/push_config.sh hotspot
+#   ap_source: "android"   -- an Android phone's hotspot hosts the network
+#                              (turn it on manually, force 2.4GHz band).
+#   ap_source: "google-ap" -- a Google WiFi router/AP hosts the network
+#                              instead (already on/broadcasting, nothing to
+#                              toggle -- just make sure it's on 2.4GHz).
+# Any value other than "esp" means "some external AP, already running" --
+# the second ESP32 isn't needed for those modes (it can optionally still
+# run as a dedicated "transmitter" -- see collector/nvs_gen.py).
+#
+# Either way: RECEIVER (joins the network, captures CSI, streams to the
+# laptop) is unchanged, and the laptop's collector/stimulus.py still
+# generates the CSI-triggering traffic (no dedicated transmitter board
+# in the default 2-board topology, regardless of ap_source).
+
+device:
+  board_id_hint: "esp32s3-1"      # human label only
+  mac: "ac:27:6e:a5:5b:c8"
+
+network:
+  ap_source: "google-ap"            # see note above; recorded per-session
+  hotspot_ssid: "setup3CE50"        # the Google AP's SSID (case-sensitive: confirmed from laptop's WiFi list)
+  hotspot_password: "styxrcgrm"     # the Google AP's password
+  laptop_iface: "wlp0s20f3"        # laptop's WiFi interface (confirmed on this machine)
+  laptop_ip: "192.168.84.21"
+  tcp_port: 5555
+
+hotspot:
+  serial_port: "/dev/ttyACM0"       # only relevant when ap_source: "esp" -- unused here
+  channel: 1
+
+transport:
+  mode: "tcp"
+  serial_port: "/dev/ttyACM0"       # the RECEIVER board (this scenario: single ESP on ttyACM0)
+  serial_baud: 921600              # nominal only; native USB-CDC on S3 mostly ignores baud
+
+csi:
+  lltf_en: true
+  htltf_en: true
+  stbc_htltf2_en: false
+  ltf_merge_en: true
+  channel_filter_en: true
+  manu_scale: false
+  shift: 0
+  dump_ack_en: false                # tested true: caused a severe regression (near-total data loss) on this hardware/IDF -- do not enable without re-verifying
+  promiscuous: true                # required for usable CSI density (see README)
+  promiscuous_filter: "data"        # data | mgmt | all -- tested "all": same severe regression as dump_ack_en above
+  bssid_filter_enabled: true        # only count CSI from frames matching the hotspot's BSSID
+
+capture:
+  target_sample_rate_hz: 50
+  max_csi_payload_bytes: 640        # >= largest documented S3 CSI length (612 bytes), rounded up
+
+stimulus:
+  enabled: true                     # essential in the 2-board (no dedicated transmitter) topology
+  target_ip: "auto"                 # "auto" = laptop's current default-route gateway (the AP)
+  rate_hz: 100
+  packet_size_bytes: 32
+
+capacity_test:
+  duration_s: 60
+  candidate_rates_hz: [20, 50, 100, 200]
+  max_acceptable_drop_pct: 1.0
+  max_acceptable_jitter_ms: 20
+
+dataset:
+  output_dir: "./data"
+  labels: ["authorized", "unauthorized", "none"]
+
+firmware:
+  idf_path: "/home/bn3273/.espressif/v6.0.2/esp-idf"
+  project_dir: "./firmware"

@@ -1,0 +1,9 @@
+# Build-time-only knobs. Never credentials or IPs -- those live in
+# config/config.yaml and reach the device via NVS (scripts/push_config.sh),
+# not here, so there is exactly one place values can drift out of sync.
+
+CONFIG_ESP_WIFI_CSI_ENABLED=y
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
