@@ -4,7 +4,6 @@ firmware/sdkconfig.old
 firmware/managed_components/
 firmware/dependencies.lock
 
-data/
 reports/
 
 __pycache__/
