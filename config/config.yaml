@@ -16,6 +16,10 @@
 #   ap_source: "google-ap" -- a Google WiFi router/AP hosts the network
 #                              instead (already on/broadcasting, nothing to
 #                              toggle -- just make sure it's on 2.4GHz).
+#   ap_source: "home-router" -- any other existing home/office router (e.g. an
+#                              ISP-provided router like ACT Fibernet) hosts the
+#                              network -- already on, nothing to toggle, just
+#                              make sure it's on 2.4GHz. See SETUP_ACTFIBERNET.md.
 # Any value other than "esp" means "some external AP, already running" --
 # the second ESP32 isn't needed for those modes (it can optionally still
 # run as a dedicated "transmitter" -- see collector/nvs_gen.py).
@@ -30,11 +34,11 @@ device:
   mac: "ac:27:6e:a5:5b:c8"
 
 network:
-  ap_source: "google-ap"            # see note above; recorded per-session
-  hotspot_ssid: "setup3CE50"        # the Google AP's SSID (case-sensitive: confirmed from laptop's WiFi list)
-  hotspot_password: "styxrcgrm"     # the Google AP's password
+  ap_source: "home-router"          # see note above; recorded per-session
+  hotspot_ssid: "ACTFIBERNET"       # the home router's SSID (case-sensitive)
+  hotspot_password: ""              # ACTFIBERNET currently has no password (open network)
   laptop_iface: "wlp0s20f3"        # laptop's WiFi interface (confirmed on this machine)
-  laptop_ip: "192.168.84.21"
+  laptop_ip: "192.168.0.101"
   tcp_port: 5555
 
 hotspot:

@@ -22,6 +22,8 @@ Pick the guide matching how you want to host the WiFi network (switchable via `n
 - **[SETUP_ESP_HOTSPOT.md](SETUP_ESP_HOTSPOT.md)** -- a second ESP32-S3 hosts the network itself.
 - **[SETUP_GOOGLE_AP.md](SETUP_GOOGLE_AP.md)** -- an existing home/office AP (Google WiFi or similar)
   hosts the network.
+- **[SETUP_ACTFIBERNET.md](SETUP_ACTFIBERNET.md)** -- an ACT Fibernet (or other ISP-provided) home
+  router hosts the network.
 
 Each is self-contained: exact config values to change, first-time setup, and routine day-to-day use.
 
