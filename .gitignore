@@ -4,7 +4,7 @@ firmware/sdkconfig.old
 firmware/managed_components/
 firmware/dependencies.lock
 
-reports/
+/reports/
 
 __pycache__/
 *.pyc
@@ -12,3 +12,8 @@ __pycache__/
 venv/
 
 .claude/
+
+temp/
+ml/data_pipeline/cache/
+ml/visualization/figures/
+visualizations/

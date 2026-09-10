@@ -1,0 +1,86 @@
+{
+  "label": "unauthorized",
+  "person_id": "sai",
+  "notes": "",
+  "start_ts": 1789038244.7505217,
+  "end_ts": 1789038424.762759,
+  "duration_s": 180.01223731040955,
+  "transport_used": "tcp",
+  "board_mac": "ac:27:6e:a5:5b:c8",
+  "firmware_version": "wire-v1",
+  "config_snapshot": {
+    "device": {
+      "board_id_hint": "esp32s3-1",
+      "mac": "ac:27:6e:a5:5b:c8"
+    },
+    "network": {
+      "ap_source": "home-router",
+      "hotspot_ssid": "ACTFIBERNET",
+      "hotspot_password": "",
+      "laptop_iface": "wlp0s20f3",
+      "laptop_ip": "192.168.0.101",
+      "tcp_port": 5555
+    },
+    "hotspot": {
+      "serial_port": "/dev/ttyACM0",
+      "channel": 1
+    },
+    "transport": {
+      "mode": "tcp",
+      "serial_port": "/dev/ttyACM0",
+      "serial_baud": 921600
+    },
+    "csi": {
+      "lltf_en": true,
+      "htltf_en": true,
+      "stbc_htltf2_en": false,
+      "ltf_merge_en": true,
+      "channel_filter_en": true,
+      "manu_scale": false,
+      "shift": 0,
+      "dump_ack_en": false,
+      "promiscuous": true,
+      "promiscuous_filter": "data",
+      "bssid_filter_enabled": true
+    },
+    "capture": {
+      "target_sample_rate_hz": 50,
+      "max_csi_payload_bytes": 640
+    },
+    "stimulus": {
+      "enabled": true,
+      "target_ip": "auto",
+      "rate_hz": 100,
+      "packet_size_bytes": 32
+    },
+    "capacity_test": {
+      "duration_s": 60,
+      "candidate_rates_hz": [
+        20,
+        50,
+        100,
+        200
+      ],
+      "max_acceptable_drop_pct": 1.0,
+      "max_acceptable_jitter_ms": 20
+    },
+    "dataset": {
+      "output_dir": "./data",
+      "labels": [
+        "authorized",
+        "unauthorized",
+        "none"
+      ]
+    },
+    "firmware": {
+      "idf_path": "/home/bn3273/.espressif/v6.0.2/esp-idf",
+      "project_dir": "./firmware"
+    }
+  },
+  "sample_count": 28494,
+  "ap_source": "home-router",
+  "motion": "walking",
+  "dropped_samples": 109,
+  "avg_rate_hz": 158.2892386969532,
+  "format_version": 1
+}

@@ -1,0 +1,109 @@
+timestamp,stage,task,preprocessing,model,split_type,fold,accuracy,eer,auroc,n_train,n_test,notes
+2026-09-09T23:46:18.699978+00:00,1,task0_presence,raw,random_forest,session_disjoint_kfold,0,0.5758654157230669,0.33814333814333813,0.7469861422430593,11843,3091,
+2026-09-09T23:46:18.699978+00:00,1,task0_presence,raw,random_forest,session_disjoint_kfold,1,0.936534034856955,0.06468814098975934,0.9910837790811301,11893,3041,
+2026-09-09T23:46:18.699978+00:00,1,task0_presence,raw,random_forest,session_disjoint_kfold,2,0.9160571229536747,0.014683446005061955,0.9979982707529659,12063,2871,
+2026-09-09T23:46:18.699978+00:00,1,task0_presence,raw,random_forest,session_disjoint_kfold,3,0.9989547038327526,0.0013238643761748236,0.9999965584115005,12064,2870,
+2026-09-09T23:46:18.699978+00:00,1,task0_presence,raw,random_forest,session_disjoint_kfold,4,0.9993466187520418,0.00019364833462431896,0.999995957237273,11873,3061,
+2026-09-09T23:46:18.699978+00:00,1,task0_presence,raw,random_forest,session_disjoint_kfold,mean,0.8853515792236981,0.08380648756979171,0.9472121415451857,,,std=0.1583
+2026-09-09T23:46:18.699978+00:00,1,task0_presence,raw,random_forest,naive_random_LEAKY,0,0.9979906229068989,0.0007252924487971748,0.9999995142046558,11948,2986,"leakage-prone, for comparison only"
+2026-09-09T23:47:09.311607+00:00,1,taskA_threeway,raw,random_forest,session_disjoint_kfold,0,0.4060174700744096,,,11843,3091,
+2026-09-09T23:47:09.311607+00:00,1,taskA_threeway,raw,random_forest,session_disjoint_kfold,1,0.5899375205524499,,,11893,3041,
+2026-09-09T23:47:09.311607+00:00,1,taskA_threeway,raw,random_forest,session_disjoint_kfold,2,0.7589690003483107,,,12063,2871,
+2026-09-09T23:47:09.311607+00:00,1,taskA_threeway,raw,random_forest,session_disjoint_kfold,3,0.6898954703832753,,,12064,2870,
+2026-09-09T23:47:09.311607+00:00,1,taskA_threeway,raw,random_forest,session_disjoint_kfold,4,0.6729826853969291,,,11873,3061,
+2026-09-09T23:47:09.311607+00:00,1,taskA_threeway,raw,random_forest,session_disjoint_kfold,mean,0.6235604293510749,,,,,std=0.1214
+2026-09-09T23:47:09.311607+00:00,1,taskA_threeway,raw,random_forest,naive_random_LEAKY,0,0.8958472873409243,,,11948,2986,"leakage-prone, for comparison only"
+2026-09-09T23:48:07.687832+00:00,1,taskB_identity,raw,random_forest,session_disjoint_kfold,0,0.8849144634525661,,,4203,643,
+2026-09-09T23:48:07.687832+00:00,1,taskB_identity,raw,random_forest,session_disjoint_kfold,1,0.8267716535433071,,,4211,635,
+2026-09-09T23:48:07.687832+00:00,1,taskB_identity,raw,random_forest,session_disjoint_kfold,2,0.021496130696474634,,,3683,1163,
+2026-09-09T23:48:07.687832+00:00,1,taskB_identity,raw,random_forest,session_disjoint_kfold,3,0.0231023102310231,,,3634,1212,
+2026-09-09T23:48:07.687832+00:00,1,taskB_identity,raw,random_forest,session_disjoint_kfold,4,0.6613579212070411,,,3653,1193,
+2026-09-09T23:48:07.687832+00:00,1,taskB_identity,raw,random_forest,session_disjoint_kfold,mean,0.4835284958260824,,,,,std=0.3837
+2026-09-09T23:48:07.687832+00:00,1,taskB_identity,raw,random_forest,naive_random_LEAKY,0,0.9153766769865841,,,3877,969,"leakage-prone, for comparison only"
+2026-09-09T23:48:23.766459+00:00,1,taskC_openset_proxy,raw,random_forest,leave_one_unauth_person_out,divya,0.5834260289210234,0.3798518684771631,0.6767321288295365,7759,1798,
+2026-09-09T23:48:23.766459+00:00,1,taskC_openset_proxy,raw,random_forest,leave_one_unauth_person_out,harshitha,0.5367892976588629,0.4290769608870487,0.6183995669696774,7763,1794,
+2026-09-09T23:48:23.766459+00:00,1,taskC_openset_proxy,raw,random_forest,leave_one_unauth_person_out,kishore,0.4157685762904141,0.5495078314122193,0.43864324991583437,7794,1763,
+2026-09-09T23:48:23.766459+00:00,1,taskC_openset_proxy,raw,random_forest,leave_one_unauth_person_out,manas,0.5038932146829811,0.5250035536602701,0.48579209217072533,7759,1798,
+2026-09-09T23:48:23.766459+00:00,1,taskC_openset_proxy,raw,random_forest,leave_one_unauth_person_out,sai,0.5743280307185957,0.36079911447546953,0.704048418196101,7734,1823,
+2026-09-09T23:48:23.766459+00:00,1,taskC_openset_proxy,raw,random_forest,leave_one_unauth_person_out,siva,0.5658342792281499,0.40677706077298365,0.6175604059136028,7795,1762,
+2026-09-09T23:48:23.766459+00:00,1,taskC_openset_proxy,raw,random_forest,leave_one_unauth_person_out,sumanth,0.5356550580431177,0.4233110761979576,0.6346112133753855,7748,1809,
+2026-09-09T23:48:23.766459+00:00,1,taskC_openset_proxy,raw,random_forest,leave_one_unauth_person_out,vasu,0.47577092511013214,0.4026219585411124,0.650596248186228,7741,1816,
+2026-09-09T23:48:23.766459+00:00,1,taskC_openset_proxy,raw,random_forest,leave_one_unauth_person_out,vishwa,0.5074792243767313,0.35163000785545956,0.7225738147410947,7752,1805,
+2026-09-09T23:48:23.766459+00:00,1,taskC_openset_proxy,raw,random_forest,naive_random_LEAKY,0,0.8545264259549974,0.14757549997370864,0.9392697360349148,7646,1911,"leakage-prone, for comparison only"
+2026-09-09T23:49:27.880835+00:00,1,task0_presence,calibA,random_forest,session_disjoint_kfold,0,0.5758654157230669,0.35012652403956757,0.7465101323796975,11843,3091,
+2026-09-09T23:49:27.880835+00:00,1,task0_presence,calibA,random_forest,session_disjoint_kfold,1,0.936534034856955,0.06476688607767872,0.9911001447771135,11893,3041,
+2026-09-09T23:49:27.880835+00:00,1,task0_presence,calibA,random_forest,session_disjoint_kfold,2,0.9160571229536747,0.014934198261832248,0.9980025595600941,12063,2871,
+2026-09-09T23:49:27.880835+00:00,1,task0_presence,calibA,random_forest,session_disjoint_kfold,3,0.9989547038327526,0.0013238643761748236,0.9999965584115005,12064,2870,
+2026-09-09T23:49:27.880835+00:00,1,task0_presence,calibA,random_forest,session_disjoint_kfold,4,0.9993466187520418,0.00019364833462431896,0.9999955529610003,11873,3061,
+2026-09-09T23:49:27.880835+00:00,1,task0_presence,calibA,random_forest,session_disjoint_kfold,mean,0.8853515792236981,0.08626902421797553,0.9471209896178813,,,std=0.1583
+2026-09-09T23:49:27.880835+00:00,1,task0_presence,calibA,random_forest,naive_random_LEAKY,0,0.9979906229068989,0.0007252924487971748,0.9999995142046558,11948,2986,"leakage-prone, for comparison only"
+2026-09-09T23:50:21.616348+00:00,1,taskA_threeway,calibA,random_forest,session_disjoint_kfold,0,0.4069880297638305,,,11843,3091,
+2026-09-09T23:50:21.616348+00:00,1,taskA_threeway,calibA,random_forest,session_disjoint_kfold,1,0.5905951989477146,,,11893,3041,
+2026-09-09T23:50:21.616348+00:00,1,taskA_threeway,calibA,random_forest,session_disjoint_kfold,2,0.7621037965865552,,,12063,2871,
+2026-09-09T23:50:21.616348+00:00,1,taskA_threeway,calibA,random_forest,session_disjoint_kfold,3,0.6885017421602787,,,12064,2870,
+2026-09-09T23:50:21.616348+00:00,1,taskA_threeway,calibA,random_forest,session_disjoint_kfold,4,0.6664488729173472,,,11873,3061,
+2026-09-09T23:50:21.616348+00:00,1,taskA_threeway,calibA,random_forest,session_disjoint_kfold,mean,0.6229275280751453,,,,,std=0.1210
+2026-09-09T23:50:21.616348+00:00,1,taskA_threeway,calibA,random_forest,naive_random_LEAKY,0,0.8958472873409243,,,11948,2986,"leakage-prone, for comparison only"
+2026-09-09T23:51:20.161602+00:00,1,taskB_identity,calibA,random_forest,session_disjoint_kfold,0,0.8895800933125972,,,4203,643,
+2026-09-09T23:51:20.161602+00:00,1,taskB_identity,calibA,random_forest,session_disjoint_kfold,1,0.8267716535433071,,,4211,635,
+2026-09-09T23:51:20.161602+00:00,1,taskB_identity,calibA,random_forest,session_disjoint_kfold,2,0.023215821152192607,,,3683,1163,
+2026-09-09T23:51:20.161602+00:00,1,taskB_identity,calibA,random_forest,session_disjoint_kfold,3,0.02392739273927393,,,3634,1212,
+2026-09-09T23:51:20.161602+00:00,1,taskB_identity,calibA,random_forest,session_disjoint_kfold,4,0.663872590108969,,,3653,1193,
+2026-09-09T23:51:20.161602+00:00,1,taskB_identity,calibA,random_forest,session_disjoint_kfold,mean,0.485473510171268,,,,,std=0.3843
+2026-09-09T23:51:20.161602+00:00,1,taskB_identity,calibA,random_forest,naive_random_LEAKY,0,0.9153766769865841,,,3877,969,"leakage-prone, for comparison only"
+2026-09-09T23:51:36.426909+00:00,1,taskC_openset_proxy,calibA,random_forest,leave_one_unauth_person_out,divya,0.5850945494994438,0.37087719298245614,0.682669359967082,7759,1798,
+2026-09-09T23:51:36.426909+00:00,1,taskC_openset_proxy,calibA,random_forest,leave_one_unauth_person_out,harshitha,0.5457079152731327,0.4253233780586913,0.6223762991286621,7763,1794,
+2026-09-09T23:51:36.426909+00:00,1,taskC_openset_proxy,calibA,random_forest,leave_one_unauth_person_out,kishore,0.41747022121384003,0.5496657421806115,0.44192090033185305,7794,1763,
+2026-09-09T23:51:36.426909+00:00,1,taskC_openset_proxy,calibA,random_forest,leave_one_unauth_person_out,manas,0.503337041156841,0.5178259080537164,0.4857374780234167,7759,1798,
+2026-09-09T23:51:36.426909+00:00,1,taskC_openset_proxy,calibA,random_forest,leave_one_unauth_person_out,sai,0.5770707624794296,0.3617303434978219,0.7071663215025352,7734,1823,
+2026-09-09T23:51:36.426909+00:00,1,taskC_openset_proxy,calibA,random_forest,leave_one_unauth_person_out,siva,0.5669693530079455,0.40858510161494754,0.619076879085361,7795,1762,
+2026-09-09T23:51:36.426909+00:00,1,taskC_openset_proxy,calibA,random_forest,leave_one_unauth_person_out,sumanth,0.531232725262576,0.4203161822466614,0.6362848952409984,7748,1809,
+2026-09-09T23:51:36.426909+00:00,1,taskC_openset_proxy,calibA,random_forest,leave_one_unauth_person_out,vasu,0.4686123348017621,0.39855896441028354,0.6505297010151337,7741,1816,
+2026-09-09T23:51:36.426909+00:00,1,taskC_openset_proxy,calibA,random_forest,leave_one_unauth_person_out,vishwa,0.5113573407202217,0.3538323420491527,0.7220274763893235,7752,1805,
+2026-09-09T23:51:36.426909+00:00,1,taskC_openset_proxy,calibA,random_forest,naive_random_LEAKY,0,0.8597592883307169,0.14389306872557095,0.9398799142902214,7646,1911,"leakage-prone, for comparison only"
+2026-09-09T23:58:12.302437+00:00,2,taskB_identity,raw,dualbranch,session_disjoint_single_split,0,0.7433903576982893,,,4203,643,
+2026-09-09T23:59:08.381927+00:00,2,task0_presence,raw,cnn1d,session_disjoint_single_split,0,0.5684244581041734,,,11843,3091,
+2026-09-10T00:02:44.356638+00:00,2,task0_presence,raw,bilstm,session_disjoint_single_split,0,0.5758654157230669,,,11843,3091,
+2026-09-10T00:04:48.327994+00:00,2,task0_presence,raw,whofi_transformer,session_disjoint_single_split,0,0.5706890973794888,,,11843,3091,
+2026-09-10T00:08:27.116630+00:00,2,task0_presence,raw,dualbranch_transformer,session_disjoint_single_split,0,0.5771594953089615,,,11843,3091,
+2026-09-10T00:15:03.164116+00:00,2,task0_presence,raw,crossattn_transformer,session_disjoint_single_split,0,0.578453574894856,,,11843,3091,
+2026-09-10T00:18:47.647328+00:00,2,task0_presence,calibA_context,calib_context_transformer,session_disjoint_single_split,0,0.5755418958265933,,,11843,3091,
+2026-09-10T00:19:02.173687+00:00,2,taskA_threeway,raw,cnn1d,session_disjoint_single_split,0,0.3778712390812035,,,11843,3091,
+2026-09-10T00:21:17.982610+00:00,2,taskA_threeway,raw,bilstm,session_disjoint_single_split,0,0.404723390488515,,,11843,3091,
+2026-09-10T00:23:14.687763+00:00,2,taskA_threeway,raw,whofi_transformer,session_disjoint_single_split,0,0.37657715949530896,,,11843,3091,
+2026-09-10T00:26:56.863410+00:00,2,taskA_threeway,raw,dualbranch_transformer,session_disjoint_single_split,0,0.41572306696861855,,,11843,3091,
+2026-09-10T00:34:00.939495+00:00,2,taskA_threeway,raw,crossattn_transformer,session_disjoint_single_split,0,0.3565189259139437,,,11843,3091,
+2026-09-10T00:37:40.728092+00:00,2,taskA_threeway,calibA_context,calib_context_transformer,session_disjoint_single_split,0,0.30119702361695244,,,11843,3091,
+2026-09-10T00:37:45.661932+00:00,2,taskB_identity,raw,cnn1d,session_disjoint_single_split,0,0.7713841368584758,,,4203,643,
+2026-09-10T00:38:30.742053+00:00,2,taskB_identity,raw,bilstm,session_disjoint_single_split,0,0.8164852255054432,,,4203,643,
+2026-09-10T00:39:13.475864+00:00,2,taskB_identity,raw,whofi_transformer,session_disjoint_single_split,0,0.6127527216174183,,,4203,643,
+2026-09-10T00:40:44.693959+00:00,2,taskB_identity,raw,dualbranch_transformer,session_disjoint_single_split,0,0.8864696734059098,,,4203,643,
+2026-09-10T00:43:12.955540+00:00,2,taskB_identity,raw,crossattn_transformer,session_disjoint_single_split,0,0.8211508553654744,,,4203,643,
+2026-09-10T00:44:33.245015+00:00,2,taskB_identity,calibA_context,calib_context_transformer,session_disjoint_single_split,0,0.838258164852255,,,4203,643,
+2026-09-10T00:48:53.183867+00:00,2,taskC_openset_embedding,raw,whofi_transformer_embedding,leave_one_unauth_person_out,divya,,0.45542737440616465,0.5700632177458571,7759,1798,
+2026-09-10T00:50:41.413585+00:00,2,taskC_openset_embedding,raw,whofi_transformer_embedding,leave_one_unauth_person_out,harshitha,,0.49640020927788575,0.5079398944262423,7763,1794,
+2026-09-10T00:52:44.886574+00:00,2,taskC_openset_embedding,raw,whofi_transformer_embedding,leave_one_unauth_person_out,kishore,,0.4589712554306876,0.5750116228738157,7794,1763,
+2026-09-10T00:54:30.331349+00:00,2,taskC_openset_embedding,raw,whofi_transformer_embedding,leave_one_unauth_person_out,manas,,0.6039471813863015,0.35570418583772867,7759,1798,
+2026-09-10T00:56:16.829356+00:00,2,taskC_openset_embedding,raw,whofi_transformer_embedding,leave_one_unauth_person_out,sai,,0.5005891594658287,0.49035420981218303,7734,1823,
+2026-09-10T00:58:02.803476+00:00,2,taskC_openset_embedding,raw,whofi_transformer_embedding,leave_one_unauth_person_out,siva,,0.4393964950835104,0.6391002687563153,7795,1762,
+2026-09-10T00:59:55.807075+00:00,2,taskC_openset_embedding,raw,whofi_transformer_embedding,leave_one_unauth_person_out,sumanth,,0.43573252160251374,0.5525517053381951,7748,1809,
+2026-09-10T01:01:47.553675+00:00,2,taskC_openset_embedding,raw,whofi_transformer_embedding,leave_one_unauth_person_out,vasu,,0.3377934404742788,0.739192956415943,7741,1816,
+2026-09-10T01:03:40.877054+00:00,2,taskC_openset_embedding,raw,whofi_transformer_embedding,leave_one_unauth_person_out,vishwa,,0.3828554595443834,0.6887894323396866,7752,1805,
+2026-09-10T01:05:04.600795+00:00,1,taskD_auth_vs_nonauth,raw,random_forest,session_disjoint_kfold,0,0.45648657392429637,nan,nan,11843,3091,
+2026-09-10T01:05:04.600795+00:00,1,taskD_auth_vs_nonauth,raw,random_forest,session_disjoint_kfold,1,0.6320289378493916,0.409018494447105,0.6969711067022417,11893,3041,
+2026-09-10T01:05:04.600795+00:00,1,taskD_auth_vs_nonauth,raw,random_forest,session_disjoint_kfold,2,0.8439568094740508,0.1574564885405168,0.9163162632556318,12063,2871,
+2026-09-10T01:05:04.600795+00:00,1,taskD_auth_vs_nonauth,raw,random_forest,session_disjoint_kfold,3,0.6878048780487804,0.3048313503164124,0.7874862307759254,12064,2870,
+2026-09-10T01:05:04.600795+00:00,1,taskD_auth_vs_nonauth,raw,random_forest,session_disjoint_kfold,4,0.6912773603397583,0.3116434502878902,0.7651522198862615,11873,3061,
+2026-09-10T01:05:04.600795+00:00,1,taskD_auth_vs_nonauth,raw,random_forest,session_disjoint_kfold,mean,0.6623109119272556,0.2957374458979811,0.7914814551550151,,,std=0.1247
+2026-09-10T01:05:04.600795+00:00,1,taskD_auth_vs_nonauth,raw,random_forest,naive_random_LEAKY,0,0.8854655056932351,0.11215038027907745,0.9585534451841623,11948,2986,"leakage-prone, for comparison only"
+2026-09-10T01:06:05.729596+00:00,1,taskD_auth_vs_nonauth,calibA,random_forest,session_disjoint_kfold,0,0.45778065351019087,nan,nan,11843,3091,
+2026-09-10T01:06:05.729596+00:00,1,taskD_auth_vs_nonauth,calibA,random_forest,session_disjoint_kfold,1,0.633344294639921,0.41094136963809264,0.6964356571115824,11893,3041,
+2026-09-10T01:06:05.729596+00:00,1,taskD_auth_vs_nonauth,calibA,random_forest,session_disjoint_kfold,2,0.8425635667014978,0.157565037423283,0.9159968264976516,12063,2871,
+2026-09-10T01:06:05.729596+00:00,1,taskD_auth_vs_nonauth,calibA,random_forest,session_disjoint_kfold,3,0.6898954703832753,0.3076026009225069,0.7875473996991283,12064,2870,
+2026-09-10T01:06:05.729596+00:00,1,taskD_auth_vs_nonauth,calibA,random_forest,session_disjoint_kfold,4,0.686703691604051,0.31613101993481163,0.7625182838396107,11873,3061,
+2026-09-10T01:06:05.729596+00:00,1,taskD_auth_vs_nonauth,calibA,random_forest,session_disjoint_kfold,mean,0.6620575353677872,0.29806000697967355,0.7906245417869933,,,std=0.1237
+2026-09-10T01:06:05.729596+00:00,1,taskD_auth_vs_nonauth,calibA,random_forest,naive_random_LEAKY,0,0.8854655056932351,0.11239668569779665,0.9585823010491169,11948,2986,"leakage-prone, for comparison only"
+2026-09-10T01:36:03.185630+00:00,2,taskD_auth_vs_nonauth,raw,crossattn_transformer_fullcv,session_disjoint_kfold,1,0.632357777047024,0.3788043602198353,0.6983749515404438,11893,3041,false_accept_unauth=0.5746549560853199 false_accept_none=0.10009354536950421
+2026-09-10T01:46:46.627522+00:00,2,taskD_auth_vs_nonauth,raw,crossattn_transformer_fullcv,session_disjoint_kfold,2,0.7168234064785789,0.28280635376105734,0.7975709889821643,12063,2871,false_accept_unauth=0.5495495495495496 false_accept_none=0.02280501710376283
+2026-09-10T01:57:24.501726+00:00,2,taskD_auth_vs_nonauth,raw,crossattn_transformer_fullcv,session_disjoint_kfold,3,0.6714285714285714,0.39827061032163413,0.7393955217385899,12064,2870,false_accept_unauth=0.22122762148337596 false_accept_none=0.0
+2026-09-10T02:07:29.264177+00:00,2,taskD_auth_vs_nonauth,raw,crossattn_transformer_fullcv,session_disjoint_kfold,4,0.6200588043123162,0.3763095481732108,0.7124037302133639,11873,3061,false_accept_unauth=0.6358897989575577 false_accept_none=0.0041753653444676405
