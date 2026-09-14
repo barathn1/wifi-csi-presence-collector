@@ -90,6 +90,41 @@ def csi_len_distribution(npz: dict) -> dict[int, int]:
     return {int(l): int(c) for l, c in zip(lens, counts)}
 
 
+def channel_2ghz_freq_mhz(channel: int) -> int:
+    return 2412 + 5 * (channel - 1)
+
+
+def channel_width_summary(npz: dict) -> dict:
+    """Dominant (cwb, channel_primary, channel_secondary) combo for a session, translated into a
+    human-readable channel/bandwidth/frequency-span description -- no router access needed, everything
+    here comes straight from the per-packet rx_ctrl fields the firmware already records. `cwb`: 0=20MHz
+    (HT20), 1=40MHz (HT40). `channel_secondary` (ESP-IDF wifi_second_chan_t): 0=NONE, 1=ABOVE, 2=BELOW."""
+    cwb = npz["cwb"]
+    ch_primary = npz["channel_primary"]
+    ch_secondary = npz["channel_secondary"]
+    combos, counts = np.unique(
+        np.stack([cwb, ch_primary, ch_secondary], axis=1), axis=0, return_counts=True,
+    )
+    dom_cwb, dom_primary, dom_secondary = combos[np.argmax(counts)]
+    dom_cwb, dom_primary, dom_secondary = int(dom_cwb), int(dom_primary), int(dom_secondary)
+
+    primary_center = channel_2ghz_freq_mhz(dom_primary)
+    if dom_cwb == 0:
+        desc = f"20MHz (HT20), channel {dom_primary}, {primary_center - 10}-{primary_center + 10} MHz"
+    else:
+        direction = {0: "NONE", 1: "ABOVE", 2: "BELOW"}.get(dom_secondary, f"?{dom_secondary}")
+        if dom_secondary == 1:
+            span = (primary_center - 10, primary_center + 30)
+        elif dom_secondary == 2:
+            span = (primary_center - 30, primary_center + 10)
+        else:
+            span = (primary_center - 10, primary_center + 10)
+        desc = f"40MHz (HT40), channel {dom_primary}+{direction}, {span[0]}-{span[1]} MHz"
+
+    return {"cwb": dom_cwb, "channel_primary": dom_primary, "channel_secondary": dom_secondary,
+            "description": desc, "fraction_of_packets": float(np.max(counts) / counts.sum())}
+
+
 def list_sessions(label: str | None = None) -> list[Path]:
     """All session dirs under data/, optionally filtered to one label (authorized/unauthorized/none)."""
     labels = [label] if label else ["authorized", "unauthorized", "none"]
@@ -134,10 +169,17 @@ def main() -> None:
     p.add_argument("path", help="session directory")
     p.add_argument("--sample", type=int, default=0, help="packet index to decode and verify")
     p.add_argument("--buckets", action="store_true", help="print csi_len bucket distribution instead")
+    p.add_argument("--channel", action="store_true",
+                   help="print dominant channel/bandwidth (20MHz vs 40MHz, which channel, frequency "
+                        "span) -- no router access needed, reads straight from samples.npz")
     args = p.parse_args()
 
     session_dir = resolve_session_dir(Path(args.path))
-    if args.buckets:
+    if args.channel:
+        session = load_session(session_dir)
+        info = channel_width_summary(session.npz)
+        print(f"{session_dir}: {info['description']} ({100 * info['fraction_of_packets']:.1f}% of packets)")
+    elif args.buckets:
         session = load_session(session_dir)
         dist = csi_len_distribution(session.npz)
         n = sum(dist.values())

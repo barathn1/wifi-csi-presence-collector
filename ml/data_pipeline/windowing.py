@@ -1,15 +1,23 @@
 """Turn decoded sessions into fixed-length CSI windows, without ever materializing the whole
 overlapping-window dataset in RAM at once.
 
-Every session mixes several `csi_len` (frame-type) buckets, but csi_len=372 bytes (186 subcarriers,
-the HT40 frame) dominates every single session in Day 1 (94.2-98.7% of packets per class, checked with
-`python3 -m ml.data_pipeline.decode_csi <session> --buckets`). We filter to that one bucket so every
-window has a consistent, fixed subcarrier count -- simplest correct choice for the first pass. The
-minority buckets (~2-6% of packets) are dropped for now; padding+attention-masking to use them too is
-listed as future work in the transformer models, not done here.
+Every session mixes several `csi_len` (frame-type) buckets. Day 1 sessions were captured almost
+entirely on a 40MHz-bonded channel (94.2-98.7% of packets at csi_len=372 bytes / 186 subcarriers), but
+Day 2 sessions negotiated a 20MHz channel instead (~98-99% of packets at csi_len=256 bytes / 128
+subcarriers) -- confirmed via the per-packet sig_mode/mcs/cwb/channel fields in samples.npz, not a
+firmware change (config_snapshot is identical across days). So "the dominant bucket" is now detected
+PER SESSION (`detect_dominant_csi_len`) rather than assumed to be one global constant. Two modes:
+- `mode="native"`: cache each session at its own dominant subcarrier count. Correct, zero-distortion,
+  but Day 1 (186 subcarriers) and Day 2 (128) windows are then different shapes -- fine for within-day
+  analysis, but they can't share one model's weights for a real cross-day comparison.
+- `mode="resampled"`: additionally resample every session's dominant bucket onto a fixed
+  `csi_resample.TARGET_SUBCARRIERS`-point grid (128, the smaller of the two -- downsampling Day 1,
+  never fabricating resolution Day 2 never captured). This is what day-disjoint splits and
+  calibration Variant B need.
+The minority buckets within a session (~1-6% of packets) are still dropped either way.
 
-Observed packet rate on the dominant bucket is 162-263 Hz (mean ~217 Hz) across all 37 sessions, so
-window_packets=200 is close to a 1-second window (matches the ESP32 person-ID paper's convention);
+Observed packet rate on the dominant bucket is 162-263 Hz (mean ~217 Hz) across all 37 Day-1 sessions,
+so window_packets=200 is close to a 1-second window (matches the ESP32 person-ID paper's convention);
 window_packets=600 (~3s) is the second variant used in the combination sweep.
 
 Memory design (this box runs with very little free RAM/swap alongside other sessions -- a first
@@ -28,9 +36,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from ml.data_pipeline.csi_resample import TARGET_SUBCARRIERS, resample_amplitude, resample_phase
 from ml.data_pipeline.decode_csi import DATA_DIR, REPO_ROOT, decode_session_by_bucket, load_session
 
-DOMINANT_CSI_LEN = 372  # bytes -> 186 subcarriers; see module docstring
+DOMINANT_CSI_LEN = 372  # bytes -> 186 subcarriers; Day-1-only legacy default, kept for old call sites
 SESSION_CACHE_DIR = REPO_ROOT / "ml/data_pipeline/cache/sessions"
 
 
@@ -38,46 +47,64 @@ def load_manifest() -> pd.DataFrame:
     return pd.read_csv(DATA_DIR / "manifest.csv")
 
 
-def _session_cache_path(session_dir_rel: str, csi_len: int) -> Path:
+def detect_dominant_csi_len(npz: dict) -> int:
+    """The csi_len value (bytes) that the most packets in this session share."""
+    lens, counts = np.unique(npz["csi_len"], return_counts=True)
+    return int(lens[np.argmax(counts)])
+
+
+def _session_cache_path(session_dir_rel: str, mode: str) -> Path:
     safe_name = session_dir_rel.replace("/", "__")
-    return SESSION_CACHE_DIR / f"{safe_name}__len{csi_len}.npz"
+    return SESSION_CACHE_DIR / f"{safe_name}__{mode}.npz"
 
 
-def cache_session(session_dir_rel: str, csi_len: int = DOMINANT_CSI_LEN, force: bool = False) -> Path | None:
-    """Decode one session's dominant bucket once and cache it. Returns None if too few packets."""
-    out_path = _session_cache_path(session_dir_rel, csi_len)
+def cache_session(session_dir_rel: str, mode: str = "resampled", force: bool = False) -> Path | None:
+    """Decode one session's own dominant bucket once and cache it (auto-detected per session -- Day 1
+    and Day 2 dominate on different frame formats, see module docstring). `mode`: "native" keeps the
+    session's own subcarrier count; "resampled" additionally resamples onto the shared
+    `TARGET_SUBCARRIERS`-point grid so sessions from either day are shape-compatible. Returns None if
+    the session has too few packets to have decoded at all."""
+    assert mode in ("native", "resampled"), mode
+    out_path = _session_cache_path(session_dir_rel, mode)
     if out_path.exists() and not force:
         return out_path
 
     session = load_session(REPO_ROOT / "data" / session_dir_rel)
     buckets = decode_session_by_bucket(session.npz)
-    bucket = buckets.get(csi_len)
-    if bucket is None:
+    if not buckets:
         return None
+    csi_len = detect_dominant_csi_len(session.npz)
+    bucket = buckets[csi_len]
+
+    amplitude, phase = bucket["amplitude"], bucket["phase"]
+    if mode == "resampled" and bucket["n_subcarriers"] != TARGET_SUBCARRIERS:
+        amplitude = resample_amplitude(amplitude, TARGET_SUBCARRIERS)
+        phase = resample_phase(phase, TARGET_SUBCARRIERS)
 
     packet_idx = bucket["packet_indices"]
     out_path.parent.mkdir(parents=True, exist_ok=True)
     np.savez(
         out_path,
-        amplitude=bucket["amplitude"],
-        phase=bucket["phase"],
+        amplitude=amplitude,
+        phase=phase,
         rssi=session.npz["rssi"][packet_idx].astype(np.float32),
         device_time_us=session.npz["device_time_us"][packet_idx].astype(np.int64),
+        source_csi_len=csi_len,
     )
     return out_path
 
 
-def cache_all_sessions(manifest: pd.DataFrame | None = None, csi_len: int = DOMINANT_CSI_LEN) -> None:
+def cache_all_sessions(manifest: pd.DataFrame | None = None, mode: str = "resampled") -> None:
     manifest = manifest if manifest is not None else load_manifest()
     for _, row in manifest.iterrows():
-        path = cache_session(row["session_dir"], csi_len)
-        n = "skipped (bucket absent)" if path is None else np.load(path)["amplitude"].shape[0]
+        path = cache_session(row["session_dir"], mode)
+        n = "skipped (no packets)" if path is None else np.load(path)["amplitude"].shape[0]
         print(f"  {row['session_dir']}: {n} packets cached")
 
 
 def build_window_index(
     manifest: pd.DataFrame | None = None,
-    csi_len: int = DOMINANT_CSI_LEN,
+    mode: str = "resampled",
     window_packets: int = 200,
     stride_packets: int | None = None,
 ) -> pd.DataFrame:
@@ -87,7 +114,7 @@ def build_window_index(
 
     rows = []
     for _, row in manifest.iterrows():
-        cache_path = cache_session(row["session_dir"], csi_len)
+        cache_path = cache_session(row["session_dir"], mode)
         if cache_path is None:
             continue
         with np.load(cache_path, mmap_mode="r") as d:
@@ -157,14 +184,19 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--window-packets", type=int, default=200)
     p.add_argument("--stride-packets", type=int, default=None)
+    p.add_argument("--mode", choices=["native", "resampled"], default="resampled",
+                   help="native = each session's own subcarrier count (days not shape-compatible); "
+                        "resampled = every session resampled onto a shared subcarrier grid")
     args = p.parse_args()
 
-    print("caching per-session dominant-bucket arrays...")
-    cache_all_sessions()
+    print(f"caching per-session dominant-bucket arrays (mode={args.mode})...")
+    cache_all_sessions(mode=args.mode)
 
     stride = args.stride_packets or args.window_packets // 2
-    index = build_window_index(window_packets=args.window_packets, stride_packets=stride)
-    index_path = REPO_ROOT / "ml/data_pipeline/cache" / f"window_index_w{args.window_packets}_s{stride}.csv"
+    index = build_window_index(mode=args.mode, window_packets=args.window_packets, stride_packets=stride)
+    suffix = "" if args.mode == "resampled" else f"_{args.mode}"
+    index_path = REPO_ROOT / "ml/data_pipeline/cache" / f"window_index_w{args.window_packets}_s{stride}{suffix}.csv"
     index.to_csv(index_path, index=False)
     print(f"built {len(index)} windows -> {index_path}")
     print(index["label"].value_counts())
+    print(index.groupby("date")["label"].count())

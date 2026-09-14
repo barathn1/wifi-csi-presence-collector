@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from ml.data_pipeline.windowing import DOMINANT_CSI_LEN, cache_session
+from ml.data_pipeline.windowing import cache_session
 
 TARGET_RATE_HZ = 25.0  # downsampled time resolution target -- see session_width()
 MIN_WIDTH, MAX_WIDTH = 400, 8000
@@ -20,7 +20,7 @@ def session_width(duration_s: float) -> int:
 
 
 def load_channel(session_dir_rel: str, channel: str) -> np.ndarray:
-    cache_path = cache_session(session_dir_rel, DOMINANT_CSI_LEN)
+    cache_path = cache_session(session_dir_rel, "native")
     with np.load(cache_path) as d:
         return d["amplitude"] if channel == "amplitude" else d["phase"]
 

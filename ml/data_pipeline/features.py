@@ -12,6 +12,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from ml.data_pipeline.csi_resample import TARGET_SUBCARRIERS
 from ml.data_pipeline.windowing import iter_windows
 
 EPS = 1e-6
@@ -29,7 +30,7 @@ def _moments(arr: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.nd
     return mean, std, skew, kurt
 
 
-def feature_slices(n_subcarriers: int = 186) -> dict[str, slice]:
+def feature_slices(n_subcarriers: int = TARGET_SUBCARRIERS) -> dict[str, slice]:
     """Column ranges within the flat feature vector, matching feature_names()'s block order."""
     slices, i = {}, 0
     for channel in ("amp", "phase"):
@@ -41,7 +42,7 @@ def feature_slices(n_subcarriers: int = 186) -> dict[str, slice]:
     return slices
 
 
-def feature_names(n_subcarriers: int = 186) -> list[str]:
+def feature_names(n_subcarriers: int = TARGET_SUBCARRIERS) -> list[str]:
     names = []
     for channel in ("amp", "phase"):
         for stat in ("mean", "std", "skew", "kurt"):
@@ -110,12 +111,12 @@ if __name__ == "__main__":
 
         manifest = load_manifest()
         window_index = pd.read_csv(args.index)
-        dates = window_index["date"].unique()
-        assert len(dates) == 1, "Variant A calibration below assumes one date; extend for multi-day."
-        baseline = compute_day_baseline(manifest, dates[0])
+        mode = "native" if index_name.endswith("_native") else "resampled"
+        baselines = {date: compute_day_baseline(manifest, date, mode=mode)
+                     for date in window_index["date"].unique()}
 
         def calib_a(amp, phase, row):
-            return apply_variant_a(amp, phase, baseline)
+            return apply_variant_a(amp, phase, baselines[row["date"]])
 
         print("building Variant-A-calibrated feature matrix...")
         build_and_cache_features(args.index, cache_dir / f"features_calibA_{index_name}.npy", calibration=calib_a)

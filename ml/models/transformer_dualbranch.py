@@ -13,10 +13,10 @@ from ml.models.common import BranchEncoder
 
 class DualBranchTransformer(nn.Module):
     def __init__(self, n_subcarriers: int, n_classes: int, d_model: int = 32, n_heads: int = 4, d_ff: int = 64,
-                 dropout: float = 0.2):
+                 dropout: float = 0.2, num_layers: int = 1, norm_first: bool = False):
         super().__init__()
-        self.amp_branch = BranchEncoder(n_subcarriers, d_model, n_heads, d_ff, dropout)
-        self.phase_branch = BranchEncoder(n_subcarriers, d_model, n_heads, d_ff, dropout)
+        self.amp_branch = BranchEncoder(n_subcarriers, d_model, n_heads, d_ff, dropout, num_layers, norm_first)
+        self.phase_branch = BranchEncoder(n_subcarriers, d_model, n_heads, d_ff, dropout, num_layers, norm_first)
         self.classifier = nn.Sequential(
             nn.Linear(2 * d_model, d_model), nn.ReLU(), nn.Dropout(dropout), nn.Linear(d_model, n_classes),
         )

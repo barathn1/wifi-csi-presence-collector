@@ -14,13 +14,17 @@ from ml.data_pipeline.windowing import load_window
 
 
 class CsiWindowDataset(Dataset):
-    def __init__(self, window_index: pd.DataFrame, task_name: str, calibration=None, classes: list | None = None):
+    def __init__(self, window_index: pd.DataFrame, task_name: str, calibration=None, classes: list | None = None,
+                 include_rssi: bool = False):
         mask, y = TASKS[task_name](window_index)
         self.index = window_index[mask].reset_index(drop=True)
         self.y = np.asarray(y)
         self.calibration = calibration  # optional callable (amp, phase, row) -> (amp, phase)
         self.classes = classes if classes is not None else sorted(set(self.y.tolist()))
         self.class_to_idx = {c: i for i, c in enumerate(self.classes)}
+        # opt-in only (default False): every existing caller gets the original 3-tuple unchanged.
+        # See models/rssi_fusion.py for why this returns raw per-packet RSSI, not a summary.
+        self.include_rssi = include_rssi
 
     def __len__(self) -> int:
         return len(self.index)
@@ -33,6 +37,9 @@ class CsiWindowDataset(Dataset):
         amp_t = torch.from_numpy(np.ascontiguousarray(amp, dtype=np.float32))
         phase_t = torch.from_numpy(np.ascontiguousarray(phase, dtype=np.float32))
         label_idx = self.class_to_idx[self.y[i]]
+        if self.include_rssi:
+            rssi_t = torch.from_numpy(np.ascontiguousarray(rssi, dtype=np.float32))
+            return amp_t, phase_t, rssi_t, label_idx
         return amp_t, phase_t, label_idx
 
     def subset_by_index_rows(self, row_positions: np.ndarray) -> "CsiWindowDataset":
@@ -43,4 +50,5 @@ class CsiWindowDataset(Dataset):
         sub.calibration = self.calibration
         sub.classes = self.classes
         sub.class_to_idx = self.class_to_idx
+        sub.include_rssi = self.include_rssi
         return sub

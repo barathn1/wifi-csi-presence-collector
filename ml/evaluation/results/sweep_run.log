@@ -1,0 +1,363 @@
+=== Stage B: comprehensive model survey ===
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 0 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 1 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 2 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 3 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 4 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 0 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 1 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 2 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 3 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 4 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-09 test=2026-09-10 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-09 test=2026-09-10 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-09 test=2026-09-10 calibB] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-10 test=2026-09-09 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-10 test=2026-09-09 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-10 test=2026-09-09 calibB] logged
+=== Stage T1: transformer architecture ablation ===
+  [StageT1] whofi_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.7485
+  [StageT1] whofi_transformer {'num_layers': 2, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.7432
+  [StageT1] whofi_transformer {'num_layers': 4, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.6687
+  [StageT1] whofi_transformer {'num_layers': 1, 'n_heads': 2, 'd_ff': 64, 'norm_first': False} mean_score=0.5749
+  [StageT1] whofi_transformer {'num_layers': 1, 'n_heads': 8, 'd_ff': 64, 'norm_first': False} mean_score=0.6909
+  [StageT1] whofi_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 128, 'norm_first': False} mean_score=0.7236
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+  [StageT1] whofi_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': True} mean_score=0.6582
+  [StageT1] dualbranch_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.4861
+  [StageT1] dualbranch_transformer {'num_layers': 2, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.7018
+  [StageT1] dualbranch_transformer {'num_layers': 4, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.4870
+  [StageT1] dualbranch_transformer {'num_layers': 1, 'n_heads': 2, 'd_ff': 64, 'norm_first': False} mean_score=0.5603
+  [StageT1] dualbranch_transformer {'num_layers': 1, 'n_heads': 8, 'd_ff': 64, 'norm_first': False} mean_score=0.4430
+  [StageT1] dualbranch_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 128, 'norm_first': False} mean_score=0.6228
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+  [StageT1] dualbranch_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': True} mean_score=0.5019
+  [StageT1] crossattn_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.4565
+  [StageT1] crossattn_transformer {'num_layers': 2, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.4908
+  [StageT1] crossattn_transformer {'num_layers': 4, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.4713
+  [StageT1] crossattn_transformer {'num_layers': 1, 'n_heads': 2, 'd_ff': 64, 'norm_first': False} mean_score=0.5840
+  [StageT1] crossattn_transformer {'num_layers': 1, 'n_heads': 8, 'd_ff': 64, 'norm_first': False} mean_score=0.6809
+  [StageT1] crossattn_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 128, 'norm_first': False} mean_score=0.3993
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+  [StageT1] crossattn_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': True} mean_score=0.7114
+  [StageT1] calib_context_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.5849
+  [StageT1] calib_context_transformer {'num_layers': 2, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.4920
+  [StageT1] calib_context_transformer {'num_layers': 4, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.4601
+  [StageT1] calib_context_transformer {'num_layers': 1, 'n_heads': 2, 'd_ff': 64, 'norm_first': False} mean_score=0.3188
+  [StageT1] calib_context_transformer {'num_layers': 1, 'n_heads': 8, 'd_ff': 64, 'norm_first': False} mean_score=0.6319
+  [StageT1] calib_context_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 128, 'norm_first': False} mean_score=0.5147
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+  [StageT1] calib_context_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': True} mean_score=0.4161
+Stage T1 winner: whofi_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} (mean_score=0.7485)
+=== Stage T2: full-rigor validation of best config ===
+  [StageT2 session_disjoint fold 0] logged
+  [StageT2 session_disjoint fold 1] logged
+  [StageT2 session_disjoint fold 2] logged
+  [StageT2 session_disjoint fold 3] logged
+  [StageT2 session_disjoint fold 4] logged
+  [StageT2 day_disjoint train=2026-09-09 test=2026-09-10] logged
+  [StageT2 day_disjoint train=2026-09-10 test=2026-09-09] logged
+=== Stage T3: secondary tasks ===
+  [StageT3] task0_presence done
+  [StageT3] taskE_motion_standing_vs_walking done
+  [StageT3] taskA_threeway done
+  [StageT3] taskB_identity done
+  [StageT3] taskC_openset_proxy done
+=== Stage S: segment-length aggregation ===
+  [StageS] done
+=== Stage N: native vs resampled subcarrier grid ===
+  [StageN] 2026-09-09 done
+  [StageN] 2026-09-10 done
+
+ALL STAGES DONE -> /home/bn3273/Desktop/wifi-csi-presence-collector/ml/evaluation/results/day2_sweep_log.csv
+=== v1 (PID 41975) finished at Sat Sep 12 02:10:18 AM IST 2026, launching v2 ===
+=== Stage B: comprehensive model survey ===
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 0 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 1 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 2 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 3 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 4 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 0 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 1 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 2 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 3 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 4 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-09 test=2026-09-10 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-09 test=2026-09-10 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-09 test=2026-09-10 calibB] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-10 test=2026-09-09 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-10 test=2026-09-09 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-10 test=2026-09-09 calibB] logged
+=== Stage T1: transformer architecture ablation ===
+  [StageT1] whofi_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.7485
+  [StageT1] whofi_transformer {'num_layers': 2, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.7432
+  [StageT1] whofi_transformer {'num_layers': 4, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.6687
+  [StageT1] whofi_transformer {'num_layers': 1, 'n_heads': 2, 'd_ff': 64, 'norm_first': False} mean_score=0.5749
+  [StageT1] whofi_transformer {'num_layers': 1, 'n_heads': 8, 'd_ff': 64, 'norm_first': False} mean_score=0.6909
+  [StageT1] whofi_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 128, 'norm_first': False} mean_score=0.7236
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+  [StageT1] whofi_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': True} mean_score=0.6582
+  [StageT1] dualbranch_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.4861
+  [StageT1] dualbranch_transformer {'num_layers': 2, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.7018
+  [StageT1] dualbranch_transformer {'num_layers': 4, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.4870
+  [StageT1] dualbranch_transformer {'num_layers': 1, 'n_heads': 2, 'd_ff': 64, 'norm_first': False} mean_score=0.5603
+  [StageT1] dualbranch_transformer {'num_layers': 1, 'n_heads': 8, 'd_ff': 64, 'norm_first': False} mean_score=0.4430
+  [StageT1] dualbranch_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 128, 'norm_first': False} mean_score=0.6228
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+  [StageT1] dualbranch_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': True} mean_score=0.5019
+  [StageT1] crossattn_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.4565
+  [StageT1] crossattn_transformer {'num_layers': 2, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.4908
+  [StageT1] crossattn_transformer {'num_layers': 4, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.4713
+  [StageT1] crossattn_transformer {'num_layers': 1, 'n_heads': 2, 'd_ff': 64, 'norm_first': False} mean_score=0.5840
+  [StageT1] crossattn_transformer {'num_layers': 1, 'n_heads': 8, 'd_ff': 64, 'norm_first': False} mean_score=0.6809
+  [StageT1] crossattn_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 128, 'norm_first': False} mean_score=0.3993
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+  [StageT1] crossattn_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': True} mean_score=0.7114
+  [StageT1] calib_context_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.6173
+  [StageT1] calib_context_transformer {'num_layers': 2, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.5742
+  [StageT1] calib_context_transformer {'num_layers': 4, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.3805
+  [StageT1] calib_context_transformer {'num_layers': 1, 'n_heads': 2, 'd_ff': 64, 'norm_first': False} mean_score=0.5530
+  [StageT1] calib_context_transformer {'num_layers': 1, 'n_heads': 8, 'd_ff': 64, 'norm_first': False} mean_score=0.6932
+  [StageT1] calib_context_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 128, 'norm_first': False} mean_score=0.5504
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+  [StageT1] calib_context_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': True} mean_score=0.4751
+=== Stage T1b: bilstm architecture ablation ===
+  [StageT1b] bilstm {'hidden_size': 32, 'num_layers': 1} mean_score=0.2547
+  [StageT1b] bilstm {'hidden_size': 16, 'num_layers': 1} mean_score=0.4199
+  [StageT1b] bilstm {'hidden_size': 64, 'num_layers': 1} mean_score=0.3750
+  [StageT1b] bilstm {'hidden_size': 32, 'num_layers': 2} mean_score=0.5712
+  [StageT1b] bilstm {'hidden_size': 32, 'num_layers': 3} mean_score=0.5237
+Stage T1/T1b winner: whofi_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} (mean_score=0.7485)
+=== Stage T2: full-rigor validation of best config ===
+  [StageT2 session_disjoint fold 0] logged
+  [StageT2 session_disjoint fold 1] logged
+  [StageT2 session_disjoint fold 2] logged
+  [StageT2 session_disjoint fold 3] logged
+  [StageT2 session_disjoint fold 4] logged
+  [StageT2 day_disjoint train=2026-09-09 test=2026-09-10] logged
+  [StageT2 day_disjoint train=2026-09-10 test=2026-09-09] logged
+=== Stage T3: secondary tasks ===
+  [StageT3] task0_presence done
+  [StageT3] taskE_motion_standing_vs_walking done
+  [StageT3] taskA_threeway done
+  [StageT3] taskB_identity done
+  [StageT3] taskC_openset_proxy done
+=== Stage S: segment-length aggregation ===
+  [StageS] done
+=== Stage N: native vs resampled subcarrier grid ===
+  [StageN] 2026-09-09 done
+  [StageN] 2026-09-10 done
+
+ALL STAGES DONE -> /home/bn3273/Desktop/wifi-csi-presence-collector/ml/evaluation/results/day2_sweep_log.csv
+=== v2 (PID 554221) finished at Sat Sep 12 10:25:00 AM IST 2026, launching v3 (with StageS calibA fix) ===
+=== Stage B: comprehensive model survey ===
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 0 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 1 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 2 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 3 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 4 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 0 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 1 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 2 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 3 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB session_disjoint fold 4 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-09 test=2026-09-10 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-09 test=2026-09-10 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-09 test=2026-09-10 calibB] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-10 test=2026-09-09 raw] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-10 test=2026-09-09 calibA] logged
+/home/bn3273/Desktop/wifi-csi-presence-collector/.venv/lib/python3.12/site-packages/sklearn/svm/_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  [StageB day_disjoint train=2026-09-10 test=2026-09-09 calibB] logged
+=== Stage T1: transformer architecture ablation ===
+  [StageT1] whofi_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.7485
+  [StageT1] whofi_transformer {'num_layers': 2, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.7432
+  [StageT1] whofi_transformer {'num_layers': 4, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.6687
+  [StageT1] whofi_transformer {'num_layers': 1, 'n_heads': 2, 'd_ff': 64, 'norm_first': False} mean_score=0.5749
+  [StageT1] whofi_transformer {'num_layers': 1, 'n_heads': 8, 'd_ff': 64, 'norm_first': False} mean_score=0.6909
+  [StageT1] whofi_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 128, 'norm_first': False} mean_score=0.7236
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+  [StageT1] whofi_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': True} mean_score=0.6582
+  [StageT1] dualbranch_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.4861
+  [StageT1] dualbranch_transformer {'num_layers': 2, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.7018
+  [StageT1] dualbranch_transformer {'num_layers': 4, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.4870
+  [StageT1] dualbranch_transformer {'num_layers': 1, 'n_heads': 2, 'd_ff': 64, 'norm_first': False} mean_score=0.5603
+  [StageT1] dualbranch_transformer {'num_layers': 1, 'n_heads': 8, 'd_ff': 64, 'norm_first': False} mean_score=0.4430
+  [StageT1] dualbranch_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 128, 'norm_first': False} mean_score=0.6228
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+  [StageT1] dualbranch_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': True} mean_score=0.5019
+  [StageT1] crossattn_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.4565
+  [StageT1] crossattn_transformer {'num_layers': 2, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.4908
+  [StageT1] crossattn_transformer {'num_layers': 4, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.4713
+  [StageT1] crossattn_transformer {'num_layers': 1, 'n_heads': 2, 'd_ff': 64, 'norm_first': False} mean_score=0.5840
+  [StageT1] crossattn_transformer {'num_layers': 1, 'n_heads': 8, 'd_ff': 64, 'norm_first': False} mean_score=0.6809
+  [StageT1] crossattn_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 128, 'norm_first': False} mean_score=0.3993
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+  [StageT1] crossattn_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': True} mean_score=0.7114
+  [StageT1] calib_context_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.6173
+  [StageT1] calib_context_transformer {'num_layers': 2, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.5742
+  [StageT1] calib_context_transformer {'num_layers': 4, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} mean_score=0.3805
+  [StageT1] calib_context_transformer {'num_layers': 1, 'n_heads': 2, 'd_ff': 64, 'norm_first': False} mean_score=0.5530
+  [StageT1] calib_context_transformer {'num_layers': 1, 'n_heads': 8, 'd_ff': 64, 'norm_first': False} mean_score=0.6932
+  [StageT1] calib_context_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 128, 'norm_first': False} mean_score=0.5504
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+/home/bn3273/Desktop/wifi-csi-presence-collector/ml/models/common.py:43: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+  [StageT1] calib_context_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': True} mean_score=0.4751
+=== Stage T1b: bilstm architecture ablation ===
+  [StageT1b] bilstm {'hidden_size': 32, 'num_layers': 1} mean_score=0.2547
+  [StageT1b] bilstm {'hidden_size': 16, 'num_layers': 1} mean_score=0.4199
+  [StageT1b] bilstm {'hidden_size': 64, 'num_layers': 1} mean_score=0.3750
+  [StageT1b] bilstm {'hidden_size': 32, 'num_layers': 2} mean_score=0.5712
+  [StageT1b] bilstm {'hidden_size': 32, 'num_layers': 3} mean_score=0.5237
+Stage T1/T1b winner: whofi_transformer {'num_layers': 1, 'n_heads': 4, 'd_ff': 64, 'norm_first': False} (mean_score=0.7485)
+=== Stage T2: full-rigor validation of best config ===
+  [StageT2 session_disjoint fold 0] logged
+  [StageT2 session_disjoint fold 1] logged
+  [StageT2 session_disjoint fold 2] logged
+  [StageT2 session_disjoint fold 3] logged
+  [StageT2 session_disjoint fold 4] logged
+  [StageT2 day_disjoint train=2026-09-09 test=2026-09-10] logged
+  [StageT2 day_disjoint train=2026-09-10 test=2026-09-09] logged
+=== Stage T3: secondary tasks ===
+  [StageT3] task0_presence done
+  [StageT3] taskE_motion_standing_vs_walking done
+  [StageT3] taskA_threeway done
+  [StageT3] taskB_identity done
+  [StageT3] taskC_openset_proxy done
+=== Stage S: segment-length aggregation ===
+  [StageS] raw done
+  [StageS] calibA done
+=== Stage N: native vs resampled subcarrier grid ===
+  [StageN] 2026-09-09 done
+  [StageN] 2026-09-10 done
+
+ALL STAGES DONE -> /home/bn3273/Desktop/wifi-csi-presence-collector/ml/evaluation/results/day2_sweep_log.csv

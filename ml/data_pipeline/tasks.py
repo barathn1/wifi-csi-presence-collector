@@ -1,4 +1,4 @@
-"""Task label definitions -- map a window_index row to the target for each of the 4 tasks in the plan.
+"""Task label definitions -- map a window_index row to the target for each of the tasks in the plan.
 
 Each function returns (mask, y): `mask` selects which windows apply to the task (e.g. Task B only uses
 authorized windows), `y` is the label array for the selected subset.
@@ -52,10 +52,19 @@ def taskD_auth_vs_nonauth(window_index: pd.DataFrame) -> tuple[np.ndarray, np.nd
     return mask, y
 
 
+def taskE_motion_standing_vs_walking(window_index: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
+    """standing vs walking, among authorized+unauthorized windows only -- `none` (empty room) has no
+    motion label at all, so it's excluded rather than forced into either class."""
+    mask = (window_index["label"].isin(["authorized", "unauthorized"]) & (window_index["motion"] != "")).values
+    y = window_index.loc[mask, "motion"].values
+    return mask, y
+
+
 TASKS = {
     "task0_presence": task0_presence,
     "taskA_threeway": taskA_threeway,
     "taskB_identity": taskB_identity,
     "taskC_openset_proxy": taskC_openset_proxy,
     "taskD_auth_vs_nonauth": taskD_auth_vs_nonauth,
+    "taskE_motion_standing_vs_walking": taskE_motion_standing_vs_walking,
 }

@@ -7,10 +7,14 @@ import torch.nn as nn
 
 
 class BiLSTMDualBranch(nn.Module):
-    def __init__(self, n_subcarriers: int, n_classes: int, hidden_size: int = 32, dropout: float = 0.2):
+    def __init__(self, n_subcarriers: int, n_classes: int, hidden_size: int = 32, dropout: float = 0.2,
+                 num_layers: int = 1):
         super().__init__()
-        self.amp_lstm = nn.LSTM(n_subcarriers, hidden_size, batch_first=True, bidirectional=True)
-        self.phase_lstm = nn.LSTM(n_subcarriers, hidden_size, batch_first=True, bidirectional=True)
+        lstm_dropout = dropout if num_layers > 1 else 0.0
+        self.amp_lstm = nn.LSTM(n_subcarriers, hidden_size, num_layers=num_layers, batch_first=True,
+                                 bidirectional=True, dropout=lstm_dropout)
+        self.phase_lstm = nn.LSTM(n_subcarriers, hidden_size, num_layers=num_layers, batch_first=True,
+                                   bidirectional=True, dropout=lstm_dropout)
         self.classifier = nn.Sequential(
             nn.Linear(4 * hidden_size, hidden_size), nn.ReLU(), nn.Dropout(dropout), nn.Linear(hidden_size, n_classes),
         )

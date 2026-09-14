@@ -24,7 +24,7 @@ import plotly.graph_objects as go
 
 from ml.data_pipeline.decode_csi import REPO_ROOT
 from ml.visualization.palette import INTERACTIVE_DIR, SEQUENTIAL_BLUE
-from ml.data_pipeline.windowing import DOMINANT_CSI_LEN, cache_session, load_manifest
+from ml.data_pipeline.windowing import cache_session, load_manifest
 
 WINDOW_PACKETS = 200
 WINDOW_DISPLAY_COLS = 100  # downsample each ~1s window for display -- see note below on file size
@@ -35,7 +35,7 @@ PLOTLY_BLUE_SCALE = [[i / (len(SEQUENTIAL_BLUE) - 1), c] for i, c in enumerate(S
 
 
 def _load_session_arrays(session_dir_rel: str) -> dict:
-    cache_path = cache_session(session_dir_rel, DOMINANT_CSI_LEN)
+    cache_path = cache_session(session_dir_rel, "native")
     with np.load(cache_path) as d:
         return {"amplitude": d["amplitude"], "phase": d["phase"], "device_time_us": d["device_time_us"]}
 

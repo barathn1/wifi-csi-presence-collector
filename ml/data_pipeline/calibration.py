@@ -27,7 +27,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-from ml.data_pipeline.windowing import DOMINANT_CSI_LEN, cache_session
+from ml.data_pipeline.windowing import cache_session
 
 EPS = 1e-6
 
@@ -43,9 +43,10 @@ class DayBaseline:
     phase_std: np.ndarray
 
 
-def compute_day_baseline(manifest: pd.DataFrame, date: str, csi_len: int = DOMINANT_CSI_LEN) -> DayBaseline:
+def compute_day_baseline(manifest: pd.DataFrame, date: str, mode: str = "resampled") -> DayBaseline:
     """Fit a baseline from ALL of a date's `none` sessions (not just windowed subsets -- uses every
-    cached packet for a tighter per-subcarrier mean/std estimate)."""
+    cached packet for a tighter per-subcarrier mean/std estimate). `mode` must match whatever window
+    index this baseline will be applied to ("resampled" for cross-day work, "native" otherwise)."""
     none_rows = manifest[
         manifest["session_dir"].str.contains(f"/{date}/", regex=False) & (manifest["label"] == "none")
     ]
@@ -56,7 +57,7 @@ def compute_day_baseline(manifest: pd.DataFrame, date: str, csi_len: int = DOMIN
     n = 0
     sources = []
     for _, row in none_rows.iterrows():
-        cache_path = cache_session(row["session_dir"], csi_len)
+        cache_path = cache_session(row["session_dir"], mode)
         if cache_path is None:
             continue
         with np.load(cache_path) as d:
@@ -84,6 +85,26 @@ def compute_day_baseline(manifest: pd.DataFrame, date: str, csi_len: int = DOMIN
     )
 
 
+def compute_day_rssi_baseline(manifest: pd.DataFrame, date: str, mode: str = "resampled") -> tuple[float, float]:
+    """Same idea as compute_day_baseline but for the single scalar RSSI field, from that date's `none`
+    sessions -- RSSI carries some class signal (see day2_next_steps.md item 7) but drifts across days
+    on its own, so it needs the same per-day self-calibration before being fused into a model."""
+    none_rows = manifest[
+        manifest["session_dir"].str.contains(f"/{date}/", regex=False) & (manifest["label"] == "none")
+    ]
+    if none_rows.empty:
+        raise ValueError(f"no `none` (empty-room) sessions found for date {date}")
+    values = []
+    for _, row in none_rows.iterrows():
+        cache_path = cache_session(row["session_dir"], mode)
+        if cache_path is None:
+            continue
+        with np.load(cache_path) as d:
+            values.append(d["rssi"])
+    all_rssi = np.concatenate(values)
+    return float(all_rssi.mean()), float(all_rssi.std())
+
+
 def apply_variant_a(amplitude: np.ndarray, phase: np.ndarray, baseline: DayBaseline) -> tuple[np.ndarray, np.ndarray]:
     """Self-calibration: standardize against the SAME day's empty-room baseline."""
     amp_z = (amplitude - baseline.amp_mean) / (baseline.amp_std + EPS)
@@ -102,9 +123,25 @@ def apply_variant_b(
     return amp_ref, phase_ref
 
 
-def day1_proxy_baselines(manifest: pd.DataFrame, date: str, csi_len: int = DOMINANT_CSI_LEN):
+def apply_l1_gain_norm(amplitude: np.ndarray, phase: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Variant C: per-packet L1 gain normalization, `H_k / mean_k(|H_k|)` -- divide each packet's
+    amplitude by its OWN mean magnitude across subcarriers, no empty-room baseline needed at all.
+
+    Motivation (see ml/reports/day2_next_steps.md item 3): a 2026 cross-device CSI paper found ESP32
+    per-subcarrier hardware profiles stable across days/channels (>0.9999 correlation) -- most of the
+    Day1/Day2 drift measured in cross_day_drift.py is propagation/AGC, not hardware. Per-day Z-score
+    (Variant A/B) recenters against a specific day's empty-room stats; L1 gain norm instead removes
+    each packet's own AGC-driven overall gain, independent of any other session -- a different,
+    complementary correction, not a replacement for A/B (can be composed: L1-normalize first, then
+    still apply A/B on the normalized signal if desired)."""
+    gain = amplitude.mean(axis=-1, keepdims=True)
+    return amplitude / (gain + EPS), phase
+
+
+def day1_proxy_baselines(manifest: pd.DataFrame, date: str, mode: str = "resampled"):
     """Pick the two Day-1 `none` sessions furthest apart in time as stand-ins for 'today' vs 'a prior
-    day's' baseline, so Variant B's code path can be exercised before real Day-2 data exists."""
+    day's' baseline -- a same-day mechanical check of the Variant B code path, superseded now that real
+    Day 1 vs Day 2 baselines exist (see run_day2_sweep.py's Stage 0)."""
     none_rows = manifest[
         manifest["session_dir"].str.contains(f"/{date}/", regex=False) & (manifest["label"] == "none")
     ].sort_values("start_ts")
@@ -112,16 +149,16 @@ def day1_proxy_baselines(manifest: pd.DataFrame, date: str, csi_len: int = DOMIN
         raise ValueError(f"need >=2 `none` sessions on {date} for a proxy baseline pair, found {len(none_rows)}")
 
     earliest, latest = none_rows.iloc[0], none_rows.iloc[-1]
-    baseline_early = compute_day_baseline_from_sessions([earliest["session_dir"]], date + "_early", csi_len)
-    baseline_late = compute_day_baseline_from_sessions([latest["session_dir"]], date + "_late", csi_len)
+    baseline_early = compute_day_baseline_from_sessions([earliest["session_dir"]], date + "_early", mode)
+    baseline_late = compute_day_baseline_from_sessions([latest["session_dir"]], date + "_late", mode)
     return baseline_early, baseline_late
 
 
-def compute_day_baseline_from_sessions(session_dirs: list[str], label: str, csi_len: int = DOMINANT_CSI_LEN) -> DayBaseline:
+def compute_day_baseline_from_sessions(session_dirs: list[str], label: str, mode: str = "resampled") -> DayBaseline:
     amp_sum = amp_sumsq = phase_sum = phase_sumsq = None
     n = 0
     for session_dir in session_dirs:
-        cache_path = cache_session(session_dir, csi_len)
+        cache_path = cache_session(session_dir, mode)
         with np.load(cache_path) as d:
             amp, phase = d["amplitude"], d["phase"]
         if amp_sum is None:
