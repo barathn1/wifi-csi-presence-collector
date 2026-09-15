@@ -154,11 +154,15 @@ def day1_proxy_baselines(manifest: pd.DataFrame, date: str, mode: str = "resampl
     return baseline_early, baseline_late
 
 
-def compute_day_baseline_from_sessions(session_dirs: list[str], label: str, mode: str = "resampled") -> DayBaseline:
+def compute_day_baseline_from_sessions(session_dirs: list[str], label: str, mode: str = "resampled",
+                                        target_rate_hz: float | None = None) -> DayBaseline:
+    """`target_rate_hz` is required for (and only for) mode="resampled_timenorm" -- so the empty-room
+    baseline is computed over the SAME time-normalized representation the windows it calibrates use,
+    rather than mixing a raw-rate baseline with time-normalized windows."""
     amp_sum = amp_sumsq = phase_sum = phase_sumsq = None
     n = 0
     for session_dir in session_dirs:
-        cache_path = cache_session(session_dir, mode)
+        cache_path = cache_session(session_dir, mode, target_rate_hz=target_rate_hz)
         with np.load(cache_path) as d:
             amp, phase = d["amplitude"], d["phase"]
         if amp_sum is None:

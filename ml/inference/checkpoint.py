@@ -36,8 +36,13 @@ def save_checkpoint(
     model: nn.Module, path: Path, *, model_class: str, arch_kwargs: dict, classes: list,
     display_labels: list[str], task_name: str, preprocessing: str, mode: str,
     window_packets: int, stride_packets: int, train_dates: list[str], seed: int, epochs: int,
-    train_loss_curve: list[float], notes: str = "",
+    train_loss_curve: list[float], notes: str = "", target_rate_hz: float | None = None,
 ) -> Path:
+    """`target_rate_hz`: only set for mode="resampled_timenorm" (see time_resample.py) -- the derived
+    common resample rate this checkpoint's windows were built at, so a downstream consumer (e.g.
+    eval_day3ch6_holdout.py) can rebuild windows at the EXACT same rate rather than guessing or
+    re-deriving a possibly-different one from a different session set. None/omitted for every other
+    caller -- purely additive, no existing checkpoint format changes."""
     assert model_class in MODEL_REGISTRY, f"unknown model_class {model_class!r}, add it to MODEL_REGISTRY"
     assert len(classes) == len(display_labels), (classes, display_labels)
     path = Path(path)
@@ -52,7 +57,7 @@ def save_checkpoint(
             "task_name": task_name, "preprocessing": preprocessing, "mode": mode,
             "window_packets": window_packets, "stride_packets": stride_packets,
             "train_dates": train_dates, "seed": seed, "epochs": epochs,
-            "train_loss_curve": train_loss_curve, "notes": notes,
+            "train_loss_curve": train_loss_curve, "notes": notes, "target_rate_hz": target_rate_hz,
             "torch_version": torch.__version__,
         },
     }

@@ -34,17 +34,27 @@ python3 -m ml.training.train_day3_ch6_model
 What it does:
 - Filters `data/manifest.csv` to `2026-09-15` sessions, then confirms each one's actual channel from the
   recorded per-packet `channel_primary` field (`decode_csi.py::channel_width_summary` — not assumed from
-  the clock time), keeping only channel-6 sessions. As of this writing that's 26 sessions: 12 authorized
-  (anjali/barath), 8 unauthorized (4 distinct strangers — divya, harshitha, sumanth, abdul — each
-  standing+walking), 6 empty-room.
+  the clock time), keeping only channel-6 sessions and explicitly excluding
+  `ml.evaluation.eval_day3ch6_holdout.HOLDOUT_SESSIONS` (sessions recorded after training, kept genuinely
+  held out). As of this writing that's 26 training sessions: 12 authorized (anjali/barath), 8
+  unauthorized (4 distinct strangers — divya, harshitha, sumanth, abdul — each standing+walking), 6
+  empty-room.
+- Derives a common time-normalization rate from THIS dataset's own sessions (never a hardcoded constant —
+  see `ml/data_pipeline/time_resample.py`) and resamples every session's packet stream onto it via
+  bin-averaging (every packet contributes, none discarded) before windowing. This closes a real,
+  confirmed confound (see [[project-day3-ch6-packet-rate-confound]] and the "what changed" section below)
+  where training-authorized sessions happened to be captured at a different packet rate than
+  training-unauthorized ones, which fixed-packet-count windowing turned into a non-biometric shortcut.
 - Builds a `calibA` empty-room baseline from just those 6 channel-6 `none` sessions (not the day's
-  channel-11 `none` sessions too — that would silently mix bands into the baseline).
+  channel-11 `none` sessions too — that would silently mix bands into the baseline), computed over the
+  same time-normalized representation the windows use.
 - Reports **real held-out numbers before shipping anything**:
-  - `taskD_auth_vs_nonauth`: leave-one-unauthorized-person-out — 4 folds, each holding out one of the 4
-    stranger identities entirely (trained on the other 3 + all authorized/none, tested against the
-    held-out one). This is a genuine open-set check: does the model reject someone it has never seen,
-    not just the specific strangers it trained on.
-  - `task0_presence` / `taskE_motion_standing_vs_walking`: a single session-disjoint 80/20 split.
+  - `taskD_auth_vs_nonauth`: leave-one-unauthorized-person-out, including `none` sessions in every fold —
+    4 folds, each holding out one of the 4 stranger identities entirely (trained on the other 3 + all
+    authorized/none, tested against the held-out one + a held-out none slice). Genuine open-set check:
+    does the model reject someone it has never seen, not just the specific strangers it trained on.
+  - `task0_presence` / `taskE_motion_standing_vs_walking`: ALL 5 session-disjoint folds (not just one
+    arbitrary fold), mean + range reported.
 - Only after printing those does it retrain each task on 100% of the ch6 Day3 data for the deployable
   checkpoint (same "no held-out split, this IS the shipped artifact" philosophy as `train_final_model.py`
   — the held-out numbers above are what stand in for a generalization estimate this time).
@@ -56,35 +66,49 @@ All per-fold and final numbers are logged to `ml/evaluation/results/day3_ch6_mod
 (`stage=eval_loo`/`eval_split` rows are the trustworthy ones; `stage=final` is in-sample-only, same
 caveat as the Day1+2 model).
 
-**Headline held-out results (real numbers, from the 2026-09-15 run — `ml/evaluation/results/day3_ch6_model_log.csv`):**
+### What changed and why (2026-09-16 audit + fix)
 
-| Task | Metric | Result |
-|---|---|---|
-| `taskD_auth_vs_nonauth`, mean over 4 held-out strangers | AUROC / false-accept rate | **AUROC 0.764 / false-accept 39.0%** |
-| `taskD_auth_vs_nonauth`, per held-out stranger | AUROC / false-accept | abdul 0.709/55.9%, divya 0.675/48.3%, harshitha 0.814/29.1%, sumanth 0.857/22.6% |
-| `task0_presence` (80/20 split) | accuracy / AUROC | 99.7% / 1.000 |
-| `taskE_motion_standing_vs_walking` (80/20 split) | accuracy / AUROC | 90.1% / undefined (see note) |
+A live-test session revealed real authorized-person accuracy was much worse than the pre-deployment
+numbers suggested. A 5-dimension audit (parallel review + adversarial verification) found the root cause
+plus 4 smaller bugs, all now fixed — see [[project-day3-ch6-packet-rate-confound]] for the full
+methodology. Headline: **training-authorized sessions were captured at 146-222Hz, training-unauthorized
+at 226-268Hz** (real network conditions at the time of day each block was recorded — not channel or
+bandwidth, both fixed at channel 6/20MHz throughout). Fixed-packet-count windowing turned that into a
+shortcut: window *duration* secretly tracked the auth label. New post-training holdout sessions (2 more
+barath, 2 from a new stranger "siva") both landed in the "unauthorized-shaped" fast-rate band, which is
+why a genuinely authorized person scored badly.
 
-**Read this honestly, don't just skim the headline AUROC:**
-- **taskD is the one that matters most (it's the actual security question) and it is NOT good yet.** A
-  39% average false-accept rate against a genuinely unseen stranger means well over 1 in 3 windows
-  wrongly says AUTHORIZED for someone who isn't. It's also wildly inconsistent per person (22.6% for
-  sumanth vs 55.9% for abdul) — with only 4 stranger identities and 2 authorized identities, this is a
-  small, high-variance sample, not a settled number. This is a per-~1s-window number, not the
-  30-second-aggregate protocol that got the Day1+2 model down to 5.5% — aggregating over the live session
-  (step 2's `--aggregate-windows 120`) should help, but hasn't been separately validated at this
-  aggregation length for this checkpoint. Don't trust a live `Auth: AUTHORIZED` reading strongly yet;
-  treat this checkpoint as a work-in-progress, not a validated auth gate.
-- **task0_presence is excellent (AUROC 1.000)** — occupied-vs-empty is a much easier task (large physical
-  effect on amplitude/RSSI), and this is consistent with that pattern showing up elsewhere in this
-  project. Trustworthy for "is anyone in the room," within the limits of a session-disjoint (not
-  room-disjoint) test — it's only ever seen this one room.
-- **taskE's AUROC is `nan`, not a bug**: with only ~20 sessions split by session-disjoint grouping (not
-  stratified by motion label), this particular 80/20 fold happened to land only one motion class in the
-  test set, which makes AUROC mathematically undefined (`compute_eer`/`compute_auroc` return `nan`
-  explicitly in that case rather than a misleading number). The 90.1% accuracy is real but should be
-  treated as a rough read, not a tight estimate — re-running with a different seed/fold would give a
-  cleaner check.
+**Real before/after, measured against the 8 genuinely-held-out post-training sessions**
+(`ml/evaluation/eval_day3ch6_holdout.py`), not just training-data folds:
+
+| | Before any fix | After bug fixes only | After time-normalization fix |
+|---|---|---|---|
+| New authorized session #1 (barath), aggregate accuracy | 74-86% @60s, inconsistent | *(bugs don't touch this)* | **100% by ~23s** |
+| New authorized session #2 (barath), aggregate accuracy | 61-98% @60s, inconsistent | *(bugs don't touch this)* | **100% by ~23s** |
+| New stranger "siva" (walking), correctly rejected? | No — false-accepted, got worse with aggregation (→0%) | — | **Still no — worse (0%).** Not fixed by this change; likely a real small-sample gait-similarity limit (only 2 authorized identities to learn "authorized" from), not a code bug. |
+| New stranger "siva" (standing), correctly rejected? | Mostly yes (95-100% @90s) | — | Yes, improved (100% by ~70s) |
+| Presence, all 8 holdout sessions | ~90-100%, converges ~30-60s | — | Still ~99-100% throughout — never the problem |
+
+**Current best checkpoints**: the 3 files in `ml/checkpoints/whofi_*_calibA_day3ch6.pt` (the time-normalized
+version above) are the current best for this track, and `ml/inference/live_infer.py --checkpoint-suffix
+_day3ch6` already points at them. A dated backup copy is preserved at
+`ml/checkpoints/best_day3ch6_timenorm_20260916/` (gitignored like the rest of `ml/checkpoints/`, so purely
+local) so a future experiment (e.g. the queued UniFi-style architecture change) that reruns
+`train_day3_ch6_model.py` and overwrites the live filenames doesn't silently lose this validated result —
+restore by copying those 3 files back over the live ones if a later change turns out worse.
+**Training-data fold numbers moved the OPPOSITE direction** (taskD mean false-accept-vs-stranger: 39% →
+45% → 58% mean across the 3 versions) — this is not a regression. The packet-rate shortcut was internally
+consistent for that training day's own unauthorized cohort (all recorded in the same fast-rate block,
+held-out stranger included), so it was propping up the same-day fold number while actively hurting
+generalization to anything recorded at a different pace — exactly the real holdout sessions. Removing it
+trades a fake same-day number for real accuracy on genuinely new data, which is the right trade; don't be
+alarmed that the training-fold number looks worse now.
+
+**Bottom line**: the fix solved "does a real authorized person get recognized" (the main complaint). It
+did NOT solve "does every stranger get reliably rejected" — that remains weak and is a data-scale
+limitation (2 authorized identities, 5 stranger identities total), not something more debugging fixes.
+Next step queued: a UniFi-style (arXiv:2512.22143) time-aware attention model that learns directly from
+irregular-rate sequences instead of resampling at all — not yet implemented.
 
 ---
 

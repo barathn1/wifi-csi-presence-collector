@@ -49,7 +49,6 @@ HOLDOUT_SESSIONS = [
 LIVE_CALIB_SESSION = "none/2026-09-15/20260915_175702"  # earliest holdout `none` -- stand-in for a fresh
 # live "stand outside" calibration period, same role compute_live_baseline plays in live_infer.py
 LIVE_CALIB_SECONDS = 60.0
-ASSUMED_PACKET_RATE_HZ = 220.0  # rough, just to slice ~60s worth of packets for the live-style baseline
 
 
 def ground_truth(task_name: str, row: pd.Series) -> int | None:
@@ -64,13 +63,17 @@ def ground_truth(task_name: str, row: pd.Series) -> int | None:
     raise ValueError(task_name)
 
 
-def build_baselines():
-    baseline_train = compute_day_baseline_from_sessions(TRAIN_NONE_SESSIONS, label="train_pooled")
+def build_baselines(mode: str, target_rate_hz: float | None):
+    baseline_train = compute_day_baseline_from_sessions(TRAIN_NONE_SESSIONS, label="train_pooled",
+                                                          mode=mode, target_rate_hz=target_rate_hz)
 
-    cache_path = cache_session(LIVE_CALIB_SESSION, mode="resampled")
+    cache_path = cache_session(LIVE_CALIB_SESSION, mode=mode, target_rate_hz=target_rate_hz)
     with np.load(cache_path) as d:
         amp, phase = d["amplitude"], d["phase"]
-    n_calib_packets = min(len(amp), int(LIVE_CALIB_SECONDS * ASSUMED_PACKET_RATE_HZ))
+    # cache is now at a known, exact rate (target_rate_hz for resampled_timenorm) rather than a guessed
+    # ASSUMED_PACKET_RATE_HZ -- slicing LIVE_CALIB_SECONDS worth of samples is now exact, not approximate.
+    rate_for_slicing = target_rate_hz if target_rate_hz is not None else 220.0
+    n_calib_packets = min(len(amp), int(LIVE_CALIB_SECONDS * rate_for_slicing))
     baseline_live = compute_live_baseline(amp[:n_calib_packets], phase[:n_calib_packets], label="live_fresh")
 
     drift_amp = float(np.mean(np.abs(baseline_train.amp_mean - baseline_live.amp_mean) / baseline_train.amp_std))
@@ -122,13 +125,30 @@ def main() -> None:
 
     print(f"holdout sessions: {len(holdout_manifest)} "
           f"({holdout_manifest['label'].value_counts().to_dict()})")
-    window_index = build_window_index(manifest=holdout_manifest, mode="resampled",
-                                       window_packets=200, stride_packets=100)
-    print(f"holdout window index: {len(window_index)} windows\n")
-
-    baseline_train, baseline_live = build_baselines()
 
     checkpoints = {name: load_checkpoint(CHECKPOINT_DIR / fn) for name, fn in TASKS.items()}
+    # read window_packets/stride_packets/mode from the checkpoints' own stored provenance rather than
+    # hardcoding separate literals here -- a previous version of this script duplicated the training
+    # script's literals by hand, with no assertion tying them together and no error if they ever drifted.
+    metas = {name: ck.meta for name, ck in checkpoints.items()}
+    modes = {m["mode"] for m in metas.values()}
+    window_packets_set = {m["window_packets"] for m in metas.values()}
+    stride_packets_set = {m["stride_packets"] for m in metas.values()}
+    rate_set = {m.get("target_rate_hz") for m in metas.values()}
+    assert len(modes) == len(window_packets_set) == len(stride_packets_set) == len(rate_set) == 1, \
+        f"shipped checkpoints disagree on windowing params: modes={modes} " \
+        f"window_packets={window_packets_set} stride_packets={stride_packets_set} target_rate_hz={rate_set}"
+    mode, window_packets, stride_packets = modes.pop(), window_packets_set.pop(), stride_packets_set.pop()
+    target_rate_hz = rate_set.pop()  # None for non-time-normalized checkpoints
+    print(f"windowing params read from checkpoints: mode={mode} window_packets={window_packets} "
+          f"stride_packets={stride_packets} target_rate_hz={target_rate_hz}")
+
+    window_index = build_window_index(manifest=holdout_manifest, mode=mode,
+                                       window_packets=window_packets, stride_packets=stride_packets,
+                                       target_rate_hz=target_rate_hz)
+    print(f"holdout window index: {len(window_index)} windows\n")
+
+    baseline_train, baseline_live = build_baselines(mode, target_rate_hz)
 
     for task_name, ck in checkpoints.items():
         print(f"\n=== {task_name} ===")

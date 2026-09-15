@@ -8,3 +8,37 @@ timestamp,stage,task,held_out,accuracy,eer,auroc,false_accept_unauthorized,false
 2026-09-15T12:10:08.084392+00:00,final,taskD_auth_vs_nonauth,,0.9157842157842158,,,,,10010,10010,in-sample sanity only; trivial_baseline=0.5217; checkpoint=whofi_taskD_calibA_day3ch6.pt
 2026-09-15T12:12:09.696039+00:00,final,task0_presence,,1.0,,,,,10010,10010,in-sample sanity only; trivial_baseline=0.7564; checkpoint=whofi_task0_presence_calibA_day3ch6.pt
 2026-09-15T12:13:36.356557+00:00,final,taskE_motion_standing_vs_walking,,0.9282884310618067,,,,,7572,7572,in-sample sanity only; trivial_baseline=0.6149; checkpoint=whofi_taskE_motion_calibA_day3ch6.pt
+2026-09-15T22:39:16.513232+00:00,eval_loo,taskD_auth_vs_nonauth,abdul,0.8069540021731256,0.20171917281753765,0.8719141229612627,0.43829113924050633,0.0,7249,2761,"leave-one-unauthorized-person-out, includes none"
+2026-09-15T22:40:51.813969+00:00,eval_loo,taskD_auth_vs_nonauth,divya,0.7792112053077773,0.22189266308804073,0.8763898151286228,0.6095890410958904,0.016442451420029897,7297,2713,"leave-one-unauthorized-person-out, includes none"
+2026-09-15T22:42:34.822635+00:00,eval_loo,taskD_auth_vs_nonauth,harshitha,0.8201038575667656,0.19366272110653016,0.8938322915281287,0.5379188712522046,0.0,7314,2696,"leave-one-unauthorized-person-out, includes none"
+2026-09-15T22:44:20.013097+00:00,eval_loo,taskD_auth_vs_nonauth,sumanth,0.8375370919881305,0.14800172895331823,0.9236351243516424,0.2292768959435626,0.0,7314,2696,"leave-one-unauthorized-person-out, includes none"
+2026-09-15T22:46:07.754710+00:00,eval_split,task0_presence,fold0,0.9926181102362205,0.0025140957978196975,0.9999941521322788,1.0,0.016008537886873,7978,2032,session-disjoint 5-fold (all folds)
+2026-09-15T22:47:59.700813+00:00,eval_split,task0_presence,fold1,1.0,nan,nan,1.0,,8073,1937,session-disjoint 5-fold (all folds)
+2026-09-15T22:50:05.604063+00:00,eval_split,task0_presence,fold2,0.996900826446281,0.0,1.0,0.9901639344262295,0.0,8074,1936,session-disjoint 5-fold (all folds)
+2026-09-15T22:51:50.309171+00:00,eval_split,task0_presence,fold3,0.9972362966374942,0.0,1.0,1.0,0.0,7839,2171,session-disjoint 5-fold (all folds)
+2026-09-15T22:53:35.891696+00:00,eval_split,task0_presence,fold4,1.0,0.0,1.0,1.0,0.0,8076,1934,session-disjoint 5-fold (all folds)
+2026-09-15T22:54:58.963257+00:00,eval_split,taskE_motion_standing_vs_walking,fold0,0.9323258869908015,nan,nan,0.7315436241610739,,6050,1522,session-disjoint 5-fold (all folds)
+2026-09-15T22:56:19.106156+00:00,eval_split,taskE_motion_standing_vs_walking,fold1,0.8863031914893617,0.1384282138794084,0.9480345847554039,0.055762081784386616,,6068,1504,session-disjoint 5-fold (all folds)
+2026-09-15T22:57:35.190888+00:00,eval_split,taskE_motion_standing_vs_walking,fold2,0.7971109652002626,0.27055943299247953,0.7900340853757507,0.6734006734006734,,6049,1523,session-disjoint 5-fold (all folds)
+2026-09-15T22:58:48.998364+00:00,eval_split,taskE_motion_standing_vs_walking,fold3,0.6910785619174434,0.3076901894551329,0.7521081167082782,0.31951640759930916,,6070,1502,session-disjoint 5-fold (all folds)
+2026-09-15T23:00:01.703790+00:00,eval_split,taskE_motion_standing_vs_walking,fold4,0.6265614727153189,0.3471335927367056,0.7405845222654561,0.9065573770491804,,6051,1521,session-disjoint 5-fold (all folds)
+2026-09-15T23:02:03.914551+00:00,final,taskD_auth_vs_nonauth,,0.9012987012987013,,,,,10010,10010,in-sample sanity only; trivial_baseline=0.5217; checkpoint=whofi_taskD_calibA_day3ch6.pt
+2026-09-15T23:04:07.377599+00:00,final,task0_presence,,1.0,,,,,10010,10010,in-sample sanity only; trivial_baseline=0.7564; checkpoint=whofi_task0_presence_calibA_day3ch6.pt
+2026-09-15T23:05:36.255290+00:00,final,taskE_motion_standing_vs_walking,,0.9282884310618067,,,,,7572,7572,in-sample sanity only; trivial_baseline=0.6149; checkpoint=whofi_taskE_motion_calibA_day3ch6.pt
+2026-09-15T23:07:47.400072+00:00,eval_loo,taskD_auth_vs_nonauth,abdul,0.8501722158438576,0.16589972527472524,0.8905906593406594,0.5083612040133779,0.005628517823639775,4871,1742,"leave-one-unauthorized-person-out, includes none"
+2026-09-15T23:08:46.912873+00:00,eval_loo,taskD_auth_vs_nonauth,divya,0.8265129682997118,0.19196803196803197,0.8904395604395604,0.6746575342465754,0.00375234521575985,4878,1735,"leave-one-unauthorized-person-out, includes none"
+2026-09-15T23:09:50.394743+00:00,eval_loo,taskD_auth_vs_nonauth,harshitha,0.8329493087557603,0.1583069472899981,0.932351062980603,0.6109215017064846,0.00375234521575985,4877,1736,"leave-one-unauthorized-person-out, includes none"
+2026-09-15T23:10:53.056559+00:00,eval_loo,taskD_auth_vs_nonauth,sumanth,0.8495981630309989,0.1573489010989011,0.9244888524936603,0.5050167224080268,0.009380863039399626,4871,1742,"leave-one-unauthorized-person-out, includes none"
+2026-09-15T23:12:02.062465+00:00,eval_split,task0_presence,fold0,0.9922057677318784,0.007085678549093205,0.9998549093183239,1.0,0.01125703564727955,5330,1283,session-disjoint 5-fold (all folds)
+2026-09-15T23:13:08.852644+00:00,eval_split,task0_presence,fold1,0.999219968798752,0.000945179584120983,0.9999673643171485,1.0,0.001890359168241966,5331,1282,session-disjoint 5-fold (all folds)
+2026-09-15T23:14:09.673190+00:00,eval_split,task0_presence,fold2,0.999219968798752,0.0,1.0,1.0,0.0,5331,1282,session-disjoint 5-fold (all folds)
+2026-09-15T23:15:11.700589+00:00,eval_split,task0_presence,fold3,0.9936215450035436,0.005167465130221181,0.9999469459432216,0.9842696629213483,0.0,5202,1411,session-disjoint 5-fold (all folds)
+2026-09-15T23:16:12.981402+00:00,eval_split,task0_presence,fold4,0.996309963099631,nan,nan,1.0,,5258,1355,session-disjoint 5-fold (all folds)
+2026-09-15T23:16:55.958002+00:00,eval_split,taskE_motion_standing_vs_walking,fold0,0.5971428571428572,0.20827373748487185,0.8835207393552647,0.6266968325791855,,3765,1050,session-disjoint 5-fold (all folds)
+2026-09-15T23:17:41.647894+00:00,eval_split,taskE_motion_standing_vs_walking,fold1,0.9613259668508287,0.051389731871898346,0.9892802313542076,0.5016835016835017,,3910,905,session-disjoint 5-fold (all folds)
+2026-09-15T23:18:30.902116+00:00,eval_split,taskE_motion_standing_vs_walking,fold2,0.8589132507149666,nan,nan,0.6506849315068494,,3766,1049,session-disjoint 5-fold (all folds)
+2026-09-15T23:19:17.868408+00:00,eval_split,taskE_motion_standing_vs_walking,fold3,0.6839779005524862,0.3394022126465138,0.7225584684714319,0.8422818791946308,,3910,905,session-disjoint 5-fold (all folds)
+2026-09-15T23:20:08.707750+00:00,eval_split,taskE_motion_standing_vs_walking,fold4,0.8498896247240618,0.14887608163801452,0.9365384299623992,,,3909,906,session-disjoint 5-fold (all folds)
+2026-09-15T23:21:29.281984+00:00,final,taskD_auth_vs_nonauth,,0.9119915318312415,,,,,6613,6613,in-sample sanity only; trivial_baseline=0.5492; checkpoint=whofi_taskD_calibA_day3ch6.pt
+2026-09-15T23:22:53.194717+00:00,final,task0_presence,,0.9996975654014819,,,,,6613,6613,in-sample sanity only; trivial_baseline=0.7281; checkpoint=whofi_task0_presence_calibA_day3ch6.pt
+2026-09-15T23:23:55.734797+00:00,final,taskE_motion_standing_vs_walking,,0.9273104880581516,,,,,4815,4815,in-sample sanity only; trivial_baseline=0.6264; checkpoint=whofi_taskE_motion_calibA_day3ch6.pt

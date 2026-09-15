@@ -38,7 +38,7 @@ from ml.data_pipeline.splits import (
     session_disjoint_kfold,
 )
 from ml.data_pipeline.torch_dataset import CsiWindowDataset
-from ml.data_pipeline.windowing import build_window_index, load_manifest
+from ml.data_pipeline.windowing import build_window_index, cache_session, load_manifest
 from ml.evaluation.metrics import compute_auroc, compute_eer
 from ml.inference.checkpoint import save_checkpoint
 from ml.models.transformer_whofi import WhoFiTransformer
@@ -46,7 +46,7 @@ from ml.training.train import train_classifier
 
 DAY3_DATE = "2026-09-15"
 TARGET_CHANNEL = 6
-INDEX_PATH = REPO_ROOT / f"ml/data_pipeline/cache/window_index_day3ch{TARGET_CHANNEL}_w200_s100.csv"
+CACHE_MODE = "resampled_timenorm"  # closes the packet-rate/window-duration confound, see time_resample.py
 CHECKPOINT_DIR = REPO_ROOT / "ml/checkpoints"
 LOG_PATH = REPO_ROOT / "ml/evaluation/results/day3_ch6_model_log.csv"
 LOG_FIELDNAMES = ["timestamp", "stage", "task", "held_out", "accuracy", "eer", "auroc",
@@ -79,19 +79,50 @@ def session_channel(session_dir: str) -> int:
 
 
 def build_day3_ch6_manifest() -> pd.DataFrame:
+    """Excludes ml.evaluation.eval_day3ch6_holdout.HOLDOUT_SESSIONS explicitly -- those were collected
+    AFTER this script's original training run and must stay held out for that script's numbers to mean
+    anything. Previously this separation was accidental (relying on a gitignored window-index cache file
+    never having been rebuilt since); now it's enforced even after a fresh clone / cleared cache."""
+    from ml.evaluation.eval_day3ch6_holdout import HOLDOUT_SESSIONS
+
     manifest = load_manifest()
     day3 = manifest[manifest["session_dir"].str.contains(f"/{DAY3_DATE}/", regex=False)].copy()
     day3["channel_primary"] = day3["session_dir"].apply(session_channel)
     ch6 = day3[day3["channel_primary"] == TARGET_CHANNEL].drop(columns=["channel_primary"])
+    ch6 = ch6[~ch6["session_dir"].isin(HOLDOUT_SESSIONS)]
     return ch6.reset_index(drop=True)
 
 
-def build_or_load_window_index(manifest: pd.DataFrame) -> pd.DataFrame:
-    if INDEX_PATH.exists():
-        return pd.read_csv(INDEX_PATH)
-    index = build_window_index(manifest=manifest, mode="resampled", window_packets=200, stride_packets=100)
-    INDEX_PATH.parent.mkdir(parents=True, exist_ok=True)
-    index.to_csv(INDEX_PATH, index=False)
+def compute_dataset_target_rate_hz(manifest: pd.DataFrame) -> float:
+    """Derive the common resample rate from THIS run's actual sessions (never a fixed constant -- see
+    time_resample.py) -- the minimum native packet rate among them, so every session is downsampled in
+    time, never upsampled past what it actually captured. Uses the plain "resampled" (subcarrier-only,
+    no time-norm) cache purely to read each session's own device_time_us cheaply."""
+    from ml.data_pipeline.time_resample import compute_target_rate_hz, session_native_rate_hz
+
+    rates = []
+    for session_dir in manifest["session_dir"]:
+        cache_path = cache_session(session_dir, mode="resampled")
+        with np.load(cache_path) as d:
+            rates.append(session_native_rate_hz(d["device_time_us"]))
+    target = compute_target_rate_hz(rates)
+    print(f"native packet rates: {min(rates):.1f}-{max(rates):.1f} Hz across {len(rates)} sessions -> "
+          f"derived time-normalization target: {target:.2f} Hz (window_packets=200 -> "
+          f"{200 / target:.2f}s/window, fixed across every session)")
+    return target
+
+
+def build_or_load_window_index(manifest: pd.DataFrame, target_rate_hz: float) -> pd.DataFrame:
+    index_path = REPO_ROOT / (
+        f"ml/data_pipeline/cache/window_index_day3ch{TARGET_CHANNEL}_timenorm_{target_rate_hz:.2f}hz"
+        f"_w200_s100.csv"
+    )
+    if index_path.exists():
+        return pd.read_csv(index_path)
+    index = build_window_index(manifest=manifest, mode=CACHE_MODE, window_packets=200, stride_packets=100,
+                                target_rate_hz=target_rate_hz)
+    index_path.parent.mkdir(parents=True, exist_ok=True)
+    index.to_csv(index_path, index=False)
     return index
 
 
@@ -124,9 +155,10 @@ def binary_eval(model: torch.nn.Module, test_ds: CsiWindowDataset) -> dict:
 
 def evaluate_taskD(window_index: pd.DataFrame, calibration, epochs: int, seed: int) -> None:
     full_ds = CsiWindowDataset(window_index, "taskD_auth_vs_nonauth", calibration=calibration)
-    print(f"\n=== taskD_auth_vs_nonauth: leave-one-unauthorized-person-out ({len(full_ds)} windows) ===")
+    print(f"\n=== taskD_auth_vs_nonauth: leave-one-unauthorized-person-out, including `none` "
+          f"({len(full_ds)} windows) ===")
     fold_metrics = []
-    for held_out, train_idx, test_idx in leave_one_unauthorized_person_out(full_ds.index):
+    for held_out, train_idx, test_idx in leave_one_unauthorized_person_out(full_ds.index, include_none=True):
         assert_no_group_leakage(full_ds.index, train_idx, test_idx, "session_dir")
         train_ds = full_ds.subset_by_index_rows(train_idx)
         test_ds = full_ds.subset_by_index_rows(test_idx)
@@ -136,34 +168,51 @@ def evaluate_taskD(window_index: pd.DataFrame, calibration, epochs: int, seed: i
         metrics.update({"held_out": held_out, "n_train": len(train_ds), "n_test": len(test_ds)})
         fold_metrics.append(metrics)
         print(f"  held out '{held_out}': acc={metrics['accuracy']:.3f} auroc={metrics['auroc']:.3f} "
-              f"eer={metrics['eer']:.3f} false_accept={metrics.get('false_accept_unauthorized', float('nan')):.3f} "
+              f"eer={metrics['eer']:.3f} false_accept_unauth={metrics.get('false_accept_unauthorized', float('nan')):.3f} "
+              f"false_accept_none={metrics.get('false_accept_none', float('nan')):.3f} "
               f"(n_train={metrics['n_train']} n_test={metrics['n_test']})")
         log_rows([{**metrics, "timestamp": datetime.now(timezone.utc).isoformat(), "stage": "eval_loo",
-                   "task": "taskD_auth_vs_nonauth", "notes": "leave-one-unauthorized-person-out"}])
+                   "task": "taskD_auth_vs_nonauth", "notes": "leave-one-unauthorized-person-out, includes none"}])
     mean_auroc = np.nanmean([m["auroc"] for m in fold_metrics])
-    mean_fa = np.nanmean([m.get("false_accept_unauthorized", float("nan")) for m in fold_metrics])
+    mean_fa_unauth = np.nanmean([m.get("false_accept_unauthorized", float("nan")) for m in fold_metrics])
+    mean_fa_none = np.nanmean([m.get("false_accept_none", float("nan")) for m in fold_metrics])
     print(f"  MEAN across {len(fold_metrics)} held-out strangers: auroc={mean_auroc:.3f} "
-          f"false_accept_rate={mean_fa:.3f}  <-- the trustworthy number, not the final checkpoint's")
+          f"false_accept_unauth={mean_fa_unauth:.3f} false_accept_none={mean_fa_none:.3f}  "
+          f"<-- the trustworthy number, not the final checkpoint's")
 
 
 def evaluate_single_split(task_name: str, window_index: pd.DataFrame, calibration, epochs: int, seed: int) -> None:
+    """Runs ALL 5 session-disjoint folds (not just fold 0) and reports the mean+range -- a single fixed
+    fold from a ~20-session pool can be lucky/unlucky, and `session_disjoint_kfold`'s own `seed` param is
+    dead code (GroupKFold built without shuffle/random_state), so picking `next(...)` always returns the
+    exact same fold regardless of --seed. Averaging across all folds sidesteps that instead of relying on
+    a seed that doesn't actually do anything."""
     full_ds = CsiWindowDataset(window_index, task_name, calibration=calibration)
-    train_idx, test_idx = next(session_disjoint_kfold(full_ds.index, n_splits=5, seed=seed))
-    assert_no_group_leakage(full_ds.index, train_idx, test_idx, "session_dir")
-    train_ds = full_ds.subset_by_index_rows(train_idx)
-    test_ds = full_ds.subset_by_index_rows(test_idx)
-    model = WhoFiTransformer(n_subcarriers=128, n_classes=len(full_ds.classes), **WINNING_ARCH_KWARGS)
-    train_classifier(model, train_ds, test_ds, epochs=epochs, seed=seed)
-    metrics = binary_eval(model, test_ds)
-    print(f"\n=== {task_name}: session-disjoint 80/20 split ({len(full_ds)} windows) ===")
-    print(f"  acc={metrics['accuracy']:.3f} auroc={metrics['auroc']:.3f} "
-          f"(n_train={len(train_ds)} n_test={len(test_ds)})")
-    log_rows([{**metrics, "timestamp": datetime.now(timezone.utc).isoformat(), "stage": "eval_split",
-               "task": task_name, "held_out": "", "n_train": len(train_ds), "n_test": len(test_ds),
-               "notes": "session-disjoint 80/20"}])
+    print(f"\n=== {task_name}: session-disjoint 5-fold ({len(full_ds)} windows) ===")
+    fold_metrics = []
+    for fold, (train_idx, test_idx) in enumerate(session_disjoint_kfold(full_ds.index, n_splits=5)):
+        assert_no_group_leakage(full_ds.index, train_idx, test_idx, "session_dir")
+        train_ds = full_ds.subset_by_index_rows(train_idx)
+        test_ds = full_ds.subset_by_index_rows(test_idx)
+        model = WhoFiTransformer(n_subcarriers=128, n_classes=len(full_ds.classes), **WINNING_ARCH_KWARGS)
+        train_classifier(model, train_ds, test_ds, epochs=epochs, seed=seed)
+        metrics = binary_eval(model, test_ds)
+        metrics.update({"n_train": len(train_ds), "n_test": len(test_ds)})
+        fold_metrics.append(metrics)
+        print(f"  fold {fold}: acc={metrics['accuracy']:.3f} auroc={metrics['auroc']:.3f} "
+              f"(n_train={metrics['n_train']} n_test={metrics['n_test']})")
+        log_rows([{**metrics, "timestamp": datetime.now(timezone.utc).isoformat(), "stage": "eval_split",
+                   "task": task_name, "held_out": f"fold{fold}", "n_train": metrics["n_train"],
+                   "n_test": metrics["n_test"], "notes": "session-disjoint 5-fold (all folds)"}])
+    accs = [m["accuracy"] for m in fold_metrics]
+    aurocs = [m["auroc"] for m in fold_metrics]
+    print(f"  MEAN across {len(fold_metrics)} folds: acc={np.mean(accs):.3f} (range "
+          f"{min(accs):.3f}-{max(accs):.3f})  auroc={np.nanmean(aurocs):.3f}  <-- the trustworthy number, "
+          f"not any single fold's")
 
 
-def train_final(task_name: str, window_index: pd.DataFrame, calibration, epochs: int, seed: int) -> None:
+def train_final(task_name: str, window_index: pd.DataFrame, calibration, epochs: int, seed: int,
+                 target_rate_hz: float) -> None:
     filename, display_labels = TASKS[task_name]
     full_ds = CsiWindowDataset(window_index, task_name, calibration=calibration)
     classes = full_ds.classes
@@ -178,10 +227,14 @@ def train_final(task_name: str, window_index: pd.DataFrame, calibration, epochs:
         model, out_path, model_class="WhoFiTransformer",
         arch_kwargs=dict(n_subcarriers=128, n_classes=len(classes), **WINNING_ARCH_KWARGS),
         classes=list(classes), display_labels=display_labels, task_name=task_name,
-        preprocessing="calibA", mode="resampled", window_packets=200, stride_packets=100,
+        preprocessing="calibA", mode=CACHE_MODE, window_packets=200, stride_packets=100,
         train_dates=[DAY3_DATE], seed=seed, epochs=epochs, train_loss_curve=result["train_loss_curve"],
-        notes=f"Day3 ({DAY3_DATE}) channel-{TARGET_CHANNEL}-ONLY, no held-out split -- see this run's "
-              f"eval_loo/eval_split log rows for the honest held-out numbers",
+        notes=f"Day3 ({DAY3_DATE}) channel-{TARGET_CHANNEL}-ONLY, time-normalized windowing "
+              f"(derived target {target_rate_hz:.2f}Hz from this dataset's own slowest session, "
+              f"a window is {200 / target_rate_hz:.2f}s, fixed across every session -- closes the "
+              f"packet-rate/window-duration confound, see [[project-day3-ch6-packet-rate-confound]]), "
+              f"no held-out split -- see this run's eval_loo/eval_split log rows for the honest held-out numbers",
+        target_rate_hz=target_rate_hz,
     )
     print(f"  saved -> {out_path}")
     log_rows([{"timestamp": datetime.now(timezone.utc).isoformat(), "stage": "final", "task": task_name,
@@ -194,11 +247,13 @@ def main(epochs: int, seed: int) -> None:
     manifest = build_day3_ch6_manifest()
     print(f"Day3 channel-{TARGET_CHANNEL} sessions: {len(manifest)} "
           f"({manifest['label'].value_counts().to_dict()})")
-    window_index = build_or_load_window_index(manifest)
+    target_rate_hz = compute_dataset_target_rate_hz(manifest)
+    window_index = build_or_load_window_index(manifest, target_rate_hz)
     print(f"window index: {len(window_index)} windows")
 
     none_sessions = manifest.loc[manifest["label"] == "none", "session_dir"].tolist()
-    baseline = compute_day_baseline_from_sessions(none_sessions, label=f"{DAY3_DATE}_ch{TARGET_CHANNEL}")
+    baseline = compute_day_baseline_from_sessions(none_sessions, label=f"{DAY3_DATE}_ch{TARGET_CHANNEL}",
+                                                   mode=CACHE_MODE, target_rate_hz=target_rate_hz)
 
     def calibration(amp, phase, row):
         return apply_variant_a(amp, phase, baseline)
@@ -208,7 +263,7 @@ def main(epochs: int, seed: int) -> None:
     evaluate_single_split("taskE_motion_standing_vs_walking", window_index, calibration, epochs, seed)
 
     for task_name in TASKS:
-        train_final(task_name, window_index, calibration, epochs, seed)
+        train_final(task_name, window_index, calibration, epochs, seed, target_rate_hz)
 
     print(f"\nDone. Checkpoints in {CHECKPOINT_DIR}/, eval+final log at {LOG_PATH}")
 

@@ -54,19 +54,32 @@ def detect_dominant_csi_len(npz: dict) -> int:
     return int(lens[np.argmax(counts)])
 
 
-def _session_cache_path(session_dir_rel: str, mode: str) -> Path:
+def _session_cache_path(session_dir_rel: str, mode: str, target_rate_hz: float | None = None) -> Path:
     safe_name = session_dir_rel.replace("/", "__")
-    return SESSION_CACHE_DIR / f"{safe_name}__{mode}.npz"
+    # target_rate_hz is folded into the filename (not just `mode`) so caches for two different derived
+    # target rates -- e.g. re-deriving after adding faster-hardware sessions later -- never collide or
+    # get silently reused from a stale, no-longer-correct rate.
+    suffix = mode if target_rate_hz is None else f"{mode}_{target_rate_hz:.2f}hz"
+    return SESSION_CACHE_DIR / f"{safe_name}__{suffix}.npz"
 
 
-def cache_session(session_dir_rel: str, mode: str = "resampled", force: bool = False) -> Path | None:
+def cache_session(session_dir_rel: str, mode: str = "resampled", force: bool = False,
+                   target_rate_hz: float | None = None) -> Path | None:
     """Decode one session's own dominant bucket once and cache it (auto-detected per session -- Day 1
     and Day 2 dominate on different frame formats, see module docstring). `mode`: "native" keeps the
     session's own subcarrier count; "resampled" additionally resamples onto the shared
-    `TARGET_SUBCARRIERS`-point grid so sessions from either day are shape-compatible. Returns None if
-    the session has too few packets to have decoded at all."""
-    assert mode in ("native", "resampled"), mode
-    out_path = _session_cache_path(session_dir_rel, mode)
+    `TARGET_SUBCARRIERS`-point grid so sessions from either day are shape-compatible; "resampled_timenorm"
+    additionally resamples the TIME axis onto `target_rate_hz` (required for this mode -- see
+    time_resample.py::compute_target_rate_hz to derive it from the actual dataset in play, never a fixed
+    constant) -- opt-in, used by ml/training/train_day3_ch6_model.py to close a real packet-rate/
+    window-duration confound found in that collection (see [[project-day3-ch6-packet-rate-confound]]);
+    every other existing caller is unaffected since this is a new, separately-cached mode value, not a
+    change to "resampled"'s existing behavior. Returns None if the session has too few packets to have
+    decoded at all."""
+    assert mode in ("native", "resampled", "resampled_timenorm"), mode
+    assert (mode == "resampled_timenorm") == (target_rate_hz is not None), \
+        "target_rate_hz is required for (and only for) mode='resampled_timenorm'"
+    out_path = _session_cache_path(session_dir_rel, mode, target_rate_hz)
     if out_path.exists() and not force:
         return out_path
 
@@ -78,18 +91,26 @@ def cache_session(session_dir_rel: str, mode: str = "resampled", force: bool = F
     bucket = buckets[csi_len]
 
     amplitude, phase = bucket["amplitude"], bucket["phase"]
-    if mode == "resampled" and bucket["n_subcarriers"] != TARGET_SUBCARRIERS:
+    if mode in ("resampled", "resampled_timenorm") and bucket["n_subcarriers"] != TARGET_SUBCARRIERS:
         amplitude = resample_amplitude(amplitude, TARGET_SUBCARRIERS)
         phase = resample_phase(phase, TARGET_SUBCARRIERS)
 
     packet_idx = bucket["packet_indices"]
+    rssi = session.npz["rssi"][packet_idx].astype(np.float32)
+    device_time_us = session.npz["device_time_us"][packet_idx].astype(np.int64)
+
+    if mode == "resampled_timenorm":
+        from ml.data_pipeline.time_resample import resample_time_axis
+        amplitude, phase, rssi, device_time_us = resample_time_axis(
+            amplitude, phase, device_time_us, rssi, target_rate_hz)
+
     out_path.parent.mkdir(parents=True, exist_ok=True)
     np.savez(
         out_path,
         amplitude=amplitude,
         phase=phase,
-        rssi=session.npz["rssi"][packet_idx].astype(np.float32),
-        device_time_us=session.npz["device_time_us"][packet_idx].astype(np.int64),
+        rssi=rssi,
+        device_time_us=device_time_us,
         source_csi_len=csi_len,
     )
     return out_path
@@ -108,14 +129,17 @@ def build_window_index(
     mode: str = "resampled",
     window_packets: int = 200,
     stride_packets: int | None = None,
+    target_rate_hz: float | None = None,
 ) -> pd.DataFrame:
-    """One row per window: where to find it (cache_path, start, end) + label metadata. No CSI data here."""
+    """One row per window: where to find it (cache_path, start, end) + label metadata. No CSI data here.
+    `target_rate_hz` is required for (and only for) mode="resampled_timenorm" -- see
+    time_resample.py::compute_target_rate_hz."""
     manifest = manifest if manifest is not None else load_manifest()
     stride_packets = stride_packets or window_packets // 2
 
     rows = []
     for _, row in manifest.iterrows():
-        cache_path = cache_session(row["session_dir"], mode)
+        cache_path = cache_session(row["session_dir"], mode, target_rate_hz=target_rate_hz)
         if cache_path is None:
             continue
         with np.load(cache_path, mmap_mode="r") as d:

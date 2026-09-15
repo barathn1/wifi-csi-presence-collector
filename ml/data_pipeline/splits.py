@@ -48,7 +48,8 @@ def person_disjoint_kfold(window_index: pd.DataFrame, n_splits: int = 5):
         yield train_idx, test_idx
 
 
-def leave_one_unauthorized_person_out(window_index: pd.DataFrame, authorized_test_frac: float = 0.25, seed: int = 42):
+def leave_one_unauthorized_person_out(window_index: pd.DataFrame, authorized_test_frac: float = 0.25, seed: int = 42,
+                                       include_none: bool = False):
     """For open-set verification (Task C): hold out ONE unauthorized person entirely at test time
     (a stand-in for a genuinely novel intruder never seen during training/enrollment/registration).
 
@@ -57,7 +58,13 @@ def leave_one_unauthorized_person_out(window_index: pd.DataFrame, authorized_tes
     it. So a fixed, session-disjoint slice of authorized sessions is held out too (same slice reused
     across every held-out-person fold below): authorized identities stay known/enrolled, but the
     specific *sessions* used to verify them at test time are never the ones trained on, avoiding the
-    overlapping-window leakage `session_disjoint_kfold` guards against elsewhere in this module."""
+    overlapping-window leakage `session_disjoint_kfold` guards against elsewhere in this module.
+
+    `include_none` (default False, preserves every existing caller's exact behavior/numbers): when True,
+    also holds out a session-disjoint slice of `none` (empty-room) sessions into every fold's train/test,
+    matching taskD_auth_vs_nonauth's actual negative-class composition (authorized vs unauthorized-OR-none).
+    Without this, a leave-one-out eval of that task silently never measures auth-vs-empty-room separation
+    at all, even though the shipped model trains on and must reject both negative types."""
     auth_sessions = sorted(window_index.loc[window_index["label"] == "authorized", "session_dir"].unique())
     rng = np.random.default_rng(seed)
     shuffled = rng.permutation(auth_sessions)
@@ -68,13 +75,24 @@ def leave_one_unauthorized_person_out(window_index: pd.DataFrame, authorized_tes
     auth_test_mask = is_auth & window_index["session_dir"].isin(auth_test_sessions)
     auth_train_mask = is_auth & ~window_index["session_dir"].isin(auth_test_sessions)
 
+    none_test_mask = pd.Series(False, index=window_index.index)
+    none_train_mask = pd.Series(False, index=window_index.index)
+    if include_none:
+        none_sessions = sorted(window_index.loc[window_index["label"] == "none", "session_dir"].unique())
+        shuffled_none = rng.permutation(none_sessions)
+        n_none_test = max(1, int(round(len(none_sessions) * authorized_test_frac)))
+        none_test_sessions = set(shuffled_none[:n_none_test])
+        is_none = window_index["label"] == "none"
+        none_test_mask = is_none & window_index["session_dir"].isin(none_test_sessions)
+        none_train_mask = is_none & ~window_index["session_dir"].isin(none_test_sessions)
+
     unauth_people = sorted(window_index.loc[window_index["label"] == "unauthorized", "person_id"].unique())
     for held_out in unauth_people:
         is_held_out_person = (window_index["label"] == "unauthorized") & (window_index["person_id"] == held_out)
         unauth_train_mask = (window_index["label"] == "unauthorized") & ~is_held_out_person
 
-        test_mask = auth_test_mask | is_held_out_person
-        train_mask = auth_train_mask | unauth_train_mask
+        test_mask = auth_test_mask | is_held_out_person | none_test_mask
+        train_mask = auth_train_mask | unauth_train_mask | none_train_mask
         yield held_out, np.flatnonzero(train_mask.values), np.flatnonzero(test_mask.values)
 
 
