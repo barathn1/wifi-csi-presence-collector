@@ -28,6 +28,7 @@ import time
 
 import numpy as np
 
+from ml.data_pipeline.decode_csi import decode_one_sample
 from ml.data_pipeline.windowing import DOMINANT_CSI_LEN, load_manifest
 from ml.visualization.session_data import build_session_grid
 
@@ -99,12 +100,6 @@ async def handle_request(websocket, request: dict) -> None:
 
 # --- Live ESP32 streaming (unchanged behavior from the original live_server.py) ---
 
-def decode_csi_data(csi_data: bytes) -> tuple[np.ndarray, np.ndarray]:
-    """Same (imag,real) int8 pair decode as ml/data_pipeline/decode_csi.py, applied to one live packet."""
-    raw = np.frombuffer(csi_data, dtype=np.int8).astype(np.float32)
-    imag, real = raw[0::2], raw[1::2]
-    return np.hypot(real, imag), np.arctan2(imag, real)
-
 
 class SimulatedSample:
     """Stand-in for collector.models.CsiSample when --simulate is used -- same fields the real receiver
@@ -172,7 +167,7 @@ def receiver_thread_main(sample_queue: "queue.Queue", stop_event: threading.Even
         for sample in source:
             if sample.csi_len != DOMINANT_CSI_LEN:
                 continue  # only the dominant frame type -- consistent with the rest of the pipeline
-            amplitude, _phase = decode_csi_data(sample.csi_data)
+            amplitude, _phase = decode_one_sample(sample.csi_data)
             sample_queue.put({
                 "type": "sample", "seq": sample.seq, "rssi": sample.rssi,
                 "amplitude": np.round(amplitude, 1).tolist(),

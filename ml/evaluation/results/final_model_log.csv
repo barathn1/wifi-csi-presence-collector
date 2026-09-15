@@ -1,0 +1,5 @@
+timestamp,stage,task,preprocessing,model,split_type,fold,accuracy,n_train,n_test,notes
+2026-09-15T00:02:58.769156+00:00,final,taskE_motion_standing_vs_walking,calibA,whofi_transformer,none_all_data_pooled,0,0.8465859732437597,17267,17267,in-sample sanity only; trivial_baseline=0.5698; checkpoint=whofi_taskE_motion_calibA.pt
+2026-09-15T00:11:56.843422+00:00,final,taskD_auth_vs_nonauth,calibA,whofi_transformer,none_all_data_pooled,0,0.9388276947285602,30504,30504,in-sample sanity only; trivial_baseline=0.7152; checkpoint=whofi_taskD_calibA.pt
+2026-09-15T00:18:09.447397+00:00,final,task0_presence,calibA,whofi_transformer,none_all_data_pooled,0,0.992656700760556,30504,30504,in-sample sanity only; trivial_baseline=0.5661; checkpoint=whofi_task0_presence_calibA.pt
+2026-09-15T00:21:48.717888+00:00,final,taskE_motion_standing_vs_walking,calibA,whofi_transformer,none_all_data_pooled,0,0.9228007181328546,17267,17267,in-sample sanity only; trivial_baseline=0.5698; checkpoint=whofi_taskE_motion_calibA.pt

@@ -90,23 +90,27 @@ def csi_len_distribution(npz: dict) -> dict[int, int]:
     return {int(l): int(c) for l, c in zip(lens, counts)}
 
 
+def decode_one_sample(csi_data: bytes) -> tuple[np.ndarray, np.ndarray]:
+    """Decode one LIVE packet's raw CSI bytes into (amplitude, phase) -- same (imag,real) int8-pair
+    math as decode_session_by_bucket/decode_one_packet, just for a single live-arriving packet rather
+    than an already-recorded session array. Shared by ml/inference/live_infer.py and
+    ml/visualization/player_server.py (each used to keep its own copy of this)."""
+    raw = np.frombuffer(csi_data, dtype=np.int8).astype(np.float32)
+    imag, real = raw[0::2], raw[1::2]
+    return np.hypot(real, imag).astype(np.float32), np.arctan2(imag, real).astype(np.float32)
+
+
 def channel_2ghz_freq_mhz(channel: int) -> int:
     return 2412 + 5 * (channel - 1)
 
 
-def channel_width_summary(npz: dict) -> dict:
-    """Dominant (cwb, channel_primary, channel_secondary) combo for a session, translated into a
-    human-readable channel/bandwidth/frequency-span description -- no router access needed, everything
-    here comes straight from the per-packet rx_ctrl fields the firmware already records. `cwb`: 0=20MHz
-    (HT20), 1=40MHz (HT40). `channel_secondary` (ESP-IDF wifi_second_chan_t): 0=NONE, 1=ABOVE, 2=BELOW."""
-    cwb = npz["cwb"]
-    ch_primary = npz["channel_primary"]
-    ch_secondary = npz["channel_secondary"]
-    combos, counts = np.unique(
-        np.stack([cwb, ch_primary, ch_secondary], axis=1), axis=0, return_counts=True,
-    )
-    dom_cwb, dom_primary, dom_secondary = combos[np.argmax(counts)]
-    dom_cwb, dom_primary, dom_secondary = int(dom_cwb), int(dom_primary), int(dom_secondary)
+def _summarize_channel_combo(combo_counts: dict[tuple[int, int, int], int]) -> dict:
+    """Shared core of channel_width_summary/channel_width_summary_live: given packet counts per
+    (cwb, channel_primary, channel_secondary) combo, pick the dominant one and describe it in human-
+    readable channel/bandwidth/frequency-span terms. `cwb`: 0=20MHz (HT20), 1=40MHz (HT40).
+    `channel_secondary` (ESP-IDF wifi_second_chan_t): 0=NONE, 1=ABOVE, 2=BELOW."""
+    (dom_cwb, dom_primary, dom_secondary), dom_count = max(combo_counts.items(), key=lambda kv: kv[1])
+    total = sum(combo_counts.values())
 
     primary_center = channel_2ghz_freq_mhz(dom_primary)
     if dom_cwb == 0:
@@ -122,7 +126,29 @@ def channel_width_summary(npz: dict) -> dict:
         desc = f"40MHz (HT40), channel {dom_primary}+{direction}, {span[0]}-{span[1]} MHz"
 
     return {"cwb": dom_cwb, "channel_primary": dom_primary, "channel_secondary": dom_secondary,
-            "description": desc, "fraction_of_packets": float(np.max(counts) / counts.sum())}
+            "description": desc, "fraction_of_packets": float(dom_count / total)}
+
+
+def channel_width_summary(npz: dict) -> dict:
+    """Dominant (cwb, channel_primary, channel_secondary) combo for an already-recorded session,
+    translated into a human-readable description -- no router access needed, everything here comes
+    straight from the per-packet rx_ctrl fields the firmware already records. See
+    channel_width_summary_live() for the equivalent check against a live, in-progress stream."""
+    cwb = npz["cwb"]
+    ch_primary = npz["channel_primary"]
+    ch_secondary = npz["channel_secondary"]
+    combos, counts = np.unique(
+        np.stack([cwb, ch_primary, ch_secondary], axis=1), axis=0, return_counts=True,
+    )
+    combo_counts = {(int(c[0]), int(c[1]), int(c[2])): int(n) for c, n in zip(combos, counts)}
+    return _summarize_channel_combo(combo_counts)
+
+
+def channel_width_summary_live(combo_counts: dict[tuple[int, int, int], int]) -> dict:
+    """Same as channel_width_summary but for counts accumulated incrementally from a live stream (e.g.
+    a collections.Counter keyed by (cwb, channel_primary, channel_secondary) that
+    ml/inference/live_infer.py updates per accepted packet) instead of a full recorded session array."""
+    return _summarize_channel_combo(dict(combo_counts))
 
 
 def list_sessions(label: str | None = None) -> list[Path]:

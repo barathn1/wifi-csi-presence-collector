@@ -1,0 +1,10 @@
+timestamp,stage,task,held_out,accuracy,eer,auroc,false_accept_unauthorized,false_accept_none,n_train,n_test,notes
+2026-09-15T12:01:47.603249+00:00,eval_loo,taskD_auth_vs_nonauth,abdul,0.6950286806883366,0.33075906016993234,0.7088038624934976,0.5585443037974683,,5480,2092,leave-one-unauthorized-person-out
+2026-09-15T12:02:57.776682+00:00,eval_loo,taskD_auth_vs_nonauth,divya,0.6374755381604696,0.4010273972602739,0.675269750422218,0.4828767123287671,,5528,2044,leave-one-unauthorized-person-out
+2026-09-15T12:04:13.344737+00:00,eval_loo,taskD_auth_vs_nonauth,harshitha,0.7691169215589542,0.24224106689860114,0.8142168587374067,0.291005291005291,,5545,2027,leave-one-unauthorized-person-out
+2026-09-15T12:05:23.261638+00:00,eval_loo,taskD_auth_vs_nonauth,sumanth,0.769610261470153,0.2277977096470247,0.8570667536420961,0.2257495590828924,,5545,2027,leave-one-unauthorized-person-out
+2026-09-15T12:06:58.309498+00:00,eval_split,task0_presence,,0.9965551181102362,0.0019804778682572643,0.9999883042645575,1.0,0.007470651013874066,7978,2032,session-disjoint 80/20
+2026-09-15T12:08:10.981201+00:00,eval_split,taskE_motion_standing_vs_walking,,0.9014454664914586,nan,nan,0.6208053691275168,,6050,1522,session-disjoint 80/20
+2026-09-15T12:10:08.084392+00:00,final,taskD_auth_vs_nonauth,,0.9157842157842158,,,,,10010,10010,in-sample sanity only; trivial_baseline=0.5217; checkpoint=whofi_taskD_calibA_day3ch6.pt
+2026-09-15T12:12:09.696039+00:00,final,task0_presence,,1.0,,,,,10010,10010,in-sample sanity only; trivial_baseline=0.7564; checkpoint=whofi_task0_presence_calibA_day3ch6.pt
+2026-09-15T12:13:36.356557+00:00,final,taskE_motion_standing_vs_walking,,0.9282884310618067,,,,,7572,7572,in-sample sanity only; trivial_baseline=0.6149; checkpoint=whofi_taskE_motion_calibA_day3ch6.pt

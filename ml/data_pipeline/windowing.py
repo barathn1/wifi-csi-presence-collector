@@ -40,6 +40,7 @@ from ml.data_pipeline.csi_resample import TARGET_SUBCARRIERS, resample_amplitude
 from ml.data_pipeline.decode_csi import DATA_DIR, REPO_ROOT, decode_session_by_bucket, load_session
 
 DOMINANT_CSI_LEN = 372  # bytes -> 186 subcarriers; Day-1-only legacy default, kept for old call sites
+DOMINANT_CSI_LEN_20MHZ = 256  # bytes -> 128 subcarriers; Day 2's (and assumed Day 3's) dominant bucket
 SESSION_CACHE_DIR = REPO_ROOT / "ml/data_pipeline/cache/sessions"
 
 

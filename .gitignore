@@ -15,5 +15,6 @@ venv/
 
 temp/
 ml/data_pipeline/cache/
+ml/checkpoints/
 ml/visualization/figures/
 visualizations/
