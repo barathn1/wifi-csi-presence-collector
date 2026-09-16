@@ -1,0 +1,10 @@
+{
+  "n_clips_total": 6516,
+  "clips_by_day_person": {
+    "2026-09-15/anjali": 1854,
+    "2026-09-15/barath": 1615,
+    "2026-09-16/anjali": 1174,
+    "2026-09-16/barath": 1873
+  },
+  "train_fit_accuracy": 1.0
+}
