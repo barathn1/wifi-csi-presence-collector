@@ -1,13 +1,15 @@
 # Day 3 / Channel 6 Runbook
 
-Train and live-test the models that are scoped to **only** the Day3 (2026-09-15) sessions recorded on
-**channel 6** — not pooled with Day1/Day2 (captured on different, non-overlapping RF bands, see
-[[project-day2-cross-channel-root-cause]]) and not even pooled with this same day's channel-11 sessions
-(the router was switched mid-day; same reason). See `LIVE_INFERENCE_RUNBOOK.md` for the original
-Day1+2-pooled model — that checkpoint set hit a real generalization gap against live Day3 data (empty
-rooms read OCCUPIED, a real authorized person never crossed the AUTHORIZED threshold; see
-[[project-ml-pipeline-status]]'s "First real Day3 test" section), which is why this separate, smaller,
-single-band track exists.
+Train and live-test the models that are scoped to **only** channel-6 sessions on Day3 (2026-09-15) +
+Day4 (2026-09-16) — not pooled with Day1/Day2 (captured on different, non-overlapping RF bands, see
+[[project-day2-cross-channel-root-cause]]) and not even pooled with either day's channel-11 sessions
+(the router was switched mid-day on 2026-09-15; same reason). Day4 turned out to also be entirely
+channel 6 (confirmed per-session from the recorded `channel_primary` field, not assumed), so as of
+2026-09-16 afternoon it pools cleanly into this same track instead of needing a separate one. See
+`LIVE_INFERENCE_RUNBOOK.md` for the original Day1+2-pooled model — that checkpoint set hit a real
+generalization gap against live Day3 data (empty rooms read OCCUPIED, a real authorized person never
+crossed the AUTHORIZED threshold; see [[project-ml-pipeline-status]]'s "First real Day3 test" section),
+which is why this separate, smaller, single-band track exists.
 
 Run everything below from the repo root, with `.venv` activated.
 
@@ -32,32 +34,36 @@ python3 -m ml.training.train_day3_ch6_model
 ```
 
 What it does:
-- Filters `data/manifest.csv` to `2026-09-15` sessions, then confirms each one's actual channel from the
-  recorded per-packet `channel_primary` field (`decode_csi.py::channel_width_summary` — not assumed from
-  the clock time), keeping only channel-6 sessions and explicitly excluding
-  `ml.evaluation.eval_day3ch6_holdout.HOLDOUT_SESSIONS` (sessions recorded after training, kept genuinely
-  held out). As of this writing that's 26 training sessions: 12 authorized (anjali/barath), 8
-  unauthorized (4 distinct strangers — divya, harshitha, sumanth, abdul — each standing+walking), 6
-  empty-room.
+- Filters `data/manifest.csv` to `2026-09-15` + `2026-09-16` sessions (`TRAIN_DATES` in the script), then
+  confirms each one's actual channel from the recorded per-packet `channel_primary` field
+  (`decode_csi.py::channel_width_summary` — not assumed from the clock time), keeping only channel-6
+  sessions and explicitly excluding `ml.evaluation.eval_day3ch6_holdout.HOLDOUT_SESSIONS` (sessions
+  recorded after the *original* Day3-only training run, kept genuinely held out ever since, including
+  through this Day4-pooling change). As of this writing that's 51 training sessions (26 from Day3, 25
+  from Day4): 25 authorized (anjali/barath), 16 unauthorized (6 distinct strangers across both days —
+  divya, harshitha, sumanth, abdul from Day3, plus divya/sumanth again and 2 new identities manas/kishore
+  on Day4 — each standing+walking), 10 empty-room.
 - Derives a common time-normalization rate from THIS dataset's own sessions (never a hardcoded constant —
   see `ml/data_pipeline/time_resample.py`) and resamples every session's packet stream onto it via
   bin-averaging (every packet contributes, none discarded) before windowing. This closes a real,
   confirmed confound (see [[project-day3-ch6-packet-rate-confound]] and the "what changed" section below)
   where training-authorized sessions happened to be captured at a different packet rate than
   training-unauthorized ones, which fixed-packet-count windowing turned into a non-biometric shortcut.
-- Builds a `calibA` empty-room baseline from just those 6 channel-6 `none` sessions (not the day's
-  channel-11 `none` sessions too — that would silently mix bands into the baseline), computed over the
-  same time-normalized representation the windows use.
+- Builds a `calibA` empty-room baseline from those 10 channel-6 `none` sessions across both days (not
+  either day's channel-11 `none` sessions too — that would silently mix bands into the baseline),
+  computed over the same time-normalized representation the windows use.
 - Reports **real held-out numbers before shipping anything**:
   - `taskD_auth_vs_nonauth`: leave-one-unauthorized-person-out, including `none` sessions in every fold —
-    4 folds, each holding out one of the 4 stranger identities entirely (trained on the other 3 + all
-    authorized/none, tested against the held-out one + a held-out none slice). Genuine open-set check:
-    does the model reject someone it has never seen, not just the specific strangers it trained on.
+    now 6 folds (up from 4 pre-Day4), each holding out one of the 6 stranger identities entirely
+    (`leave_one_unauthorized_person_out` groups by `person_id`, so divya/sumanth's Day3+Day4 sessions are
+    held out together, not split across folds). Genuine open-set check: does the model reject someone it
+    has never seen, not just the specific strangers it trained on.
   - `task0_presence` / `taskE_motion_standing_vs_walking`: ALL 5 session-disjoint folds (not just one
     arbitrary fold), mean + range reported.
-- Only after printing those does it retrain each task on 100% of the ch6 Day3 data for the deployable
-  checkpoint (same "no held-out split, this IS the shipped artifact" philosophy as `train_final_model.py`
-  — the held-out numbers above are what stand in for a generalization estimate this time).
+- Only after printing those does it retrain each task on 100% of the pooled ch6 Day3+Day4 data for the
+  deployable checkpoint (same "no held-out split, this IS the shipped artifact" philosophy as
+  `train_final_model.py` — the held-out numbers above are what stand in for a generalization estimate
+  this time).
 
 Checkpoints save as `ml/checkpoints/whofi_{task}_calibA_day3ch6.pt` — a different filename than the
 Day1+2-pooled ones, so both sets coexist; this never overwrites `train_final_model.py`'s output.
@@ -110,6 +116,24 @@ limitation (2 authorized identities, 5 stranger identities total), not something
 Next step queued: a UniFi-style (arXiv:2512.22143) time-aware attention model that learns directly from
 irregular-rate sequences instead of resampling at all — not yet implemented.
 
+### What changed and why (2026-09-16 afternoon: Day4 pooled in)
+
+25 more channel-6 sessions were collected on 2026-09-16 (Day4: 13 authorized anjali/barath, 8
+unauthorized across divya/sumanth (repeat identities from Day3) + manas/kishore (2 brand-new
+identities), 4 empty-room). Checked per-session packet rate before pooling specifically because the
+Day3-only track had already hit one packet-rate confound once (above): Day4's authorized/none/unauthorized
+sessions all land in the same fast-rate band (~228-266Hz) regardless of label, unlike Day3 alone where
+authorized was slow and unauthorized was fast — so pooling doesn't reintroduce that shortcut, and the
+existing time-normalization windowing (already resampling to a common rate derived from the pool's
+slowest session) handles the wider combined range without changes. `train_day3_ch6_model.py`'s
+`TRAIN_DATES` now lists both dates; the same 8-session `HOLDOUT_SESSIONS` (all Day3, collected after the
+*original* Day3-only run) stay excluded from training so they remain a valid apples-to-apples comparison
+against the numbers in the table above.
+
+**Real before/after against those same 8 held-out sessions, Day3-only vs Day3+Day4-pooled checkpoints**
+(`ml/evaluation/eval_day3ch6_holdout.py`): *pending — training is running now, numbers land here once
+it and the holdout re-eval finish, not filled in with placeholders.*
+
 ---
 
 ## 2. Start live inference
@@ -117,7 +141,8 @@ irregular-rate sequences instead of resampling at all — not yet implemented.
 ```
 python3 -m ml.inference.live_infer --checkpoint-suffix _day3ch6 --expect-channel 6 --aggregate-windows 120 --calib-seconds 60
 ```
-- `--checkpoint-suffix _day3ch6` loads the checkpoints from step 1 instead of the Day1+2-pooled default.
+- `--checkpoint-suffix _day3ch6` loads the checkpoints from step 1 (now the Day3+Day4-pooled version)
+  instead of the Day1+2-pooled default.
 - `--expect-channel 6` hard-gates on the exact channel, not just bandwidth — channel 6 and channel 11 are
   both 20MHz, so `--expect-mhz 20` alone can't tell them apart. If the router has drifted off channel 6,
   this aborts loudly instead of silently feeding the model data from a band it never saw.
@@ -128,6 +153,23 @@ python3 -m ml.inference.live_infer --checkpoint-suffix _day3ch6 --expect-channel
 ---
 
 ## 3. Test protocol — exact timings, what to do, what to expect
+
+**Quick-reference timing table** (all phases run back-to-back automatically once you start the step-2
+command — there's no need to restart it between phases, just act out each phase during its window):
+
+| Phase | When (elapsed) | Duration | Who's in the room | Doing what |
+|---|---|---|---|---|
+| Calibration | 0:00-1:00 | 60s | Nobody | Nothing — stay OUTSIDE the room |
+| 1. Empty check | 1:00-2:00 | 60s | Nobody | Nothing — confirms Presence reads EMPTY |
+| 2. Authorized standing | 2:00-3:00 | 60s | anjali or barath | Walk in, then stand still |
+| 3. Authorized walking | 3:00-4:00 | 60s | Same person | Walk around continuously, no stopping |
+| 4a. Unauthorized standing (optional) | 4:00-5:00 | 60s | Someone NOT anjali/barath | Walk in, then stand still |
+| 4b. Unauthorized walking (optional) | 5:00-6:00 | 60s | Same person | Walk around continuously |
+
+Total: **~4 minutes** for the required phases (calibration + phase 1-3), **~6 minutes** if you add the
+optional unauthorized-person phase 4. Every phase is a full 60 seconds because
+`--aggregate-windows 120 --calib-seconds 60` (step 2) sizes both the calibration and the rolling decision
+window to 60s — judge each phase only once its own 60-second window has fully elapsed, not before.
 
 **Calibration (0:00-1:00, 60 seconds). Answer to "do I need to stay out of the room": yes — nobody
 enters, nobody moves near the sensor, for this entire 60 seconds.** The moment you start the command in
@@ -164,10 +206,14 @@ up; `Auth` should stay `AUTHORIZED` throughout.
 
 **Phase 4 (recommended) — an unauthorized person (4:00-6:00, 2x60 seconds: standing then walking)**:
 repeat Phase 2 then Phase 3 with someone who is NOT anjali/barath. Expect `Presence: OCCUPIED` and a
-`Motion` reading as before, but `Auth: NOT AUTHORIZED`. **Use someone who is NOT one of the 4 strangers
-already in the training data (divya, harshitha, sumanth, abdul)** if you want this to be a genuine
-live open-set check comparable to the leave-one-out evaluation in step 1 — re-testing with one of those 4
-only confirms the model remembers a known identity, not that it generalizes to a new one.
+`Motion` reading as before, but `Auth: NOT AUTHORIZED`. **Use someone who is NOT one of the 6 strangers
+already in the training data (divya, harshitha, sumanth, abdul, manas, kishore)** if you want this to be
+a genuine live open-set check comparable to the leave-one-out evaluation in step 1 — re-testing with one
+of those 6 only confirms the model remembers a known identity, not that it generalizes to a new one.
+**"siva" is the best available choice for this** if they're around: siva has 2 recorded sessions but was
+deliberately kept out of every training run so far (`HOLDOUT_SESSIONS`), so a live test against siva is
+directly comparable to the offline holdout numbers already measured for them (see the before/after table
+above) — same person, this time live instead of replayed from a recording.
 
 **Stop** with Ctrl+C.
 
@@ -175,15 +221,18 @@ only confirms the model remembers a known identity, not that it generalizes to a
 
 ## 4. Honest reliability
 
-See the headline results table in step 1 — those leave-one-stranger-out/held-out-split numbers are the
+See the headline results tables in step 1 — those leave-one-stranger-out/held-out-split numbers are the
 trustworthy estimate for this checkpoint set. Caveats specific to this track, on top of the usual
 fixed-0.5-threshold caveat (same as the Day1+2 model, see `LIVE_INFERENCE_RUNBOOK.md` section 5):
-- **Small dataset**: a few dozen sessions and 4 stranger identities is enough for a first real read, not
-  a statistically tight one. Treat any single number as directional; re-run after collecting more ch6
-  Day3 data (more sessions and/or more stranger identities) before trusting it the way the original
-  Day1+2 sweep's numbers were trusted.
-- **Single room/day**: unlike the Day1+2 model (validated across two separate collection days), this
-  model has only ever seen one room on one day. It says nothing about whether it'd hold up on a Day 4.
+- **Small dataset**: ~51 sessions and 6 stranger identities (as of the Day4 pooling) is enough for a
+  clearer read than the original 26-session/4-stranger Day3-only version, but still not a statistically
+  tight one. Treat any single number as directional; re-run after collecting more ch6 data (more sessions
+  and/or more stranger identities) before trusting it the way the original Day1+2 sweep's numbers were
+  trusted.
+- **Two days, one room**: unlike the Day1+2 model (validated across two separate collection days on
+  different RF bands), this model has now seen two days but only ever one room, and both days share the
+  same channel/band. It says nothing about whether it'd hold up in a different room, or on a genuinely
+  new day's worth of RF conditions beyond what Day3+Day4 already covered.
 
 ---
 
@@ -201,6 +250,7 @@ fixed-0.5-threshold caveat (same as the Day1+2 model, see `LIVE_INFERENCE_RUNBOO
 
 - **Not a replacement for the Day1+2-pooled model or `LIVE_INFERENCE_RUNBOOK.md`.** Both checkpoint sets
   coexist; use whichever matches what you're trying to learn (broad two-day-validated behavior vs. a
-  clean, single-band, single-day baseline that isn't confounded by the cross-channel issue).
-- **Not a Day-4 collection/labeling pipeline.** If you collect more data, re-run step 1 to fold it in —
-  this doc/checkpoint set will need updating, not automatically kept in sync.
+  clean, single-band, two-day baseline that isn't confounded by the cross-channel issue).
+- **Not a Day-5 collection/labeling pipeline.** If you collect more data, re-run step 1 to fold it in —
+  `TRAIN_DATES` in `train_day3_ch6_model.py` needs a new date added by hand, and this doc/checkpoint set
+  will need updating too — neither is kept in sync automatically.

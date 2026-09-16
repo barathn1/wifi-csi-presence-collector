@@ -38,7 +38,7 @@ network:
   hotspot_ssid: "ACTFIBERNET"       # the home router's SSID (case-sensitive)
   hotspot_password: ""              # ACTFIBERNET currently has no password (open network)
   laptop_iface: "wlp0s20f3"        # laptop's WiFi interface (confirmed on this machine)
-  laptop_ip: "192.168.0.101"
+  laptop_ip: "192.168.0.103"
   tcp_port: 5555
 
 hotspot:

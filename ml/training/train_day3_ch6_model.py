@@ -1,10 +1,12 @@
-"""Train fresh models on ONLY Day3 (2026-09-15), ONLY channel-6 sessions -- deliberately NOT pooled
-with Day1/Day2 (different, non-overlapping RF bands, see [[project-day2-cross-channel-root-cause]]) or
-even with this same day's channel-11 sessions (same reason -- the router was switched mid-day). Channel
-membership is read straight from the recorded per-packet channel_primary field (`decode_csi.py
-::channel_width_summary`), not assumed from the clock time. Produces its own checkpoint set
-(`*_day3ch6.pt`) so it never clobbers `train_final_model.py`'s Day1+2-pooled checkpoints -- both can
-coexist and `ml/inference/live_infer.py --checkpoint-suffix _day3ch6` picks these instead.
+"""Train fresh models on Day3 (2026-09-15) + Day4 (2026-09-16), ONLY channel-6 sessions -- deliberately
+NOT pooled with Day1/Day2 (different, non-overlapping RF bands, see
+[[project-day2-cross-channel-root-cause]]) or with either day's channel-11 sessions (same reason -- the
+router was switched mid-day on 2026-09-15). Channel membership is read straight from the recorded
+per-packet channel_primary field (`decode_csi.py::channel_width_summary`), not assumed from the clock
+time. Day4 turned out to also be entirely channel 6, so it pools cleanly into the same track -- see
+TRAIN_DATES below. Produces its own checkpoint set (`*_day3ch6.pt`) so it never clobbers
+`train_final_model.py`'s Day1+2-pooled checkpoints -- both can coexist and
+`ml/inference/live_infer.py --checkpoint-suffix _day3ch6` picks these instead.
 
 Two-stage, same "evaluate honestly, then ship" discipline as the rest of this project:
 1. Held-out numbers FIRST: leave-one-unauthorized-person-out for taskD (this Day3-ch6 collection has 4
@@ -45,6 +47,7 @@ from ml.models.transformer_whofi import WhoFiTransformer
 from ml.training.train import train_classifier
 
 DAY3_DATE = "2026-09-15"
+TRAIN_DATES = ["2026-09-15", "2026-09-16"]  # Day3 + Day4, both confirmed channel-6 (see session_channel)
 TARGET_CHANNEL = 6
 CACHE_MODE = "resampled_timenorm"  # closes the packet-rate/window-duration confound, see time_resample.py
 CHECKPOINT_DIR = REPO_ROOT / "ml/checkpoints"
@@ -80,15 +83,18 @@ def session_channel(session_dir: str) -> int:
 
 def build_day3_ch6_manifest() -> pd.DataFrame:
     """Excludes ml.evaluation.eval_day3ch6_holdout.HOLDOUT_SESSIONS explicitly -- those were collected
-    AFTER this script's original training run and must stay held out for that script's numbers to mean
-    anything. Previously this separation was accidental (relying on a gitignored window-index cache file
-    never having been rebuilt since); now it's enforced even after a fresh clone / cleared cache."""
+    AFTER this script's original (Day3-only) training run and must stay held out so that script's
+    before/after numbers stay comparable across every version of this checkpoint set, including this
+    Day3+Day4 pooled one. Previously this separation was accidental (relying on a gitignored window-index
+    cache file never having been rebuilt since); now it's enforced even after a fresh clone / cleared
+    cache."""
     from ml.evaluation.eval_day3ch6_holdout import HOLDOUT_SESSIONS
 
     manifest = load_manifest()
-    day3 = manifest[manifest["session_dir"].str.contains(f"/{DAY3_DATE}/", regex=False)].copy()
-    day3["channel_primary"] = day3["session_dir"].apply(session_channel)
-    ch6 = day3[day3["channel_primary"] == TARGET_CHANNEL].drop(columns=["channel_primary"])
+    date_mask = manifest["session_dir"].apply(lambda s: any(f"/{d}/" in s for d in TRAIN_DATES))
+    pooled = manifest[date_mask].copy()
+    pooled["channel_primary"] = pooled["session_dir"].apply(session_channel)
+    ch6 = pooled[pooled["channel_primary"] == TARGET_CHANNEL].drop(columns=["channel_primary"])
     ch6 = ch6[~ch6["session_dir"].isin(HOLDOUT_SESSIONS)]
     return ch6.reset_index(drop=True)
 
@@ -113,9 +119,12 @@ def compute_dataset_target_rate_hz(manifest: pd.DataFrame) -> float:
 
 
 def build_or_load_window_index(manifest: pd.DataFrame, target_rate_hz: float) -> pd.DataFrame:
+    # n_sessions in the cache key: keying on channel+rate alone can collide silently when the manifest
+    # grows (e.g. a new day added) but its slowest session's rate happens not to change -- exactly what
+    # pooling Day4 in on top of Day3 does here (Day3's `none` session stays the overall minimum).
     index_path = REPO_ROOT / (
         f"ml/data_pipeline/cache/window_index_day3ch{TARGET_CHANNEL}_timenorm_{target_rate_hz:.2f}hz"
-        f"_w200_s100.csv"
+        f"_n{len(manifest)}_w200_s100.csv"
     )
     if index_path.exists():
         return pd.read_csv(index_path)
@@ -220,7 +229,7 @@ def train_final(task_name: str, window_index: pd.DataFrame, calibration, epochs:
     trivial_baseline = max((full_ds.y == c).mean() for c in classes)
     model = WhoFiTransformer(n_subcarriers=128, n_classes=len(classes), **WINNING_ARCH_KWARGS)
     result = train_classifier(model, full_ds, full_ds, epochs=epochs, seed=seed)
-    print(f"\n=== {task_name}: FINAL checkpoint, trained on ALL {len(full_ds)} ch{TARGET_CHANNEL}-Day3 windows ===")
+    print(f"\n=== {task_name}: FINAL checkpoint, trained on ALL {len(full_ds)} ch{TARGET_CHANNEL}-Day3+Day4 windows ===")
     print(f"  in-sample sanity accuracy: {result['accuracy']:.4f} (trivial baseline: {trivial_baseline:.4f})")
     out_path = CHECKPOINT_DIR / filename
     save_checkpoint(
@@ -228,9 +237,9 @@ def train_final(task_name: str, window_index: pd.DataFrame, calibration, epochs:
         arch_kwargs=dict(n_subcarriers=128, n_classes=len(classes), **WINNING_ARCH_KWARGS),
         classes=list(classes), display_labels=display_labels, task_name=task_name,
         preprocessing="calibA", mode=CACHE_MODE, window_packets=200, stride_packets=100,
-        train_dates=[DAY3_DATE], seed=seed, epochs=epochs, train_loss_curve=result["train_loss_curve"],
-        notes=f"Day3 ({DAY3_DATE}) channel-{TARGET_CHANNEL}-ONLY, time-normalized windowing "
-              f"(derived target {target_rate_hz:.2f}Hz from this dataset's own slowest session, "
+        train_dates=TRAIN_DATES, seed=seed, epochs=epochs, train_loss_curve=result["train_loss_curve"],
+        notes=f"Day3+Day4 ({', '.join(TRAIN_DATES)}) channel-{TARGET_CHANNEL}-ONLY, time-normalized "
+              f"windowing (derived target {target_rate_hz:.2f}Hz from this dataset's own slowest session, "
               f"a window is {200 / target_rate_hz:.2f}s, fixed across every session -- closes the "
               f"packet-rate/window-duration confound, see [[project-day3-ch6-packet-rate-confound]]), "
               f"no held-out split -- see this run's eval_loo/eval_split log rows for the honest held-out numbers",
@@ -245,14 +254,14 @@ def train_final(task_name: str, window_index: pd.DataFrame, calibration, epochs:
 
 def main(epochs: int, seed: int) -> None:
     manifest = build_day3_ch6_manifest()
-    print(f"Day3 channel-{TARGET_CHANNEL} sessions: {len(manifest)} "
+    print(f"Day3+Day4 channel-{TARGET_CHANNEL} sessions: {len(manifest)} "
           f"({manifest['label'].value_counts().to_dict()})")
     target_rate_hz = compute_dataset_target_rate_hz(manifest)
     window_index = build_or_load_window_index(manifest, target_rate_hz)
     print(f"window index: {len(window_index)} windows")
 
     none_sessions = manifest.loc[manifest["label"] == "none", "session_dir"].tolist()
-    baseline = compute_day_baseline_from_sessions(none_sessions, label=f"{DAY3_DATE}_ch{TARGET_CHANNEL}",
+    baseline = compute_day_baseline_from_sessions(none_sessions, label=f"day3-4_ch{TARGET_CHANNEL}",
                                                    mode=CACHE_MODE, target_rate_hz=target_rate_hz)
 
     def calibration(amp, phase, row):
