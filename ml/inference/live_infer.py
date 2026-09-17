@@ -11,6 +11,12 @@ ml/reports/day2_next_steps.md's validated 5.5%-false-accept result).
 See LIVE_INFERENCE_RUNBOOK.md for the full step-by-step testing protocol (how long to stand still to
 calibrate, how long to stand vs. walk, what output to expect at each step).
 
+Supports checkpoints trained in either mode="resampled" (raw packet-count windows) or
+mode="resampled_timenorm" (windows built on a fixed target_rate_hz grid, e.g. the day3+day4
+channel-6 checkpoints -- see ml/data_pipeline/time_resample.py). For the latter, live packets are
+routed through ml.inference.live_time_resample.LiveTimeResampler first, which is the causal
+streaming equivalent of that same time-axis resampling.
+
 Mutual exclusion: the ESP32 transport can only be held by one process at a time -- stop
 collector.cli_collect / ml.visualization.player_server before running this.
 """
@@ -35,6 +41,7 @@ from ml.data_pipeline.calibration import apply_variant_a
 from ml.data_pipeline.decode_csi import REPO_ROOT, channel_width_summary_live, decode_one_sample
 from ml.inference.checkpoint import LoadedCheckpoint, load_checkpoint
 from ml.inference.live_calibration import compute_live_baseline
+from ml.inference.live_time_resample import LiveTimeResampler
 from ml.inference.live_window import RollingWindower
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -67,13 +74,18 @@ def load_all_checkpoints(suffix: str = "") -> dict[str, LoadedCheckpoint]:
             logger.error("missing checkpoint %s -- run `python3 -m ml.training.train_final_model` first", path)
             sys.exit(1)
         ck = load_checkpoint(path)
-        if ck.meta["preprocessing"] != "calibA" or ck.meta["mode"] != "resampled":
+        if ck.meta["preprocessing"] != "calibA" or ck.meta["mode"] not in ("resampled", "resampled_timenorm"):
             logger.error("checkpoint %s has unexpected preprocessing/mode %r/%r -- this script assumes "
-                         "calibA/resampled", path, ck.meta["preprocessing"], ck.meta["mode"])
+                         "calibA/resampled or calibA/resampled_timenorm", path, ck.meta["preprocessing"],
+                         ck.meta["mode"])
             sys.exit(1)
         checkpoints[task_name] = ck
     n_subcarriers = {ck.arch_kwargs["n_subcarriers"] for ck in checkpoints.values()}
     assert len(n_subcarriers) == 1, f"checkpoints disagree on n_subcarriers: {n_subcarriers}"
+    modes = {ck.meta["mode"] for ck in checkpoints.values()}
+    rates = {ck.meta.get("target_rate_hz") for ck in checkpoints.values()}
+    assert len(modes) == 1, f"checkpoints disagree on preprocessing mode: {modes}"
+    assert len(rates) == 1, f"checkpoints disagree on target_rate_hz: {rates}"
     return checkpoints
 
 
@@ -145,8 +157,15 @@ def main(argv=None) -> int:
     expected_csi_len = 2 * n_subcarriers
     window_packets = next(iter(checkpoints.values())).meta["window_packets"]
     stride_packets = next(iter(checkpoints.values())).meta["stride_packets"]
+    ckpt_mode = next(iter(checkpoints.values())).meta["mode"]
+    target_rate_hz = next(iter(checkpoints.values())).meta.get("target_rate_hz")
     logger.info("loaded %d checkpoints, expecting csi_len=%d bytes (%d subcarriers)",
                 len(checkpoints), expected_csi_len, n_subcarriers)
+    time_resampler = None
+    if ckpt_mode == "resampled_timenorm":
+        time_resampler = LiveTimeResampler(target_rate_hz)
+        logger.info("mode=resampled_timenorm: live packets will be time-resampled onto %.1fHz "
+                    "before calibration/windowing to match how these checkpoints were trained", target_rate_hz)
 
     stop_event = threading.Event()
     stimulus_thread = None
@@ -204,88 +223,99 @@ def main(argv=None) -> int:
 
             amplitude, phase = decode_one_sample(sample.csi_data)
 
-            if calibrating:
-                calib_amp.append(amplitude)
-                calib_phase.append(phase)
-                elapsed = time.monotonic() - calib_start_time
-                enough_time = elapsed >= args.calib_seconds
-                enough_packets = len(calib_amp) >= window_packets
-                if enough_time and enough_packets:
-                    baseline = compute_live_baseline(np.stack(calib_amp), np.stack(calib_phase))
-                    logger.info("calibration complete: %d packets, amp_mean range [%.2f, %.2f], "
-                                "amp_std range [%.2f, %.2f]", len(calib_amp),
-                                baseline.amp_mean.min(), baseline.amp_mean.max(),
-                                baseline.amp_std.min(), baseline.amp_std.max())
-                    calibrating = False
-                    if guided_phases:
+            # mode="resampled_timenorm" checkpoints were trained on a fixed target_rate_hz grid, not
+            # raw packet counts -- resample onto that grid before calibration/windowing so a live
+            # "packet" here means the same real duration a training window did. Yields 0 packets while
+            # still inside the currently-open bin, 1 in the common case, or >1 across a dropped-packet
+            # gap wide enough to span multiple bins.
+            if time_resampler is not None:
+                virtual_packets = time_resampler.push(amplitude, phase, sample.device_time_us)
+            else:
+                virtual_packets = [(amplitude, phase)]
+
+            for amplitude, phase in virtual_packets:
+                if calibrating:
+                    calib_amp.append(amplitude)
+                    calib_phase.append(phase)
+                    elapsed = time.monotonic() - calib_start_time
+                    enough_time = elapsed >= args.calib_seconds
+                    enough_packets = len(calib_amp) >= window_packets
+                    if enough_time and enough_packets:
+                        baseline = compute_live_baseline(np.stack(calib_amp), np.stack(calib_phase))
+                        logger.info("calibration complete: %d packets, amp_mean range [%.2f, %.2f], "
+                                    "amp_std range [%.2f, %.2f]", len(calib_amp),
+                                    baseline.amp_mean.min(), baseline.amp_mean.max(),
+                                    baseline.amp_std.min(), baseline.amp_std.max())
+                        calibrating = False
+                        if guided_phases:
+                            phase_start_time = time.monotonic()
+                            label, duration = guided_phases[0]
+                            logger.info("=== NOW: have the authorized person %s (%.0fs) ===", label, duration)
+                        else:
+                            logger.info("=== streaming (no guided phases configured) -- Ctrl+C to stop ===")
+                    elif enough_time and not enough_packets:
+                        pass  # safety floor: keep waiting for packets even past the nominal duration
+                    elif time.monotonic() - last_calib_status >= CALIB_STATUS_INTERVAL_S:
+                        remaining = max(0.0, args.calib_seconds - elapsed)
+                        logger.info("calibrating... %.0fs remaining (%d packets so far)", remaining, len(calib_amp))
+                        last_calib_status = time.monotonic()
+                    continue
+
+                # periodic bandwidth re-check during streaming -- warns (doesn't abort) on drift, since
+                # aborting a live demo mid-flight over a possibly-transient blip is worse than a warning
+                if n_accepted % 3000 == 0:
+                    bandwidth_gate(combo_counts, args.expect_mhz, force=True, expect_channel=args.expect_channel)
+
+                if not windower.push(amplitude, phase):
+                    continue
+                window_idx += 1
+                amp_w, phase_w = windower.get_window()
+                amp_z, phase_z = apply_variant_a(amp_w, phase_w, baseline)
+                amp_t = torch.from_numpy(amp_z.astype(np.float32)).unsqueeze(0)
+                phase_t = torch.from_numpy(phase_z.astype(np.float32)).unsqueeze(0)
+
+                proba_inst, proba_agg = {}, {}
+                for task_name, ck in checkpoints.items():
+                    with torch.no_grad():
+                        logits = ck.model(amp_t, phase_t)
+                        proba = torch.softmax(logits, dim=-1)[0, 1].item()
+                    proba_inst[task_name] = proba
+                    aggregators[task_name].append(proba)
+                    proba_agg[task_name] = float(np.mean(aggregators[task_name]))
+
+                presence_ck = checkpoints["task0_presence"]
+                present = proba_agg["task0_presence"] >= 0.5
+                parts = [format_reading(
+                    "Presence", proba_inst["task0_presence"], proba_agg["task0_presence"],
+                    len(aggregators["task0_presence"]), args.aggregate_windows, presence_ck.display_labels, gated=False,
+                )]
+                for task_name, label in [("taskD_auth_vs_nonauth", "Auth"), ("taskE_motion_standing_vs_walking", "Motion")]:
+                    ck = checkpoints[task_name]
+                    parts.append(format_reading(
+                        label, proba_inst[task_name], proba_agg[task_name],
+                        len(aggregators[task_name]), args.aggregate_windows, ck.display_labels, gated=not present,
+                    ))
+
+                # guided-phase countdown, prepended to the status line so you can tell the person when to
+                # switch without watching a separate stopwatch. Advances/announces the next phase (or
+                # "free monitoring") the moment the current one's duration elapses.
+                phase_tag = ""
+                if guided_phases and phase_idx < len(guided_phases):
+                    label, duration = guided_phases[phase_idx]
+                    elapsed_phase = time.monotonic() - phase_start_time
+                    if elapsed_phase >= duration:
+                        phase_idx += 1
                         phase_start_time = time.monotonic()
-                        label, duration = guided_phases[0]
-                        logger.info("=== NOW: have the authorized person %s (%.0fs) ===", label, duration)
+                        if phase_idx < len(guided_phases):
+                            next_label, next_duration = guided_phases[phase_idx]
+                            logger.info("=== NOW: have the authorized person %s (%.0fs) ===", next_label, next_duration)
+                            phase_tag = f"[{next_label}, just started] "
+                        else:
+                            logger.info("=== guided phases done -- free monitoring now, Ctrl+C to stop ===")
                     else:
-                        logger.info("=== streaming (no guided phases configured) -- Ctrl+C to stop ===")
-                elif enough_time and not enough_packets:
-                    pass  # safety floor: keep waiting for packets even past the nominal duration
-                elif time.monotonic() - last_calib_status >= CALIB_STATUS_INTERVAL_S:
-                    remaining = max(0.0, args.calib_seconds - elapsed)
-                    logger.info("calibrating... %.0fs remaining (%d packets so far)", remaining, len(calib_amp))
-                    last_calib_status = time.monotonic()
-                continue
+                        phase_tag = f"[{label}, {duration - elapsed_phase:.0f}s left] "
 
-            # periodic bandwidth re-check during streaming -- warns (doesn't abort) on drift, since
-            # aborting a live demo mid-flight over a possibly-transient blip is worse than a warning
-            if n_accepted % 3000 == 0:
-                bandwidth_gate(combo_counts, args.expect_mhz, force=True, expect_channel=args.expect_channel)
-
-            if not windower.push(amplitude, phase):
-                continue
-            window_idx += 1
-            amp_w, phase_w = windower.get_window()
-            amp_z, phase_z = apply_variant_a(amp_w, phase_w, baseline)
-            amp_t = torch.from_numpy(amp_z.astype(np.float32)).unsqueeze(0)
-            phase_t = torch.from_numpy(phase_z.astype(np.float32)).unsqueeze(0)
-
-            proba_inst, proba_agg = {}, {}
-            for task_name, ck in checkpoints.items():
-                with torch.no_grad():
-                    logits = ck.model(amp_t, phase_t)
-                    proba = torch.softmax(logits, dim=-1)[0, 1].item()
-                proba_inst[task_name] = proba
-                aggregators[task_name].append(proba)
-                proba_agg[task_name] = float(np.mean(aggregators[task_name]))
-
-            presence_ck = checkpoints["task0_presence"]
-            present = proba_agg["task0_presence"] >= 0.5
-            parts = [format_reading(
-                "Presence", proba_inst["task0_presence"], proba_agg["task0_presence"],
-                len(aggregators["task0_presence"]), args.aggregate_windows, presence_ck.display_labels, gated=False,
-            )]
-            for task_name, label in [("taskD_auth_vs_nonauth", "Auth"), ("taskE_motion_standing_vs_walking", "Motion")]:
-                ck = checkpoints[task_name]
-                parts.append(format_reading(
-                    label, proba_inst[task_name], proba_agg[task_name],
-                    len(aggregators[task_name]), args.aggregate_windows, ck.display_labels, gated=not present,
-                ))
-
-            # guided-phase countdown, prepended to the status line so you can tell the person when to
-            # switch without watching a separate stopwatch. Advances/announces the next phase (or
-            # "free monitoring") the moment the current one's duration elapses.
-            phase_tag = ""
-            if guided_phases and phase_idx < len(guided_phases):
-                label, duration = guided_phases[phase_idx]
-                elapsed_phase = time.monotonic() - phase_start_time
-                if elapsed_phase >= duration:
-                    phase_idx += 1
-                    phase_start_time = time.monotonic()
-                    if phase_idx < len(guided_phases):
-                        next_label, next_duration = guided_phases[phase_idx]
-                        logger.info("=== NOW: have the authorized person %s (%.0fs) ===", next_label, next_duration)
-                        phase_tag = f"[{next_label}, just started] "
-                    else:
-                        logger.info("=== guided phases done -- free monitoring now, Ctrl+C to stop ===")
-                else:
-                    phase_tag = f"[{label}, {duration - elapsed_phase:.0f}s left] "
-
-            print(f"[{time.strftime('%H:%M:%S')}] {phase_tag}window#{window_idx:5d}  " + "  |  ".join(parts))
+                print(f"[{time.strftime('%H:%M:%S')}] {phase_tag}window#{window_idx:5d}  " + "  |  ".join(parts))
 
     except (KeyboardInterrupt, _GracefulExit):
         logger.info("stopping (interrupted)")
