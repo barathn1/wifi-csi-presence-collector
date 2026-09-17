@@ -37,12 +37,20 @@ def save_checkpoint(
     display_labels: list[str], task_name: str, preprocessing: str, mode: str,
     window_packets: int, stride_packets: int, train_dates: list[str], seed: int, epochs: int,
     train_loss_curve: list[float], notes: str = "", target_rate_hz: float | None = None,
+    decision_threshold: float | None = None,
 ) -> Path:
     """`target_rate_hz`: only set for mode="resampled_timenorm" (see time_resample.py) -- the derived
     common resample rate this checkpoint's windows were built at, so a downstream consumer (e.g.
     eval_day3ch6_holdout.py) can rebuild windows at the EXACT same rate rather than guessing or
     re-deriving a possibly-different one from a different session set. None/omitted for every other
-    caller -- purely additive, no existing checkpoint format changes."""
+    caller -- purely additive, no existing checkpoint format changes.
+
+    `decision_threshold`: optional calibrated cutoff for the positive-class probability, to use
+    instead of a naive 0.5 at inference (see live_infer.py::format_reading). None (default) means
+    "use 0.5", preserving every existing caller's behavior. Set this from the POSITIVE/genuine class's
+    own held-out score distribution only (never from negative/intruder data, which for taskD is either
+    unavailable at deployment time or an unrepresentative sample of future strangers) -- same principle
+    as the CAUTION paper's intruder threshold, tuned without intruder data."""
     assert model_class in MODEL_REGISTRY, f"unknown model_class {model_class!r}, add it to MODEL_REGISTRY"
     assert len(classes) == len(display_labels), (classes, display_labels)
     path = Path(path)
@@ -58,7 +66,7 @@ def save_checkpoint(
             "window_packets": window_packets, "stride_packets": stride_packets,
             "train_dates": train_dates, "seed": seed, "epochs": epochs,
             "train_loss_curve": train_loss_curve, "notes": notes, "target_rate_hz": target_rate_hz,
-            "torch_version": torch.__version__,
+            "decision_threshold": decision_threshold, "torch_version": torch.__version__,
         },
     }
     torch.save(bundle, path)

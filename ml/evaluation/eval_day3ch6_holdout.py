@@ -28,11 +28,14 @@ TASKS = {
     "taskE_motion_standing_vs_walking": "whofi_taskE_motion_calibA_day3ch6.pt",
 }
 
-# the 6 `none` sessions the training run's calibA baseline was pooled from
+# the `none` sessions the training run's calibA baseline was pooled from (6 from Day3, 4 more from Day4
+# once train_day3_ch6_model.py started pooling both days -- see TRAIN_DATES there)
 TRAIN_NONE_SESSIONS = [
     "none/2026-09-15/20260915_150333", "none/2026-09-15/20260915_150550",
     "none/2026-09-15/20260915_152301", "none/2026-09-15/20260915_152825",
     "none/2026-09-15/20260915_155425", "none/2026-09-15/20260915_155941",
+    "none/2026-09-16/20260916_131138", "none/2026-09-16/20260916_131548",
+    "none/2026-09-16/20260916_131825", "none/2026-09-16/20260916_133907",
 ]
 
 # sessions recorded AFTER the training run finished (mtime-checked against the checkpoints)

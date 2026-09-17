@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, WeightedRandomSampler
 
 from ml.data_pipeline.decode_csi import REPO_ROOT
 from ml.data_pipeline.splits import assert_no_group_leakage, session_disjoint_kfold
@@ -26,19 +26,33 @@ DEVICE = torch.device("cpu")
 
 
 def train_classifier(model: nn.Module, train_ds: CsiWindowDataset, test_ds: CsiWindowDataset,
-                      epochs: int = 6, batch_size: int = 64, lr: float = 1e-3, seed: int = 0) -> dict:
+                      epochs: int = 6, batch_size: int = 64, lr: float = 1e-3, seed: int = 0,
+                      sample_weights: np.ndarray | None = None) -> dict:
     """seed fixes weight init + minibatch shuffling -- added after discovering that re-training the
     SAME model on the SAME fold gave wildly different results (taskD fold 1: AUROC 0.757 vs 0.698,
     unauthorized-false-accept 26% vs 57%, across two otherwise-identical runs). On a dataset this small
     with only a handful of epochs, seed variance can be as large as the effect being measured -- so
     every architecture comparison in this codebase needs to control for it, not just the train/test
-    split. Comparing architectures still requires averaging over several seeds, not just fixing one."""
+    split. Comparing architectures still requires averaging over several seeds, not just fixing one.
+
+    `sample_weights`: optional, one weight per `train_ds` row (same order as `train_ds.index`). When
+    given, minibatches are drawn via `WeightedRandomSampler` instead of a plain shuffle -- lets a
+    caller rebalance a class-conditional confound (e.g. motion state correlating with the label) by
+    resampling rather than discarding rows, since this project's datasets are too small to afford
+    throwing data away. None (default) preserves every existing caller's exact behavior."""
     torch.manual_seed(seed)
     model.to(DEVICE)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
     loss_fn = nn.CrossEntropyLoss()
 
-    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=0)
+    if sample_weights is not None:
+        assert len(sample_weights) == len(train_ds), (len(sample_weights), len(train_ds))
+        sampler = WeightedRandomSampler(torch.as_tensor(sample_weights, dtype=torch.double),
+                                         num_samples=len(train_ds), replacement=True,
+                                         generator=torch.Generator().manual_seed(seed))
+        train_loader = DataLoader(train_ds, batch_size=batch_size, sampler=sampler, num_workers=0)
+    else:
+        train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=0)
     test_loader = DataLoader(test_ds, batch_size=64, shuffle=False, num_workers=0)
 
     history = []

@@ -52,6 +52,22 @@ def taskD_auth_vs_nonauth(window_index: pd.DataFrame) -> tuple[np.ndarray, np.nd
     return mask, y
 
 
+def taskF_identity_or_nonauth(window_index: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
+    """anjali / barath / non_auth (unauthorized OR empty room), 3-way -- keeps each enrolled identity
+    as its own class instead of merging them into one "authorized" super-class (taskD), on the
+    hypothesis that a merged class has higher within-class variance for the same amount of data and
+    gives the model a fuzzier decision boundary against non_auth. Per-identity prototypes are exactly
+    what the literature's few-shot open-set methods (CAUTION, SimID) already do internally. NOTE: this
+    is still a closed-set softmax classifier -- literature on open-set recognition (OpenMax, EVT-based
+    thresholds, margin/prototype losses) finds plain softmax is overconfident on inputs unlike anything
+    in training regardless of how many known classes it has, so this is not expected to fully solve
+    open-set generalization by itself; see the embedding/centroid approach for that."""
+    mask = np.ones(len(window_index), dtype=bool)
+    is_auth = window_index["label"] == "authorized"
+    y = np.where(is_auth, window_index["person_id"].values, "non_auth")
+    return mask, y
+
+
 def taskE_motion_standing_vs_walking(window_index: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
     """standing vs walking, among authorized+unauthorized windows only -- `none` (empty room) has no
     motion label at all, so it's excluded rather than forced into either class."""
@@ -66,5 +82,6 @@ TASKS = {
     "taskB_identity": taskB_identity,
     "taskC_openset_proxy": taskC_openset_proxy,
     "taskD_auth_vs_nonauth": taskD_auth_vs_nonauth,
+    "taskF_identity_or_nonauth": taskF_identity_or_nonauth,
     "taskE_motion_standing_vs_walking": taskE_motion_standing_vs_walking,
 }
