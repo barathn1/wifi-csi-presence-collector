@@ -33,13 +33,26 @@ class SessionWriter:
     def add(self, sample: CsiSample) -> None:
         self.samples.append(sample)
 
-    def finish(self, transport_used: str, board_mac: str, firmware_version: str, dropped_samples: int = 0) -> Path:
+    def finish(
+        self,
+        transport_used: str,
+        board_mac: str,
+        firmware_version: str,
+        dropped_samples: int = 0,
+        board_tag: str = "",
+    ) -> Path:
+        """`board_tag` disambiguates output dirs when multiple boards were
+        collected in the same session (same label/person_id/second would
+        otherwise collide on the same session_id) -- leave blank for the
+        single-board case so existing dataset paths don't change."""
         end_ts = time.time()
         duration_s = end_ts - self.start_ts
         avg_rate_hz = len(self.samples) / duration_s if duration_s > 0 else 0.0
         session_id = time.strftime("%Y%m%d_%H%M%S", time.localtime(self.start_ts))
         if self.person_id:
             session_id += f"_{self.person_id}"
+        if board_tag:
+            session_id += f"_{board_tag}"
 
         date_str = time.strftime("%Y-%m-%d", time.localtime(self.start_ts))
         out_dir = self.cfg.dataset_dir() / self.label / date_str / session_id

@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import logging
 import os
+import re
 import signal
 import sys
 import threading
@@ -28,8 +29,9 @@ import time
 from collector import preflight, stimulus, wire
 from collector.build_manifest import build_manifest
 from collector.config import load_config
-from collector.receiver import get_receiver
+from collector.receiver import get_multi_receiver
 from collector.session_writer import SessionWriter
+from collector.transport_tcp import resolve_mac_for_ip
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -44,6 +46,19 @@ class _GracefulExit(Exception):
 
 def _handle_sigterm(signum, frame):
     raise _GracefulExit()
+
+
+def _resolve_board_mac(cfg, key: str) -> str:
+    """`key` is a TCP peer IP or (for serial) the fixed configured port --
+    neither is the board's real MAC, so resolve the best display value for
+    metadata.json/board_tag."""
+    if cfg.transport.mode == "tcp":
+        return resolve_mac_for_ip(cfg.network.laptop_iface, key) or key
+    return preflight.get_board_mac(cfg) or key
+
+
+def _sanitize_tag(s: str) -> str:
+    return re.sub(r"[^0-9A-Za-z]+", "", s)
 
 
 def parse_args(argv=None):
@@ -77,7 +92,6 @@ def main(argv=None) -> int:
         logger.error("preflight failed: %s", reason)
         return 1
     logger.info("preflight ok: %s", reason)
-    board_mac = preflight.get_board_mac(cfg) or "unknown"
 
     stop_event = threading.Event()
     stimulus_thread = None
@@ -87,8 +101,7 @@ def main(argv=None) -> int:
         )
         stimulus_thread.start()
 
-    writer = SessionWriter(cfg, args.label, args.person_id, args.notes, motion=args.motion)
-    receiver = get_receiver(cfg, stop_event=stop_event, on_stat_line=lambda line: logger.debug(line))
+    receiver = get_multi_receiver(cfg, stop_event=stop_event, on_stat_line=lambda line: logger.debug(line))
 
     logger.info(
         "collecting label=%s person_id=%s motion=%s duration=%s transport=%s "
@@ -96,76 +109,95 @@ def main(argv=None) -> int:
         args.label, args.person_id, args.motion or "n/a", args.duration, cfg.transport.mode, os.getpid(),
     )
 
+    # One SessionWriter per connected board, created lazily on its first
+    # sample -- this is what turns N simultaneously-connected boards into
+    # N separate {metadata.json, samples.npz} pairs from one invocation.
     # `seq` is a monotonic counter the firmware assigns at CSI-capture
     # time (see wire_format.c); a gap between consecutive received seq
-    # values means samples were dropped somewhere between the board's
-    # capture queue and here (queue-full, tx failure, or real transport
-    # loss) -- this is real loss detection, not a guess.
-    last_seq = None
-    dropped = 0
+    # values (tracked independently per board) means samples were dropped
+    # somewhere between that board's capture queue and here.
+    writers: dict[str, SessionWriter] = {}
+    last_seq: dict[str, int] = {}
+    dropped: dict[str, int] = {}
     STATUS_INTERVAL_S = 5.0
 
     start = time.monotonic()
     last_status = start
     try:
-        for sample in receiver:
+        for key, sample in receiver:
+            if key not in writers:
+                writers[key] = SessionWriter(cfg, args.label, args.person_id, args.notes, motion=args.motion)
+                dropped[key] = 0
+                logger.info("board %s: first sample received (%d board(s) active)", key, len(writers))
+            writer = writers[key]
             writer.add(sample)
 
-            if last_seq is not None:
-                gap = sample.seq - last_seq - 1
+            if key in last_seq:
+                gap = sample.seq - last_seq[key] - 1
                 if gap > 0:
-                    dropped += gap
+                    dropped[key] += gap
                 elif gap < 0:
                     logger.warning(
-                        "sequence went backward (seq=%d after %d) -- board likely reset mid-session",
-                        sample.seq, last_seq,
+                        "board %s: sequence went backward (seq=%d after %d) -- board likely reset mid-session",
+                        key, sample.seq, last_seq[key],
                     )
-            last_seq = sample.seq
+            last_seq[key] = sample.seq
 
             now = time.monotonic()
             if now - last_status >= STATUS_INTERVAL_S:
                 elapsed = now - start
-                n = len(writer.samples)
-                rate = n / elapsed if elapsed > 0 else 0.0
+                per_board = " | ".join(
+                    f"{k}: {len(w.samples)} ({len(w.samples) / elapsed if elapsed > 0 else 0.0:.1f} Hz, "
+                    f"{dropped[k]} dropped)"
+                    for k, w in writers.items()
+                )
                 if args.duration is not None:
                     remaining = max(0.0, args.duration - elapsed)
-                    logger.info(
-                        "%d samples (%.1f Hz) | %.0fs elapsed, %.0fs remaining | %d dropped (%.1f%% loss)",
-                        n, rate, elapsed, remaining, dropped, 100.0 * dropped / (dropped + n) if (dropped + n) else 0.0,
-                    )
+                    logger.info("%.0fs elapsed, %.0fs remaining | %s", elapsed, remaining, per_board)
                 else:
-                    logger.info(
-                        "%d samples (%.1f Hz) | %.0fs elapsed | %d dropped (%.1f%% loss)",
-                        n, rate, elapsed, dropped, 100.0 * dropped / (dropped + n) if (dropped + n) else 0.0,
-                    )
+                    logger.info("%.0fs elapsed | %s", elapsed, per_board)
                 last_status = now
 
             if args.duration is not None and (time.monotonic() - start) >= args.duration:
                 break
     except (KeyboardInterrupt, _GracefulExit):
-        logger.info("stopping early (interrupted) -- saving %d samples collected so far", len(writer.samples))
+        total = sum(len(w.samples) for w in writers.values())
+        logger.info(
+            "stopping early (interrupted) -- saving %d samples collected so far across %d board(s)",
+            total, len(writers),
+        )
     finally:
         stop_event.set()
         receiver.close()
         if stimulus_thread is not None:
             stimulus_thread.join(timeout=2.0)
 
-    out_dir = writer.finish(
-        transport_used=cfg.transport.mode,
-        board_mac=board_mac,
-        # Firmware doesn't yet report its own build ID over the wire;
-        # the CSI wire-format version is the best available proxy today.
-        firmware_version=f"wire-v{wire.VERSION}",
-        dropped_samples=dropped,
-    )
-    n = len(writer.samples)
-    loss_pct = 100.0 * dropped / (dropped + n) if (dropped + n) else 0.0
+    if not writers:
+        logger.warning("no boards ever sent data -- nothing written")
+        build_manifest(cfg)
+        return 0
+
+    multi_board = len(writers) > 1
     elapsed = time.monotonic() - start
-    avg_hz = n / elapsed if elapsed > 0 else 0.0
-    logger.info(
-        "wrote %d samples to %s -- avg %.1f Hz over %.0fs (%d dropped, %.1f%% loss)",
-        n, out_dir, avg_hz, elapsed, dropped, loss_pct,
-    )
+    for key, writer in writers.items():
+        board_mac = _resolve_board_mac(cfg, key)
+        out_dir = writer.finish(
+            transport_used=cfg.transport.mode,
+            board_mac=board_mac,
+            # Firmware doesn't yet report its own build ID over the wire;
+            # the CSI wire-format version is the best available proxy today.
+            firmware_version=f"wire-v{wire.VERSION}",
+            dropped_samples=dropped[key],
+            board_tag=_sanitize_tag(board_mac) if multi_board else "",
+        )
+        n = len(writer.samples)
+        d = dropped[key]
+        loss_pct = 100.0 * d / (d + n) if (d + n) else 0.0
+        avg_hz = n / elapsed if elapsed > 0 else 0.0
+        logger.info(
+            "board %s: wrote %d samples to %s -- avg %.1f Hz over %.0fs (%d dropped, %.1f%% loss)",
+            key, n, out_dir, avg_hz, elapsed, d, loss_pct,
+        )
 
     build_manifest(cfg)  # keep data/manifest.csv current after every session
     return 0

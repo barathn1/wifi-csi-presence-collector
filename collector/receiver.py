@@ -23,3 +23,24 @@ def get_receiver(
     if cfg.transport.mode == "serial":
         return transport_serial.iter_samples(cfg, stop_event=stop_event, on_stat_line=on_stat_line)
     raise ValueError(f"unknown transport.mode: {cfg.transport.mode!r}")
+
+
+def get_multi_receiver(
+    cfg: Config,
+    stop_event: Optional[threading.Event] = None,
+    on_stat_line: Optional[Callable[[str], None]] = None,
+) -> Iterator[tuple[str, CsiSample]]:
+    """Like get_receiver, but yields (board_key, sample) pairs and fans in
+    as many simultaneously-connected boards as show up, instead of
+    assuming exactly one. Only TCP supports more than one board at once
+    (each dials in as its own connection) -- serial is always exactly one
+    physical port, so it's wrapped under a single fixed key for a uniform
+    call site in cli_collect.py."""
+    if cfg.transport.mode == "tcp":
+        return transport_tcp.iter_multi_samples(cfg, stop_event=stop_event, on_stat_line=on_stat_line)
+    if cfg.transport.mode == "serial":
+        def _single_key() -> Iterator[tuple[str, CsiSample]]:
+            for sample in transport_serial.iter_samples(cfg, stop_event=stop_event, on_stat_line=on_stat_line):
+                yield cfg.transport.serial_port, sample
+        return _single_key()
+    raise ValueError(f"unknown transport.mode: {cfg.transport.mode!r}")
