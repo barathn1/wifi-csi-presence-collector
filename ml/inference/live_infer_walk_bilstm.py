@@ -10,10 +10,28 @@ of a whole pre-recorded session array.
 
 This model is CLOSED-SET and WALKING-ONLY by construction (see `walk_bilstm_pipeline.py`'s own
 docstring and the project's earlier open-set investigation, which found no combination of
-loss/architecture separated authorized from unauthorized walkers on this hardware): it can tell you
-WHICH of anjali/barath it thinks is walking, with no "neither" option, and the model has only ever
-seen WALKING data -- standing or otherwise-idle packets feed noise into the model, not a meaningful
-"standing" pattern.
+loss/architecture separated authorized from unauthorized walkers on this hardware): fed a window at
+all, it will always answer "anjali" or "barath", never "neither" -- there is no built-in notion of an
+empty room. That includes an actually-empty room: per-window z-score normalization (needed for
+cross-day identity accuracy) throws away the one thing that would otherwise say "nothing happened in
+this window", namely its absolute signal magnitude, so an empty room's window still gets normalized
+into *some* shape and confidently assigned to one of the two classes.
+
+To fix that, this script adds a PRESENCE GATE in front of the identity model, using the one signal
+per-window normalization deliberately discards: raw (pre-normalization) amplitude variance over time.
+A person walking causes far more amplitude fluctuation than an empty room's residual noise floor, so a
+short empty-room calibration at startup (`--calib-seconds`, default 20s -- stay out of the room during
+this) establishes a baseline activity level; live windows are only fed to the identity model once
+their own activity clearly exceeds that baseline (`--presence-threshold-multiplier`, default 2x --
+tuned against real same-day empty-vs-walking recordings, see that flag's own help text for numbers).
+20s is not an arbitrary default: an 8s calibration was tested and found too short -- the empty-room
+activity score itself varies window to window, so an 8s snapshot can land on an unlucky quiet/noisy
+moment and set a threshold that's wrong for the rest of the session (measured: 48% of a real walking
+session's windows wrongly read EMPTY). 20s gave a stable enough baseline to bring that down to 0%.
+Below threshold, the script prints EMPTY and skips the identity model entirely, rather than forcing a
+guess between the two enrolled people. This is a simple, self-contained heuristic, not the separately
+trained/validated presence checkpoint (`ml/inference/live_infer.py`'s `task0_presence`) -- it exists so
+this script doesn't need a second model/feature-pipeline loaded just to answer "is anyone even there".
 
 Live-vs-offline differences, called out here rather than silently glossed over:
 - The offline pipeline runs Hampel/Butterworth ONCE over an entire session's continuous packet stream
@@ -63,6 +81,18 @@ EXPECTED_CSI_LEN_BYTES = 2 * N_SUB_EXPECTED
 COMBO_LOCK_PACKETS = 100  # how many (channel-6, dst==board_mac) packets to see before locking the dominant PHY combo
 BUFFER_SECONDS = 8.0      # rolling context buffer -- must be > window_sec so windows get two-sided filtering context
 MIN_PACKETS_FOR_FIRST_WINDOW = 20
+PRESENCE_AGGREGATE_WINDOWS = 5  # majority vote over the last N windows' presence calls, same idea as the identity aggregate
+
+
+def activity_score(amp_buf: np.ndarray, t_us_buf: np.ndarray, window_start_us: int, window_sec: float) -> float | None:
+    """Mean per-subcarrier amplitude variance-over-time within [window_start_us, window_start_us +
+    window_sec) of the RAW (pre-Hampel, pre-normalization) buffer -- the presence signal per-window
+    z-score normalization would otherwise throw away. None if too few packets fall in range."""
+    t = (t_us_buf.astype(np.float64) - window_start_us) / 1e6
+    sel = np.flatnonzero((t >= 0) & (t < window_sec))
+    if len(sel) < MIN_PACKETS_FOR_FIRST_WINDOW:
+        return None
+    return float(np.mean(np.var(amp_buf[sel], axis=0)))
 
 
 class _GracefulExit(Exception):
@@ -119,7 +149,21 @@ def main(argv=None) -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--expect-channel", type=int, default=6)
     p.add_argument("--aggregate-windows", type=int, default=5, help="rolling majority-vote window count "
-                    "(~10s at 50% overlap, 4s windows)")
+                    "(~10s at 50%% overlap, 4s windows)")
+    p.add_argument("--calib-seconds", type=float, default=20.0,
+                    help="empty-room presence-baseline calibration duration -- stay OUT of the room for "
+                         "this long at startup. Tested at 8s vs 20s on real recordings: 8s produced an "
+                         "unstable baseline (48%% false-EMPTY on a real walking session); 20s fixed it "
+                         "(0%% false-EMPTY, 98%% correct on the empty-room session) -- don't go below "
+                         "this without re-validating")
+    p.add_argument("--presence-threshold-multiplier", type=float, default=2.0,
+                    help="a window counts as PRESENT once its raw amplitude activity exceeds "
+                         "multiplier x the calibrated empty-room baseline. Tuned against real "
+                         "2026-09-16 recordings (same-day empty vs. walking): 2.0 gave 0%% false-EMPTY "
+                         "on both anjali and barath's walking windows and only ~3%% false-PRESENT on "
+                         "empty-room windows (smoothed further by the 5-window majority vote below); "
+                         "3.0 looked safer on paper but wrongly called 43 percent of a real walking "
+                         "session's windows EMPTY -- don't raise this back toward 3 without re-checking")
     p.add_argument("--no-stimulus", action="store_true")
     p.add_argument("--config", default=None)
     args = p.parse_args(argv)
@@ -160,9 +204,15 @@ def main(argv=None) -> int:
     buf_amp: deque = deque()
     buf_phase: deque = deque()
     buf_t: deque = deque()
+    calib_amp: list = []  # untrimmed -- see the calibration block for why this must NOT share buf_amp's rolling trim
     next_window_start_us: int | None = None
     window_idx = 0
     aggregator: deque = deque(maxlen=args.aggregate_windows)
+    presence_aggregator: deque = deque(maxlen=PRESENCE_AGGREGATE_WINDOWS)
+
+    calibrating = False
+    calib_start_time: float | None = None
+    presence_threshold: float | None = None
 
     try:
         for sample in receiver:
@@ -182,12 +232,38 @@ def main(argv=None) -> int:
                                  "-- this checkpoint was trained on %d-subcarrier packets; aborting",
                                  locked_combo[-1], locked_combo[-1] // 2, EXPECTED_CSI_LEN_BYTES, N_SUB_EXPECTED)
                     return 1
+                calibrating = True
+                calib_start_time = time.monotonic()
+                logger.info("=== PRESENCE CALIBRATION: stand OUTSIDE the room / away from the sensor now (%.0fs) ===",
+                            args.calib_seconds)
                 continue
 
             if combo_key(sample) != locked_combo:
                 continue
 
             amplitude, phase = decode_one_sample(sample.csi_data)
+
+            if calibrating:
+                # accumulated separately from buf_amp/buf_phase/buf_t on purpose: that buffer is
+                # continuously trimmed to the last BUFFER_SECONDS (8s), which is shorter than
+                # calib_seconds (20s default) -- if calibration packets went through that same trim,
+                # by the time calibration "finished" the buffer would already have lost everything
+                # older than 8s ago, silently shrinking the baseline estimate back down to an 8s one
+                # (measured: an 8s baseline is unstable enough to cause 48% false-EMPTY during real
+                # walking -- see --calib-seconds's help text). This list is never trimmed.
+                calib_amp.append(amplitude)
+                elapsed = time.monotonic() - calib_start_time
+                if elapsed < args.calib_seconds or len(calib_amp) < MIN_PACKETS_FOR_FIRST_WINDOW:
+                    continue
+                baseline_activity = float(np.mean(np.var(np.stack(calib_amp), axis=0)))
+                presence_threshold = baseline_activity * args.presence_threshold_multiplier
+                logger.info("presence calibration complete: %d packets over %.1fs, baseline_activity=%.6f, "
+                            "presence_threshold=%.6f (%.1fx baseline)", len(calib_amp), elapsed,
+                            baseline_activity, presence_threshold, args.presence_threshold_multiplier)
+                calibrating = False
+                next_window_start_us = sample.device_time_us  # first identity window starts fresh, post-calibration
+                continue
+
             buf_amp.append(amplitude)
             buf_phase.append(phase)
             buf_t.append(sample.device_time_us)
@@ -204,14 +280,30 @@ def main(argv=None) -> int:
             amp_buf = np.stack(buf_amp)
             phase_buf = np.stack(buf_phase)
             t_buf = np.array(buf_t, dtype=np.int64)
+
+            score = activity_score(amp_buf, t_buf, next_window_start_us, pp["window_sec"])
+            if score is None:
+                next_window_start_us += int(step_sec * 1e6)
+                continue
+            present = score >= presence_threshold
+            presence_aggregator.append(present)
+            agg_present = (sum(presence_aggregator) / len(presence_aggregator)) >= 0.5
+
+            window_idx += 1
+            if not agg_present:
+                print(f"[{time.strftime('%H:%M:%S')}] window#{window_idx:4d}  EMPTY  "
+                      f"(activity={score:.6f}, threshold={presence_threshold:.6f}, "
+                      f"present-votes={sum(presence_aggregator)}/{len(presence_aggregator)})")
+                next_window_start_us += int(step_sec * 1e6)
+                aggregator.clear()  # don't let identity confidence carry over across an empty gap
+                continue
+
             window = build_window(amp_buf, phase_buf, t_buf, next_window_start_us, pp["window_sec"],
                                    pp["final_len"], pp["hampel_window"], pp["hampel_n_sigmas"],
                                    pp["butter_cutoff_hz"], pp["butter_order"], idx)
             next_window_start_us += int(step_sec * 1e6)
             if window is None:
                 continue
-
-            window_idx += 1
             x = torch.from_numpy(window.astype(np.float32)).unsqueeze(0)
             with torch.no_grad():
                 _, logits = model(x)
