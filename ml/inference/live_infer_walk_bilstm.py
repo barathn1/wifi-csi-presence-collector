@@ -216,6 +216,14 @@ def main(argv=None) -> int:
 
     try:
         for sample in receiver:
+            if sample.first_word_invalid:
+                # dropped OFFLINE too (`select_dominant_packets`'s very first filter) -- a garbled/
+                # invalid CSI read that was never in this checkpoint's training distribution at all.
+                # Missing this live let corrupted packets into the buffer/calibration baseline
+                # unfiltered -- found while debugging a live session that confidently misclassified
+                # anjali as barath, with an empty-room baseline ~2-3x higher than any recorded
+                # training-day "none" session, consistent with garbage packets inflating activity.
+                continue
             if sample.dst_mac_str.lower() != board_mac_str or sample.channel_primary != args.expect_channel:
                 continue
 
