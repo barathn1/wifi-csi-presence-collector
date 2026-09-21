@@ -30,7 +30,7 @@ from collector import preflight, stimulus, wire
 from collector.build_manifest import build_manifest
 from collector.config import load_config
 from collector.receiver import get_multi_receiver
-from collector.session_writer import SessionWriter
+from collector.session_writer import SessionWriter, session_dir_for
 from collector.transport_tcp import resolve_mac_for_ip
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -111,11 +111,16 @@ def main(argv=None) -> int:
 
     # One SessionWriter per connected board, created lazily on its first
     # sample -- this is what turns N simultaneously-connected boards into
-    # N separate {metadata.json, samples.npz} pairs from one invocation.
+    # N sets of {metadata.json, samples.npz} from one invocation. All
+    # boards in a run share one session folder (session_start_wall,
+    # captured once here rather than per-board) so it's obvious which
+    # files came from the same run, instead of each board landing in its
+    # own similarly-but-not-identically-timestamped directory.
     # `seq` is a monotonic counter the firmware assigns at CSI-capture
     # time (see wire_format.c); a gap between consecutive received seq
     # values (tracked independently per board) means samples were dropped
     # somewhere between that board's capture queue and here.
+    session_start_wall = time.time()
     writers: dict[str, SessionWriter] = {}
     last_seq: dict[str, int] = {}
     dropped: dict[str, int] = {}
@@ -187,6 +192,9 @@ def main(argv=None) -> int:
     logger.info("saving %d board(s)' data to disk -- please wait, this can take a moment", len(writers))
 
     multi_board = len(writers) > 1
+    session_dir = (
+        session_dir_for(cfg, args.label, args.person_id, session_start_wall) if multi_board else None
+    )
     elapsed = time.monotonic() - start
     for key, writer in writers.items():
         board_mac = _resolve_board_mac(cfg, key)
@@ -198,6 +206,7 @@ def main(argv=None) -> int:
             firmware_version=f"wire-v{wire.VERSION}",
             dropped_samples=dropped[key],
             board_tag=_sanitize_tag(board_mac) if multi_board else "",
+            session_dir=session_dir,
         )
         n = len(writer.samples)
         d = dropped[key]

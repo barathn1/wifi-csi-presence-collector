@@ -24,14 +24,38 @@ from pathlib import Path
 import numpy as np
 
 
-def resolve_npz_path(path: Path) -> Path:
-    if path.is_dir():
-        return path / "samples.npz"
-    return path
+def resolve_npz_path(path: Path, board: str = "") -> Path:
+    """A session dir holds one `samples.npz` for a single-board session,
+    or several `<mac>_samples.npz` files for a multi-board one (see
+    session_writer.py) -- pick the right one, or make the ambiguity an
+    explicit error instead of silently picking one."""
+    if not path.is_dir():
+        return path
+    if board:
+        candidate = path / f"{board}_samples.npz"
+        if not candidate.exists():
+            raise FileNotFoundError(f"no {candidate.name} in {path}")
+        return candidate
+    default = path / "samples.npz"
+    if default.exists():
+        return default
+    matches = sorted(path.glob("*_samples.npz"))
+    if len(matches) == 1:
+        return matches[0]
+    if len(matches) > 1:
+        boards = ", ".join(m.name[: -len("_samples.npz")] for m in matches)
+        raise FileNotFoundError(
+            f"{path} has multiple boards' data ({boards}) -- pass --board <mac> or the exact samples.npz path"
+        )
+    raise FileNotFoundError(f"no samples.npz (or <mac>_samples.npz) found in {path}")
 
 
-def print_metadata(session_dir: Path) -> None:
-    meta_path = session_dir / "metadata.json"
+def _prefix_for(npz_path: Path) -> str:
+    return npz_path.name[: -len("samples.npz")] if npz_path.name.endswith("samples.npz") else ""
+
+
+def print_metadata(session_dir: Path, prefix: str = "") -> None:
+    meta_path = session_dir / f"{prefix}metadata.json"
     if not meta_path.exists():
         print(f"(no metadata.json found at {meta_path})")
         return
@@ -126,22 +150,25 @@ def dump_csv(data: np.lib.npyio.NpzFile, out_path: Path) -> None:
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("path", help="session directory or direct path to samples.npz")
+    p.add_argument("--board", default="",
+                    help="MAC (no colons) to pick one board's files out of a multi-board session dir")
     p.add_argument("--sample", type=int, help="print full detail (incl. decoded CSI) for one sample index")
     p.add_argument("--csv", action="store_true",
-                    help="dump every field (incl. raw CSI) to <session_dir>/csi_export.csv")
+                    help="dump every field (incl. raw CSI) to <session_dir>/[<board>_]csi_export.csv")
     args = p.parse_args()
 
     input_path = Path(args.path)
-    npz_path = resolve_npz_path(input_path)
+    npz_path = resolve_npz_path(input_path, board=args.board)
     session_dir = npz_path.parent
+    prefix = _prefix_for(npz_path)
 
-    print_metadata(session_dir)
+    print_metadata(session_dir, prefix)
     with np.load(npz_path) as data:
         print_summary(data)
         if args.sample is not None:
             print_one_sample(data, args.sample)
         if args.csv:
-            dump_csv(data, session_dir / "csi_export.csv")
+            dump_csv(data, session_dir / f"{prefix}csi_export.csv")
 
 
 if __name__ == "__main__":

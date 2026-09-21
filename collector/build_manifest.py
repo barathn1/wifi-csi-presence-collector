@@ -20,7 +20,10 @@ FIELDS = [
 def build_manifest(cfg: Config) -> int:
     dataset_dir = cfg.dataset_dir()
     rows = []
-    for meta_path in sorted(dataset_dir.glob("*/*/*/metadata.json")):
+    # "*metadata.json" (not the literal name) also matches multi-board
+    # sessions' "<mac>_metadata.json" files -- several boards' metadata
+    # can share one session_id folder (see cli_collect.py/session_writer.py).
+    for meta_path in sorted(dataset_dir.glob("*/*/*/*metadata.json")):
         meta = json.loads(meta_path.read_text())
         # .get(): sessions collected before a field existed (e.g. ap_source)
         # shouldn't break manifest rebuilds -- they just show blank there.

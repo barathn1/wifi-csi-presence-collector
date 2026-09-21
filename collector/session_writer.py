@@ -11,11 +11,25 @@ import json
 import time
 from dataclasses import asdict
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 
 from collector.config import Config
 from collector.models import CsiSample, SessionMetadata
+
+
+def session_dir_for(cfg: Config, label: str, person_id: str, start_ts: float) -> Path:
+    """Session output directory for a given label/person_id/start time --
+    shared by SessionWriter's own default (single-board) path and by
+    cli_collect.py's multi-board path, which computes one shared dir up
+    front for every board in a run instead of letting each board derive
+    its own from its (slightly different) first-sample time."""
+    session_id = time.strftime("%Y%m%d_%H%M%S", time.localtime(start_ts))
+    if person_id:
+        session_id += f"_{person_id}"
+    date_str = time.strftime("%Y-%m-%d", time.localtime(start_ts))
+    return cfg.dataset_dir() / label / date_str / session_id
 
 
 class SessionWriter:
@@ -40,25 +54,30 @@ class SessionWriter:
         firmware_version: str,
         dropped_samples: int = 0,
         board_tag: str = "",
+        session_dir: Optional[Path] = None,
     ) -> Path:
-        """`board_tag` disambiguates output dirs when multiple boards were
-        collected in the same session (same label/person_id/second would
-        otherwise collide on the same session_id) -- leave blank for the
-        single-board case so existing dataset paths don't change."""
+        """`session_dir`, when given, is a shared folder that multiple
+        boards' files get written into together (cli_collect.py's
+        multi-board path passes one shared dir for every board in a run,
+        computed up front) -- `board_tag` then becomes a filename prefix
+        (`<tag>_samples.npz`/`<tag>_metadata.json`) so files from the same
+        run are obviously grouped and never collide, instead of each
+        board getting its own similarly-but-not-identically-timestamped
+        subfolder. Leave both blank for the single-board case: unchanged
+        `samples.npz`/`metadata.json` in their own session dir."""
         end_ts = time.time()
         duration_s = end_ts - self.start_ts
         avg_rate_hz = len(self.samples) / duration_s if duration_s > 0 else 0.0
-        session_id = time.strftime("%Y%m%d_%H%M%S", time.localtime(self.start_ts))
-        if self.person_id:
-            session_id += f"_{self.person_id}"
-        if board_tag:
-            session_id += f"_{board_tag}"
 
-        date_str = time.strftime("%Y-%m-%d", time.localtime(self.start_ts))
-        out_dir = self.cfg.dataset_dir() / self.label / date_str / session_id
+        if session_dir is not None:
+            out_dir = session_dir
+            prefix = f"{board_tag}_" if board_tag else ""
+        else:
+            out_dir = session_dir_for(self.cfg, self.label, self.person_id, self.start_ts)
+            prefix = ""
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        self._write_samples(out_dir / "samples.npz")
+        self._write_samples(out_dir / f"{prefix}samples.npz")
 
         meta = SessionMetadata(
             label=self.label,
@@ -77,7 +96,7 @@ class SessionWriter:
             dropped_samples=dropped_samples,
             avg_rate_hz=avg_rate_hz,
         )
-        (out_dir / "metadata.json").write_text(json.dumps(asdict(meta), indent=2))
+        (out_dir / f"{prefix}metadata.json").write_text(json.dumps(asdict(meta), indent=2))
         return out_dir
 
     def _write_samples(self, path: Path) -> None:
