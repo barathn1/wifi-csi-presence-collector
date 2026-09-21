@@ -177,6 +177,15 @@ def main(argv=None) -> int:
         build_manifest(cfg)
         return 0
 
+    # Writing samples.npz is slow for large sessions and can't be safely
+    # interrupted partway through (it's a streaming zip write) -- ignore
+    # further Ctrl+C/`kill` here so a second interrupt during save (easy
+    # to trigger right after the first one that stopped collection)
+    # can't corrupt/abort a save that was otherwise going to succeed.
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    logger.info("saving %d board(s)' data to disk -- please wait, this can take a moment", len(writers))
+
     multi_board = len(writers) > 1
     elapsed = time.monotonic() - start
     for key, writer in writers.items():
