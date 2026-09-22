@@ -1,12 +1,12 @@
 {
-  "label": "authorized",
+  "label": "unauthorized",
   "person_id": "sumanth",
   "notes": "",
-  "start_ts": 1789994308.8601215,
-  "end_ts": 1789994427.134202,
-  "duration_s": 118.27408051490784,
+  "start_ts": 1789994309.061161,
+  "end_ts": 1789994429.5154445,
+  "duration_s": 120.45428347587585,
   "transport_used": "tcp",
-  "board_mac": "ac:27:6e:a2:f2:78",
+  "board_mac": "ac:27:6e:a5:5b:c8",
   "firmware_version": "wire-v1",
   "config_snapshot": {
     "device": {
@@ -77,10 +77,10 @@
       "project_dir": "./firmware"
     }
   },
-  "sample_count": 59543,
+  "sample_count": 58847,
   "ap_source": "home-router",
   "motion": "walking",
-  "dropped_samples": 27241,
-  "avg_rate_hz": 503.4323643927624,
+  "dropped_samples": 30590,
+  "avg_rate_hz": 488.54219461432155,
   "format_version": 1
 }

@@ -1,12 +1,12 @@
 {
-  "label": "authorized",
-  "person_id": "promoda",
+  "label": "unauthorized",
+  "person_id": "sumanth",
   "notes": "",
-  "start_ts": 1789992128.4750435,
-  "end_ts": 1789992249.4794335,
-  "duration_s": 121.004390001297,
+  "start_ts": 1789994309.0610673,
+  "end_ts": 1789994428.2745748,
+  "duration_s": 119.21350741386414,
   "transport_used": "tcp",
-  "board_mac": "ac:27:6e:a5:5b:c8",
+  "board_mac": "a4:cb:8f:d4:52:b0",
   "firmware_version": "wire-v1",
   "config_snapshot": {
     "device": {
@@ -77,10 +77,10 @@
       "project_dir": "./firmware"
     }
   },
-  "sample_count": 60830,
+  "sample_count": 65312,
   "ap_source": "home-router",
   "motion": "walking",
-  "dropped_samples": 20611,
-  "avg_rate_hz": 502.70903393957843,
+  "dropped_samples": 21689,
+  "avg_rate_hz": 547.8573814061311,
   "format_version": 1
 }
