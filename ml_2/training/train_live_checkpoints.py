@@ -25,6 +25,11 @@ CHECKPOINT_DIR = REPO_ROOT / "ml_2/checkpoints"
 TASK_NAME = "auth_vs_nonauth"
 WINDOW_PACKETS = 200
 STRIDE_PACKETS = 100
+# NOTE: two attempts at speeding this up (more DataLoader workers, running both models concurrently
+# across the 2 GPUs) both crashed -- once from a fork-vs-CUDA race, once from an OOM kill (each forked
+# worker process builds its own independent copy of windowing.py's session-array cache, so raising
+# worker count multiplies memory use by worker count against this dataset's ~9GB cache). Reverted to
+# gpu_utils' own defaults (4 workers, batch_size=64) rather than risk a third crash.
 
 MODEL_SPECS = {
     "gnn_subcarrier": ("SubcarrierGNN", lambda n_cls: SubcarrierGNN(n_subcarriers=N_SUBCARRIERS, n_classes=n_cls)),
