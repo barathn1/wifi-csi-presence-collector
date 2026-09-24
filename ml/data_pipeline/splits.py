@@ -105,6 +105,20 @@ def naive_random_split(window_index: pd.DataFrame, test_size: float = 0.2, seed:
     return idx[n_test:], idx[:n_test]
 
 
+def leave_one_day_out(window_index: pd.DataFrame):
+    """Generalizes `day_disjoint_split` from "hold out the last date" to "hold out EVERY date in turn,
+    one fold each" -- the real cross-day generalization check requested once >=3 dates exist (2 dates
+    only gives one train/test direction; this gives one honest number per date, matching WiPIN's
+    leave-one-day-out style evaluation cited in RESEARCH_NOTES.md section 12). No group-leakage check
+    needed beyond the date split itself: unlike session-disjoint/person-disjoint splits, overlapping
+    windows from the same session cannot straddle two different dates by construction."""
+    dates = sorted(window_index["date"].unique())
+    for held_out_date in dates:
+        test_mask = (window_index["date"] == held_out_date).values
+        train_mask = ~test_mask
+        yield held_out_date, np.flatnonzero(train_mask), np.flatnonzero(test_mask)
+
+
 def day_disjoint_split(window_index: pd.DataFrame):
     """None on Day-1-only data. Once >1 date exists, train on all-but-last date, test on the last."""
     dates = sorted(window_index["date"].unique())

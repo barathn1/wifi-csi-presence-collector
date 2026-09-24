@@ -35,10 +35,21 @@ def resolve_session_dir(path: Path) -> Path:
     return path
 
 
-def load_session(session_dir: Path) -> Session:
+def load_session(session_dir: Path, board_mac: str | None = None) -> Session:
+    """`board_mac` (e.g. "ac:27:6e:a5:5b:c8") selects one receiver's files in a multi-receiver session
+    directory (2026-09-21 onward: 3 ESP32 receivers recorded in parallel into the same session_dir,
+    each writing `<mac-no-colons>_samples.npz` / `<mac-no-colons>_metadata.json` instead of the
+    unprefixed `samples.npz`/`metadata.json` single-receiver sessions use). Falls back to the unprefixed
+    filenames when `board_mac` is None or the prefixed file doesn't exist, so every single-receiver
+    session (2026-09-09 through -17) is unaffected."""
     session_dir = resolve_session_dir(Path(session_dir))
-    meta_path = session_dir / "metadata.json"
-    npz_path = session_dir / "samples.npz"
+    prefix = ""
+    if board_mac is not None:
+        candidate = board_mac.replace(":", "").lower()
+        if (session_dir / f"{candidate}_samples.npz").exists():
+            prefix = f"{candidate}_"
+    meta_path = session_dir / f"{prefix}metadata.json"
+    npz_path = session_dir / f"{prefix}samples.npz"
     metadata = json.loads(meta_path.read_text()) if meta_path.exists() else {}
     with np.load(npz_path) as data:
         npz = {k: data[k] for k in data.files}

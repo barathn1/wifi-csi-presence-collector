@@ -43,10 +43,36 @@ def compute_target_rate_hz(native_rates_hz: list[float], safety_margin: float = 
     return min(native_rates_hz) * safety_margin
 
 
+def fix_clock_reset(device_time_us: np.ndarray) -> np.ndarray:
+    """Boolean mask selecting the longest contiguous monotonically-increasing run of `device_time_us`.
+    `device_time_us` is time-since-boot, not time-since-session-start -- a receiver reboot mid-session
+    (seen on several 2026-09-21/22 sessions, the first collection with 3 receivers sharing a power/USB
+    setup) makes it jump sharply backward at the reset point, then climb again from near-zero. That
+    single discontinuity breaks BOTH the native-rate estimate (a naive last-minus-first duration goes
+    negative) and `resample_time_axis`'s bin-index math (which assumes strictly increasing time) if left
+    in. Dropping the shorter side of the split is a conservative fix -- some real packets are discarded,
+    but nothing is fabricated and no cross-reset time-ordering corruption reaches downstream code.
+    A no-op (mask all True) when `device_time_us` is already monotonic (every session before
+    2026-09-21)."""
+    diffs = np.diff(device_time_us.astype(np.int64))
+    if (diffs >= 0).all():
+        return np.ones(len(device_time_us), dtype=bool)
+    reset_points = np.flatnonzero(diffs < 0) + 1  # index of the first sample AFTER each reset
+    boundaries = [0] + reset_points.tolist() + [len(device_time_us)]
+    seg_lengths = np.diff(boundaries)
+    best = int(np.argmax(seg_lengths))
+    mask = np.zeros(len(device_time_us), dtype=bool)
+    mask[boundaries[best]:boundaries[best + 1]] = True
+    return mask
+
+
 def session_native_rate_hz(device_time_us: np.ndarray) -> float:
-    """Packets/second actually captured in this session, straight from its own timestamps."""
-    duration_s = (device_time_us[-1] - device_time_us[0]) / 1e6
-    return (len(device_time_us) - 1) / duration_s
+    """Packets/second actually captured in this session, straight from its own timestamps (after
+    dropping any clock-reset artifact -- see fix_clock_reset)."""
+    mask = fix_clock_reset(device_time_us)
+    dt = device_time_us[mask]
+    duration_s = (dt[-1] - dt[0]) / 1e6
+    return (len(dt) - 1) / duration_s
 
 
 def resample_time_axis(

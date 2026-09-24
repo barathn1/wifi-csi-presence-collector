@@ -36,6 +36,7 @@ from ml.data_pipeline.calibration import apply_variant_a, compute_day_baseline_f
 from ml.data_pipeline.decode_csi import REPO_ROOT, channel_width_summary, load_session
 from ml.data_pipeline.splits import (
     assert_no_group_leakage,
+    leave_one_day_out,
     leave_one_unauthorized_person_out,
     session_disjoint_kfold,
 )
@@ -47,7 +48,13 @@ from ml.models.transformer_whofi import WhoFiTransformer
 from ml.training.train import train_classifier
 
 DAY3_DATE = "2026-09-15"
-TRAIN_DATES = ["2026-09-15", "2026-09-16"]  # Day3 + Day4, both confirmed channel-6 (see session_channel)
+# Day3-7: 2026-09-15/16/17 (single-receiver sessions) + 2026-09-21/22 (3 receivers recorded in
+# parallel per session -- see decode_csi.load_session/board_mac). All confirmed channel-6 (see
+# session_channel). Every date's data is read from SINGLE_RECEIVER_MAC only -- the one receiver
+# board present across all 5 dates -- so the pooled dataset is single-receiver throughout, not a mix
+# of 1x and 3x receiver coverage across days.
+TRAIN_DATES = ["2026-09-15", "2026-09-16", "2026-09-17", "2026-09-21", "2026-09-22"]
+SINGLE_RECEIVER_MAC = "ac:27:6e:a5:5b:c8"
 TARGET_CHANNEL = 6
 CACHE_MODE = "resampled_timenorm"  # closes the packet-rate/window-duration confound, see time_resample.py
 CHECKPOINT_DIR = REPO_ROOT / "ml/checkpoints"
@@ -77,7 +84,7 @@ def log_rows(rows: list[dict]) -> None:
 
 
 def session_channel(session_dir: str) -> int:
-    session = load_session(REPO_ROOT / "data" / session_dir)
+    session = load_session(REPO_ROOT / "data" / session_dir, board_mac=SINGLE_RECEIVER_MAC)
     return channel_width_summary(session.npz)["channel_primary"]
 
 
@@ -85,14 +92,22 @@ def build_day3_ch6_manifest() -> pd.DataFrame:
     """Excludes ml.evaluation.eval_day3ch6_holdout.HOLDOUT_SESSIONS explicitly -- those were collected
     AFTER this script's original (Day3-only) training run and must stay held out so that script's
     before/after numbers stay comparable across every version of this checkpoint set, including this
-    Day3+Day4 pooled one. Previously this separation was accidental (relying on a gitignored window-index
+    Day3-7 pooled one. Previously this separation was accidental (relying on a gitignored window-index
     cache file never having been rebuilt since); now it's enforced even after a fresh clone / cleared
-    cache."""
+    cache.
+
+    2026-09-21/22 each have 3 receivers recording in parallel into the same session_dir (manifest.csv
+    has 3 rows per session, one per board_mac -- see collector/build_manifest.py); filtering to
+    `manifest["board_mac"] == SINGLE_RECEIVER_MAC` both (a) collapses those triplicated rows down to
+    the one receiver present on every date and (b) is a no-op on 2026-09-15/16/17, which only ever had
+    that one receiver anyway -- so the whole pooled TRAIN_DATES range ends up single-receiver
+    throughout. Also drops 2 anomalous 2026-09-21 rows where the collector recorded an IP address in
+    the board_mac field instead of a MAC (a different, non-matching value either way)."""
     from ml.evaluation.eval_day3ch6_holdout import HOLDOUT_SESSIONS
 
     manifest = load_manifest()
     date_mask = manifest["session_dir"].apply(lambda s: any(f"/{d}/" in s for d in TRAIN_DATES))
-    pooled = manifest[date_mask].copy()
+    pooled = manifest[date_mask & (manifest["board_mac"] == SINGLE_RECEIVER_MAC)].copy()
     pooled["channel_primary"] = pooled["session_dir"].apply(session_channel)
     ch6 = pooled[pooled["channel_primary"] == TARGET_CHANNEL].drop(columns=["channel_primary"])
     ch6 = ch6[~ch6["session_dir"].isin(HOLDOUT_SESSIONS)]
@@ -108,7 +123,7 @@ def compute_dataset_target_rate_hz(manifest: pd.DataFrame) -> float:
 
     rates = []
     for session_dir in manifest["session_dir"]:
-        cache_path = cache_session(session_dir, mode="resampled")
+        cache_path = cache_session(session_dir, mode="resampled", board_mac=SINGLE_RECEIVER_MAC)
         with np.load(cache_path) as d:
             rates.append(session_native_rate_hz(d["device_time_us"]))
     target = compute_target_rate_hz(rates)
@@ -129,7 +144,7 @@ def build_or_load_window_index(manifest: pd.DataFrame, target_rate_hz: float) ->
     if index_path.exists():
         return pd.read_csv(index_path)
     index = build_window_index(manifest=manifest, mode=CACHE_MODE, window_packets=200, stride_packets=100,
-                                target_rate_hz=target_rate_hz)
+                                target_rate_hz=target_rate_hz, board_mac=SINGLE_RECEIVER_MAC)
     index_path.parent.mkdir(parents=True, exist_ok=True)
     index.to_csv(index_path, index=False)
     return index
@@ -188,6 +203,42 @@ def evaluate_taskD(window_index: pd.DataFrame, calibration, epochs: int, seed: i
     print(f"  MEAN across {len(fold_metrics)} held-out strangers: auroc={mean_auroc:.3f} "
           f"false_accept_unauth={mean_fa_unauth:.3f} false_accept_none={mean_fa_none:.3f}  "
           f"<-- the trustworthy number, not the final checkpoint's")
+
+
+def evaluate_taskD_day_disjoint(window_index: pd.DataFrame, calibration, epochs: int, seed: int) -> None:
+    """Real cross-day generalization check for taskD, requested on top of the person-open-set check
+    above: leave-one-DAY-out (train on the other 4 dates, test on the held-out date), one fold per
+    date. Unlike `evaluate_taskD`'s leave-one-unauthorized-person-out (which pools windows from every
+    date together on both sides of the split, so it never tests whether the model generalizes across
+    days), this is genuinely day-disjoint -- the honest cross-day number RESEARCH_NOTES.md section 8/12
+    repeatedly flags as the actually-hard, usually-unreported part of CSI person-ID."""
+    full_ds = CsiWindowDataset(window_index, "taskD_auth_vs_nonauth", calibration=calibration)
+    print(f"\n=== taskD_auth_vs_nonauth: leave-one-DAY-out, cross-day generalization "
+          f"({len(full_ds)} windows) ===")
+    fold_metrics = []
+    for held_out_date, train_idx, test_idx in leave_one_day_out(full_ds.index):
+        train_ds = full_ds.subset_by_index_rows(train_idx)
+        test_ds = full_ds.subset_by_index_rows(test_idx)
+        if len(np.unique(test_ds.y)) < 2:
+            print(f"  skipping {held_out_date}: only one class present in this day's windows")
+            continue
+        model = WhoFiTransformer(n_subcarriers=128, n_classes=2, **WINNING_ARCH_KWARGS)
+        train_classifier(model, train_ds, test_ds, epochs=epochs, seed=seed)
+        metrics = binary_eval(model, test_ds)
+        metrics.update({"held_out": held_out_date, "n_train": len(train_ds), "n_test": len(test_ds)})
+        fold_metrics.append(metrics)
+        print(f"  held out day '{held_out_date}': acc={metrics['accuracy']:.3f} auroc={metrics['auroc']:.3f} "
+              f"eer={metrics['eer']:.3f} false_accept_unauth={metrics.get('false_accept_unauthorized', float('nan')):.3f} "
+              f"false_accept_none={metrics.get('false_accept_none', float('nan')):.3f} "
+              f"(n_train={metrics['n_train']} n_test={metrics['n_test']})")
+        log_rows([{**metrics, "timestamp": datetime.now(timezone.utc).isoformat(), "stage": "eval_day_loo",
+                   "task": "taskD_auth_vs_nonauth", "notes": "leave-one-day-out (cross-day generalization)"}])
+    mean_auroc = np.nanmean([m["auroc"] for m in fold_metrics])
+    mean_fa_unauth = np.nanmean([m.get("false_accept_unauthorized", float("nan")) for m in fold_metrics])
+    mean_fa_none = np.nanmean([m.get("false_accept_none", float("nan")) for m in fold_metrics])
+    print(f"  MEAN across {len(fold_metrics)} held-out days: auroc={mean_auroc:.3f} "
+          f"false_accept_unauth={mean_fa_unauth:.3f} false_accept_none={mean_fa_none:.3f}  "
+          f"<-- the real cross-day number, not the pooled-random one")
 
 
 def evaluate_single_split(task_name: str, window_index: pd.DataFrame, calibration, epochs: int, seed: int) -> None:
@@ -261,13 +312,15 @@ def main(epochs: int, seed: int) -> None:
     print(f"window index: {len(window_index)} windows")
 
     none_sessions = manifest.loc[manifest["label"] == "none", "session_dir"].tolist()
-    baseline = compute_day_baseline_from_sessions(none_sessions, label=f"day3-4_ch{TARGET_CHANNEL}",
-                                                   mode=CACHE_MODE, target_rate_hz=target_rate_hz)
+    baseline = compute_day_baseline_from_sessions(none_sessions, label=f"day3-7_ch{TARGET_CHANNEL}",
+                                                   mode=CACHE_MODE, target_rate_hz=target_rate_hz,
+                                                   board_mac=SINGLE_RECEIVER_MAC)
 
     def calibration(amp, phase, row):
         return apply_variant_a(amp, phase, baseline)
 
     evaluate_taskD(window_index, calibration, epochs, seed)
+    evaluate_taskD_day_disjoint(window_index, calibration, epochs, seed)
     evaluate_single_split("task0_presence", window_index, calibration, epochs, seed)
     evaluate_single_split("taskE_motion_standing_vs_walking", window_index, calibration, epochs, seed)
 
