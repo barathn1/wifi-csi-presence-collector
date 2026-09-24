@@ -18,3 +18,6 @@ ml/data_pipeline/cache/
 ml/checkpoints/
 ml/visualization/figures/
 visualizations/
+ml_2/checkpoints/
+ml_2/cache/
+ml_2/features_channel6.npy

@@ -1,0 +1,759 @@
+full manifest: 275 (session,receiver) rows across 199 sessions
+channel distribution (rows): {6: 198, 11: 40, 1: 37}
+channel distribution (by date):
+date
+2026-09-09           {1: 37}
+2026-09-10          {11: 37}
+2026-09-15    {6: 34, 11: 3}
+2026-09-16           {6: 27}
+2026-09-17           {6: 20}
+2026-09-21           {6: 54}
+2026-09-22           {6: 63}
+Name: channel, dtype: object
+
+channel-6-only, >= 50 packets: 198 (session,receiver) rows across 122 sessions, dates=['2026-09-15', '2026-09-16', '2026-09-17', '2026-09-21', '2026-09-22']
+label counts: {'authorized': 111, 'unauthorized': 53, 'none': 34}
+dominant_csi_len distribution: {256: 198}
+caching (session, receiver) decoded arrays...
+window index: 178040 windows from 122 sessions
+computing per-(date, receiver) empty-room baselines...
+  9 baselines: [('2026-09-15', 'ac:27:6e:a5:5b:c8'), ('2026-09-16', 'ac:27:6e:a5:5b:c8'), ('2026-09-17', 'ac:27:6e:a5:5b:c8'), ('2026-09-21', 'a4:cb:8f:d4:52:b0'), ('2026-09-21', 'ac:27:6e:a2:f2:78'), ('2026-09-21', 'ac:27:6e:a5:5b:c8'), ('2026-09-22', 'a4:cb:8f:d4:52:b0'), ('2026-09-22', 'ac:27:6e:a2:f2:78'), ('2026-09-22', 'ac:27:6e:a5:5b:c8')]
+building handcrafted feature matrix (shared across every classical model in ml_2)...
+feature matrix: (178040, 514)
+
+=== SVM[oc_svm] open-set: leave-one-unauthorized-person-out ===
+  held out 'abdul': WINDOW auroc=0.346 eer=0.627 false_accept_unauth=0.127 false_accept_none=0.662
+    SESSION-LEVEL (not window-level): acc=0.208 auroc=0.352 (n_sessions=24)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.011 mean_proba=-5.541 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.053 mean_proba=0.924 n_windows=262
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.104 mean_proba=3.768 n_windows=570
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.134 mean_proba=8.281 n_windows=277
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.151 mean_proba=6.206 n_windows=578
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.183 mean_proba=6.371 n_windows=586
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.255 mean_proba=10.974 n_windows=286
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.276 mean_proba=10.602 n_windows=457
+      authorized/2026-09-22/20260922_143709_barath  y_true=1 majority_pred=0 window_acc=0.287 mean_proba=11.759 n_windows=2522
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.309 mean_proba=20.337 n_windows=301 <-- window_accuracy far from majority vote
+      none/2026-09-16/20260916_133907               y_true=0 majority_pred=1 window_acc=0.318 mean_proba=19.475 n_windows=7232 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_130957_barath  y_true=1 majority_pred=0 window_acc=0.319 mean_proba=12.766 n_windows=2591 <-- window_accuracy far from majority vote
+      ... (12 more sessions, see full CSV)
+  held out 'divya': WINDOW auroc=0.397 eer=0.579 false_accept_unauth=0.424 false_accept_none=0.694
+    SESSION-LEVEL (not window-level): acc=0.452 auroc=0.321 (n_sessions=31)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.018 mean_proba=-5.541 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.095 mean_proba=0.924 n_windows=262
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.132 mean_proba=3.768 n_windows=570
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.173 mean_proba=6.206 n_windows=578
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.191 mean_proba=8.281 n_windows=277
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.218 mean_proba=6.371 n_windows=586
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.282 mean_proba=20.337 n_windows=301
+      none/2026-09-16/20260916_133907               y_true=0 majority_pred=1 window_acc=0.286 mean_proba=19.475 n_windows=7232
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.311 mean_proba=10.602 n_windows=457 <-- window_accuracy far from majority vote
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.311 mean_proba=10.974 n_windows=286 <-- window_accuracy far from majority vote
+      none/2026-09-15/20260915_152301               y_true=0 majority_pred=1 window_acc=0.322 mean_proba=17.984 n_windows=677 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_143709_barath  y_true=1 majority_pred=0 window_acc=0.334 mean_proba=11.759 n_windows=2522 <-- window_accuracy far from majority vote
+      ... (19 more sessions, see full CSV)
+  held out 'harshitha': WINDOW auroc=0.358 eer=0.612 false_accept_unauth=0.507 false_accept_none=0.672
+    SESSION-LEVEL (not window-level): acc=0.286 auroc=0.271 (n_sessions=28)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.014 mean_proba=-5.541 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.065 mean_proba=0.924 n_windows=262
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.111 mean_proba=3.768 n_windows=570
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.152 mean_proba=8.281 n_windows=277
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.157 mean_proba=6.206 n_windows=578
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.193 mean_proba=6.371 n_windows=586
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.276 mean_proba=10.974 n_windows=286
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.282 mean_proba=10.602 n_windows=457
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.299 mean_proba=20.337 n_windows=301
+      authorized/2026-09-22/20260922_143709_barath  y_true=1 majority_pred=0 window_acc=0.302 mean_proba=11.759 n_windows=2522 <-- window_accuracy far from majority vote
+      none/2026-09-16/20260916_133907               y_true=0 majority_pred=1 window_acc=0.308 mean_proba=19.475 n_windows=7232 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_130957_barath  y_true=1 majority_pred=0 window_acc=0.333 mean_proba=12.766 n_windows=2591 <-- window_accuracy far from majority vote
+      ... (16 more sessions, see full CSV)
+  held out 'kishore': WINDOW auroc=0.350 eer=0.628 false_accept_unauth=0.089 false_accept_none=0.661
+    SESSION-LEVEL (not window-level): acc=0.208 auroc=0.367 (n_sessions=24)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.011 mean_proba=-5.541 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.053 mean_proba=0.924 n_windows=262
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.104 mean_proba=3.768 n_windows=570
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.130 mean_proba=8.281 n_windows=277
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.151 mean_proba=6.206 n_windows=578
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.181 mean_proba=6.371 n_windows=586
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.252 mean_proba=10.974 n_windows=286
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.276 mean_proba=10.602 n_windows=457
+      authorized/2026-09-22/20260922_143709_barath  y_true=1 majority_pred=0 window_acc=0.285 mean_proba=11.759 n_windows=2522
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.309 mean_proba=20.337 n_windows=301 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_130957_barath  y_true=1 majority_pred=0 window_acc=0.318 mean_proba=12.766 n_windows=2591 <-- window_accuracy far from majority vote
+      none/2026-09-16/20260916_133907               y_true=0 majority_pred=1 window_acc=0.319 mean_proba=19.475 n_windows=7232 <-- window_accuracy far from majority vote
+      ... (12 more sessions, see full CSV)
+  held out 'manas': WINDOW auroc=0.358 eer=0.618 false_accept_unauth=0.209 false_accept_none=0.667
+    SESSION-LEVEL (not window-level): acc=0.308 auroc=0.419 (n_sessions=26)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.011 mean_proba=-5.541 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.057 mean_proba=0.924 n_windows=262
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.109 mean_proba=3.768 n_windows=570
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.148 mean_proba=8.281 n_windows=277
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.156 mean_proba=6.206 n_windows=578
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.189 mean_proba=6.371 n_windows=586
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.266 mean_proba=10.974 n_windows=286
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.278 mean_proba=10.602 n_windows=457
+      authorized/2026-09-22/20260922_143709_barath  y_true=1 majority_pred=0 window_acc=0.295 mean_proba=11.759 n_windows=2522
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.309 mean_proba=20.337 n_windows=301 <-- window_accuracy far from majority vote
+      none/2026-09-16/20260916_133907               y_true=0 majority_pred=1 window_acc=0.313 mean_proba=19.475 n_windows=7232 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_130957_barath  y_true=1 majority_pred=0 window_acc=0.329 mean_proba=12.766 n_windows=2591 <-- window_accuracy far from majority vote
+      ... (14 more sessions, see full CSV)
+  held out 'promoda': WINDOW auroc=0.367 eer=0.603 false_accept_unauth=0.413 false_accept_none=0.679
+    SESSION-LEVEL (not window-level): acc=0.292 auroc=0.250 (n_sessions=24)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.014 mean_proba=-5.541 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.073 mean_proba=0.924 n_windows=262
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.112 mean_proba=3.768 n_windows=570
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.159 mean_proba=6.206 n_windows=578
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.166 mean_proba=8.281 n_windows=277
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.196 mean_proba=6.371 n_windows=586
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.283 mean_proba=10.974 n_windows=286
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.289 mean_proba=10.602 n_windows=457
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.289 mean_proba=20.337 n_windows=301
+      none/2026-09-16/20260916_133907               y_true=0 majority_pred=1 window_acc=0.301 mean_proba=19.475 n_windows=7232 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_143709_barath  y_true=1 majority_pred=0 window_acc=0.311 mean_proba=11.759 n_windows=2522 <-- window_accuracy far from majority vote
+      none/2026-09-15/20260915_152301               y_true=0 majority_pred=1 window_acc=0.338 mean_proba=17.984 n_windows=677 <-- window_accuracy far from majority vote
+      ... (12 more sessions, see full CSV)
+  held out 'siva': WINDOW auroc=0.347 eer=0.627 false_accept_unauth=0.118 false_accept_none=0.662
+    SESSION-LEVEL (not window-level): acc=0.208 auroc=0.359 (n_sessions=24)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.011 mean_proba=-5.541 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.053 mean_proba=0.924 n_windows=262
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.104 mean_proba=3.768 n_windows=570
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.134 mean_proba=8.281 n_windows=277
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.151 mean_proba=6.206 n_windows=578
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.183 mean_proba=6.371 n_windows=586
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.252 mean_proba=10.974 n_windows=286
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.276 mean_proba=10.602 n_windows=457
+      authorized/2026-09-22/20260922_143709_barath  y_true=1 majority_pred=0 window_acc=0.287 mean_proba=11.759 n_windows=2522
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.309 mean_proba=20.337 n_windows=301 <-- window_accuracy far from majority vote
+      none/2026-09-16/20260916_133907               y_true=0 majority_pred=1 window_acc=0.318 mean_proba=19.475 n_windows=7232 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_130957_barath  y_true=1 majority_pred=0 window_acc=0.319 mean_proba=12.766 n_windows=2591 <-- window_accuracy far from majority vote
+      ... (12 more sessions, see full CSV)
+  held out 'sumanth': WINDOW auroc=0.362 eer=0.609 false_accept_unauth=0.447 false_accept_none=0.675
+    SESSION-LEVEL (not window-level): acc=0.321 auroc=0.312 (n_sessions=28)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.014 mean_proba=-5.541 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.065 mean_proba=0.924 n_windows=262
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.111 mean_proba=3.768 n_windows=570
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.155 mean_proba=8.281 n_windows=277
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.157 mean_proba=6.206 n_windows=578
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.195 mean_proba=6.371 n_windows=586
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.280 mean_proba=10.974 n_windows=286
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.282 mean_proba=10.602 n_windows=457
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.296 mean_proba=20.337 n_windows=301
+      authorized/2026-09-22/20260922_143709_barath  y_true=1 majority_pred=0 window_acc=0.305 mean_proba=11.759 n_windows=2522 <-- window_accuracy far from majority vote
+      none/2026-09-16/20260916_133907               y_true=0 majority_pred=1 window_acc=0.305 mean_proba=19.475 n_windows=7232 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_130957_barath  y_true=1 majority_pred=0 window_acc=0.338 mean_proba=12.766 n_windows=2591 <-- window_accuracy far from majority vote
+      ... (16 more sessions, see full CSV)
+  held out 'vishwa': WINDOW auroc=0.366 eer=0.604 false_accept_unauth=0.427 false_accept_none=0.679
+    SESSION-LEVEL (not window-level): acc=0.292 auroc=0.250 (n_sessions=24)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.014 mean_proba=-5.541 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.073 mean_proba=0.924 n_windows=262
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.112 mean_proba=3.768 n_windows=570
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.159 mean_proba=6.206 n_windows=578
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.166 mean_proba=8.281 n_windows=277
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.196 mean_proba=6.371 n_windows=586
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.283 mean_proba=10.974 n_windows=286
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.289 mean_proba=10.602 n_windows=457
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.289 mean_proba=20.337 n_windows=301
+      none/2026-09-16/20260916_133907               y_true=0 majority_pred=1 window_acc=0.301 mean_proba=19.475 n_windows=7232 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_143709_barath  y_true=1 majority_pred=0 window_acc=0.310 mean_proba=11.759 n_windows=2522 <-- window_accuracy far from majority vote
+      none/2026-09-15/20260915_152301               y_true=0 majority_pred=1 window_acc=0.338 mean_proba=17.984 n_windows=677 <-- window_accuracy far from majority vote
+      ... (12 more sessions, see full CSV)
+  MEAN across 9 held-out strangers: window_auroc=0.361 session_auroc=0.322 false_accept_unauth=0.307 false_accept_none=0.672
+
+=== SVM[oc_svm] cross-day: leave-one-day-out ===
+  held out day '2026-09-15': WINDOW auroc=0.318 eer=0.650 false_accept_unauth=0.411 false_accept_none=0.846
+    SESSION-LEVEL (not window-level): acc=0.265 auroc=0.207 (n_sessions=34)
+      none/2026-09-15/20260915_180705               y_true=0 majority_pred=1 window_acc=0.095 mean_proba=17.607 n_windows=285
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.116 mean_proba=18.849 n_windows=301
+      none/2026-09-15/20260915_150333               y_true=0 majority_pred=1 window_acc=0.123 mean_proba=17.178 n_windows=260
+      none/2026-09-15/20260915_182340               y_true=0 majority_pred=1 window_acc=0.133 mean_proba=18.187 n_windows=301
+      none/2026-09-15/20260915_155941               y_true=0 majority_pred=1 window_acc=0.151 mean_proba=16.458 n_windows=431
+      none/2026-09-15/20260915_152301               y_true=0 majority_pred=1 window_acc=0.155 mean_proba=16.464 n_windows=677
+      none/2026-09-15/20260915_150550               y_true=0 majority_pred=1 window_acc=0.160 mean_proba=15.696 n_windows=238
+      none/2026-09-15/20260915_155425               y_true=0 majority_pred=1 window_acc=0.164 mean_proba=14.812 n_windows=385
+      none/2026-09-15/20260915_182121               y_true=0 majority_pred=1 window_acc=0.186 mean_proba=15.062 n_windows=295
+      authorized/2026-09-15/20260915_162230_barath  y_true=1 majority_pred=0 window_acc=0.197 mean_proba=-7.416 n_windows=482
+      authorized/2026-09-15/20260915_155004_barath  y_true=1 majority_pred=0 window_acc=0.209 mean_proba=-7.455 n_windows=363
+      none/2026-09-15/20260915_152825               y_true=0 majority_pred=1 window_acc=0.219 mean_proba=14.026 n_windows=447
+      ... (22 more sessions, see full CSV)
+  held out day '2026-09-16': WINDOW auroc=0.201 eer=0.746 false_accept_unauth=0.276 false_accept_none=0.901
+    SESSION-LEVEL (not window-level): acc=0.370 auroc=0.350 (n_sessions=27)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.025 mean_proba=-21.805 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.065 mean_proba=-17.832 n_windows=262
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.079 mean_proba=-17.231 n_windows=570
+      none/2026-09-16/20260916_131825               y_true=0 majority_pred=1 window_acc=0.085 mean_proba=17.846 n_windows=599
+      none/2026-09-16/20260916_133907               y_true=0 majority_pred=1 window_acc=0.097 mean_proba=17.720 n_windows=7232
+      authorized/2026-09-16/20260916_152145_barath  y_true=1 majority_pred=0 window_acc=0.106 mean_proba=-15.662 n_windows=574
+      none/2026-09-16/20260916_131548               y_true=0 majority_pred=1 window_acc=0.128 mean_proba=16.564 n_windows=243
+      none/2026-09-16/20260916_131138               y_true=0 majority_pred=1 window_acc=0.133 mean_proba=15.935 n_windows=578
+      authorized/2026-09-16/20260916_144821_barath  y_true=1 majority_pred=0 window_acc=0.135 mean_proba=-14.755 n_windows=555
+      authorized/2026-09-16/20260916_133308_barath  y_true=1 majority_pred=0 window_acc=0.135 mean_proba=-14.419 n_windows=613
+      authorized/2026-09-16/20260916_153821_barath  y_true=1 majority_pred=0 window_acc=0.190 mean_proba=-10.856 n_windows=584
+      authorized/2026-09-16/20260916_132829_barath  y_true=1 majority_pred=0 window_acc=0.196 mean_proba=-11.013 n_windows=602
+      ... (15 more sessions, see full CSV)
+  held out day '2026-09-17': WINDOW auroc=0.360 eer=0.606 false_accept_unauth=0.457 false_accept_none=0.653
+    SESSION-LEVEL (not window-level): acc=0.300 auroc=0.390 (n_sessions=20)
+      authorized/2026-09-17/20260917_181923_barath  y_true=1 majority_pred=0 window_acc=0.153 mean_proba=-3.442 n_windows=300
+      authorized/2026-09-17/20260917_181647_barath  y_true=1 majority_pred=0 window_acc=0.191 mean_proba=3.687 n_windows=293
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.274 mean_proba=7.148 n_windows=277
+      authorized/2026-09-17/20260917_182152_anjali  y_true=1 majority_pred=0 window_acc=0.294 mean_proba=5.999 n_windows=289
+      unauthorized/2026-09-17/20260917_184432_divya y_true=0 majority_pred=1 window_acc=0.299 mean_proba=15.321 n_windows=294
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.336 mean_proba=8.425 n_windows=286 <-- window_accuracy far from majority vote
+      none/2026-09-17/20260917_134508               y_true=0 majority_pred=1 window_acc=0.345 mean_proba=14.926 n_windows=6270 <-- window_accuracy far from majority vote
+      authorized/2026-09-17/20260917_182354_anjali  y_true=1 majority_pred=0 window_acc=0.370 mean_proba=8.571 n_windows=289 <-- window_accuracy far from majority vote
+      authorized/2026-09-17/20260917_185506_barath  y_true=1 majority_pred=0 window_acc=0.372 mean_proba=10.439 n_windows=277 <-- window_accuracy far from majority vote
+      none/2026-09-17/20260917_134430               y_true=0 majority_pred=1 window_acc=0.400 mean_proba=14.436 n_windows=5 <-- window_accuracy far from majority vote
+      none/2026-09-17/20260917_181241               y_true=0 majority_pred=1 window_acc=0.423 mean_proba=12.863 n_windows=142 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-17/20260917_184204_divya y_true=0 majority_pred=1 window_acc=0.445 mean_proba=12.075 n_windows=290 <-- window_accuracy far from majority vote
+      ... (8 more sessions, see full CSV)
+  held out day '2026-09-21': WINDOW auroc=0.490 eer=0.508 false_accept_unauth=0.467 false_accept_none=0.544
+    SESSION-LEVEL (not window-level): acc=0.450 auroc=0.615 (n_sessions=20)
+      authorized/2026-09-21/20260921_174702_anjali  y_true=1 majority_pred=0 window_acc=0.379 mean_proba=10.957 n_windows=2595 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_172757_barath  y_true=1 majority_pred=0 window_acc=0.418 mean_proba=12.887 n_windows=2569 <-- window_accuracy far from majority vote
+      none/2026-09-21/20260921_170052               y_true=0 majority_pred=1 window_acc=0.423 mean_proba=15.631 n_windows=4735 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_172447_barath  y_true=1 majority_pred=0 window_acc=0.432 mean_proba=13.124 n_windows=2754 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-21/20260921_181037_sumanth y_true=0 majority_pred=1 window_acc=0.448 mean_proba=14.986 n_windows=689 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_174349_anjali  y_true=1 majority_pred=0 window_acc=0.452 mean_proba=13.304 n_windows=2657 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_173647_barath  y_true=1 majority_pred=0 window_acc=0.463 mean_proba=13.702 n_windows=2724 <-- window_accuracy far from majority vote
+      none/2026-09-21/20260921_171508               y_true=0 majority_pred=1 window_acc=0.490 mean_proba=13.604 n_windows=1839 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_172059_anjali  y_true=1 majority_pred=0 window_acc=0.492 mean_proba=14.266 n_windows=2587 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_175008_anjali  y_true=1 majority_pred=0 window_acc=0.496 mean_proba=13.148 n_windows=2448 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_171752_anjali  y_true=1 majority_pred=0 window_acc=0.498 mean_proba=14.427 n_windows=2654 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-21/20260921_180826_sumanth y_true=0 majority_pred=0 window_acc=0.500 mean_proba=14.421 n_windows=1829 <-- window_accuracy far from majority vote
+      ... (8 more sessions, see full CSV)
+  held out day '2026-09-22': WINDOW auroc=0.367 eer=0.595 false_accept_unauth=0.426 false_accept_none=0.639
+    SESSION-LEVEL (not window-level): acc=0.333 auroc=0.324 (n_sessions=21)
+      authorized/2026-09-22/20260922_143709_barath  y_true=1 majority_pred=0 window_acc=0.261 mean_proba=9.310 n_windows=2522
+      authorized/2026-09-22/20260922_140742_barath  y_true=1 majority_pred=0 window_acc=0.264 mean_proba=9.093 n_windows=2610
+      authorized/2026-09-22/20260922_130957_barath  y_true=1 majority_pred=0 window_acc=0.305 mean_proba=10.765 n_windows=2591 <-- window_accuracy far from majority vote
+      none/2026-09-22/20260922_120632               y_true=0 majority_pred=1 window_acc=0.346 mean_proba=18.855 n_windows=36552 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_140007_barath  y_true=1 majority_pred=0 window_acc=0.363 mean_proba=11.395 n_windows=2727 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-22/20260922_165414_harshitha y_true=0 majority_pred=1 window_acc=0.369 mean_proba=17.898 n_windows=1972 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_141105_barath  y_true=1 majority_pred=0 window_acc=0.374 mean_proba=11.939 n_windows=2778 <-- window_accuracy far from majority vote
+      none/2026-09-22/20260922_125324               y_true=0 majority_pred=1 window_acc=0.375 mean_proba=18.233 n_windows=2630 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_131501_barath  y_true=1 majority_pred=0 window_acc=0.398 mean_proba=12.620 n_windows=2531 <-- window_accuracy far from majority vote
+      none/2026-09-22/20260922_125641               y_true=0 majority_pred=1 window_acc=0.442 mean_proba=16.915 n_windows=6406 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_140359_anjali  y_true=1 majority_pred=0 window_acc=0.455 mean_proba=14.468 n_windows=2752 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_142313_anjali  y_true=1 majority_pred=0 window_acc=0.464 mean_proba=14.411 n_windows=2614 <-- window_accuracy far from majority vote
+      ... (9 more sessions, see full CSV)
+  MEAN across 5 held-out days: window_auroc=0.347 session_auroc=0.377
+
+=== SVM[oc_svm] closed-set sanity: session-disjoint 5-fold ===
+  MEAN across 5 folds: acc=0.376 auroc=0.444
+
+=== SVM[binary_svc] open-set: leave-one-unauthorized-person-out ===
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'abdul': WINDOW auroc=0.949 eer=0.119 false_accept_unauth=0.953 false_accept_none=0.061
+    SESSION-LEVEL (not window-level): acc=0.833 auroc=0.828 (n_sessions=24)
+      unauthorized/2026-09-15/20260915_171532_abdul y_true=0 majority_pred=1 window_acc=0.006 mean_proba=0.753 n_windows=317
+      unauthorized/2026-09-15/20260915_171755_abdul y_true=0 majority_pred=1 window_acc=0.089 mean_proba=0.684 n_windows=315
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.264 mean_proba=0.226 n_windows=277
+      none/2026-09-21/20260921_161220_ac276ea2f278  y_true=0 majority_pred=1 window_acc=0.354 mean_proba=0.374 n_windows=130 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=1 window_acc=0.642 mean_proba=0.542 n_windows=578 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=1 window_acc=0.785 mean_proba=0.602 n_windows=594
+      authorized/2026-09-22/20260922_130435_anjali  y_true=1 majority_pred=1 window_acc=0.804 mean_proba=0.616 n_windows=2385
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=1 window_acc=0.804 mean_proba=0.524 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=1 window_acc=0.847 mean_proba=0.607 n_windows=262
+      authorized/2026-09-22/20260922_141852_anjali  y_true=1 majority_pred=1 window_acc=0.883 mean_proba=0.678 n_windows=2580
+      authorized/2026-09-21/20260921_172059_anjali  y_true=1 majority_pred=1 window_acc=0.896 mean_proba=0.704 n_windows=2587
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=1 window_acc=0.901 mean_proba=0.662 n_windows=604
+      ... (12 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'divya': WINDOW auroc=0.853 eer=0.232 false_accept_unauth=0.531 false_accept_none=0.008
+    SESSION-LEVEL (not window-level): acc=0.742 auroc=0.871 (n_sessions=31)
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.105 mean_proba=0.323 n_windows=277
+      unauthorized/2026-09-15/20260915_165742_divya y_true=0 majority_pred=1 window_acc=0.213 mean_proba=0.765 n_windows=291
+      unauthorized/2026-09-16/20260916_151236_divya y_true=0 majority_pred=1 window_acc=0.230 mean_proba=0.724 n_windows=587
+      unauthorized/2026-09-16/20260916_151702_divya y_true=0 majority_pred=1 window_acc=0.237 mean_proba=0.751 n_windows=578
+      unauthorized/2026-09-15/20260915_165524_divya y_true=0 majority_pred=1 window_acc=0.300 mean_proba=0.721 n_windows=293 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-17/20260917_183958_divya y_true=0 majority_pred=1 window_acc=0.369 mean_proba=0.647 n_windows=295 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-17/20260917_184432_divya y_true=0 majority_pred=1 window_acc=0.483 mean_proba=0.589 n_windows=294 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.489 mean_proba=0.609 n_windows=276 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-22/20260922_164942_divya y_true=0 majority_pred=0 window_acc=0.515 mean_proba=0.567 n_windows=1977 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-22/20260922_165158_divya y_true=0 majority_pred=0 window_acc=0.575 mean_proba=0.530 n_windows=2161 <-- window_accuracy far from majority vote
+      none/2026-09-21/20260921_161220_ac276ea2f278  y_true=0 majority_pred=0 window_acc=0.592 mean_proba=0.581 n_windows=130 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_130435_anjali  y_true=1 majority_pred=1 window_acc=0.622 mean_proba=0.655 n_windows=2385 <-- window_accuracy far from majority vote
+      ... (19 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'harshitha': WINDOW auroc=0.903 eer=0.173 false_accept_unauth=0.449 false_accept_none=0.014
+    SESSION-LEVEL (not window-level): acc=0.857 auroc=0.870 (n_sessions=28)
+      unauthorized/2026-09-15/20260915_170244_harshitha y_true=0 majority_pred=1 window_acc=0.092 mean_proba=0.744 n_windows=303
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.144 mean_proba=0.231 n_windows=277
+      unauthorized/2026-09-15/20260915_170022_harshitha y_true=0 majority_pred=1 window_acc=0.152 mean_proba=0.750 n_windows=264
+      unauthorized/2026-09-17/20260917_190642_harshitha y_true=0 majority_pred=1 window_acc=0.456 mean_proba=0.497 n_windows=307 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-22/20260922_165626_harshitha y_true=0 majority_pred=0 window_acc=0.502 mean_proba=0.496 n_windows=2056 <-- window_accuracy far from majority vote
+      none/2026-09-21/20260921_161220_ac276ea2f278  y_true=0 majority_pred=0 window_acc=0.569 mean_proba=0.445 n_windows=130 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-17/20260917_190415_harshitha y_true=0 majority_pred=0 window_acc=0.587 mean_proba=0.410 n_windows=288 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=1 window_acc=0.699 mean_proba=0.659 n_windows=578 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=1 window_acc=0.714 mean_proba=0.613 n_windows=276
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=1 window_acc=0.717 mean_proba=0.644 n_windows=594
+      authorized/2026-09-22/20260922_130435_anjali  y_true=1 majority_pred=1 window_acc=0.734 mean_proba=0.657 n_windows=2385
+      unauthorized/2026-09-22/20260922_165414_harshitha y_true=0 majority_pred=0 window_acc=0.736 mean_proba=0.308 n_windows=1972
+      ... (16 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'kishore': WINDOW auroc=0.960 eer=0.107 false_accept_unauth=0.942 false_accept_none=0.056
+    SESSION-LEVEL (not window-level): acc=0.833 auroc=0.945 (n_sessions=24)
+      unauthorized/2026-09-16/20260916_155718_kishore y_true=0 majority_pred=1 window_acc=0.007 mean_proba=0.569 n_windows=271
+      unauthorized/2026-09-16/20260916_155503_kishore y_true=0 majority_pred=1 window_acc=0.107 mean_proba=0.658 n_windows=281
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.245 mean_proba=0.190 n_windows=277
+      none/2026-09-21/20260921_161220_ac276ea2f278  y_true=0 majority_pred=1 window_acc=0.254 mean_proba=0.384 n_windows=130
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=1 window_acc=0.715 mean_proba=0.578 n_windows=578
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=1 window_acc=0.754 mean_proba=0.570 n_windows=594
+      authorized/2026-09-22/20260922_130435_anjali  y_true=1 majority_pred=1 window_acc=0.822 mean_proba=0.602 n_windows=2385
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=1 window_acc=0.841 mean_proba=0.631 n_windows=604
+      authorized/2026-09-22/20260922_141852_anjali  y_true=1 majority_pred=1 window_acc=0.888 mean_proba=0.669 n_windows=2580
+      authorized/2026-09-21/20260921_172059_anjali  y_true=1 majority_pred=1 window_acc=0.913 mean_proba=0.706 n_windows=2587
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=1 window_acc=0.930 mean_proba=0.751 n_windows=457
+      none/2026-09-15/20260915_152301               y_true=0 majority_pred=0 window_acc=0.936 mean_proba=0.061 n_windows=677
+      ... (12 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'manas': WINDOW auroc=0.937 eer=0.141 false_accept_unauth=0.842 false_accept_none=0.056
+    SESSION-LEVEL (not window-level): acc=0.769 auroc=0.819 (n_sessions=26)
+      unauthorized/2026-09-17/20260917_183730_manas y_true=0 majority_pred=1 window_acc=0.024 mean_proba=0.787 n_windows=248
+      unauthorized/2026-09-16/20260916_154926_manas y_true=0 majority_pred=1 window_acc=0.084 mean_proba=0.683 n_windows=310
+      unauthorized/2026-09-17/20260917_183506_manas y_true=0 majority_pred=1 window_acc=0.213 mean_proba=0.665 n_windows=263
+      unauthorized/2026-09-16/20260916_155144_manas y_true=0 majority_pred=1 window_acc=0.311 mean_proba=0.529 n_windows=270 <-- window_accuracy far from majority vote
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.347 mean_proba=0.303 n_windows=277 <-- window_accuracy far from majority vote
+      none/2026-09-21/20260921_161220_ac276ea2f278  y_true=0 majority_pred=1 window_acc=0.454 mean_proba=0.403 n_windows=130 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=1 window_acc=0.724 mean_proba=0.588 n_windows=594
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=1 window_acc=0.772 mean_proba=0.659 n_windows=578
+      authorized/2026-09-22/20260922_130435_anjali  y_true=1 majority_pred=1 window_acc=0.776 mean_proba=0.635 n_windows=2385
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=1 window_acc=0.820 mean_proba=0.659 n_windows=604
+      authorized/2026-09-22/20260922_141852_anjali  y_true=1 majority_pred=1 window_acc=0.832 mean_proba=0.690 n_windows=2580
+      authorized/2026-09-21/20260921_172059_anjali  y_true=1 majority_pred=1 window_acc=0.860 mean_proba=0.708 n_windows=2587
+      ... (14 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'promoda': WINDOW auroc=0.814 eer=0.250 false_accept_unauth=0.862 false_accept_none=0.007
+    SESSION-LEVEL (not window-level): acc=0.875 auroc=0.758 (n_sessions=24)
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.043 mean_proba=0.242 n_windows=277
+      unauthorized/2026-09-21/20260921_173206_promoda y_true=0 majority_pred=1 window_acc=0.093 mean_proba=0.867 n_windows=1785
+      unauthorized/2026-09-21/20260921_173426_promoda y_true=0 majority_pred=1 window_acc=0.182 mean_proba=0.791 n_windows=1785
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=1 window_acc=0.537 mean_proba=0.591 n_windows=594 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=1 window_acc=0.630 mean_proba=0.667 n_windows=578 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_130435_anjali  y_true=1 majority_pred=1 window_acc=0.633 mean_proba=0.661 n_windows=2385 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=1 window_acc=0.682 mean_proba=0.691 n_windows=604 <-- window_accuracy far from majority vote
+      none/2026-09-21/20260921_161220_ac276ea2f278  y_true=0 majority_pred=0 window_acc=0.685 mean_proba=0.506 n_windows=130 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=1 window_acc=0.692 mean_proba=0.694 n_windows=276 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_141852_anjali  y_true=1 majority_pred=1 window_acc=0.726 mean_proba=0.727 n_windows=2580
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=1 window_acc=0.773 mean_proba=0.728 n_windows=286
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=1 window_acc=0.779 mean_proba=0.770 n_windows=262
+      ... (12 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'siva': WINDOW auroc=0.954 eer=0.109 false_accept_unauth=0.862 false_accept_none=0.058
+    SESSION-LEVEL (not window-level): acc=0.833 auroc=0.859 (n_sessions=24)
+      unauthorized/2026-09-15/20260915_175047_siva  y_true=0 majority_pred=1 window_acc=0.000 mean_proba=0.821 n_windows=315
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.166 mean_proba=0.168 n_windows=277
+      unauthorized/2026-09-15/20260915_175309_siva  y_true=0 majority_pred=1 window_acc=0.281 mean_proba=0.492 n_windows=303
+      none/2026-09-21/20260921_161220_ac276ea2f278  y_true=0 majority_pred=1 window_acc=0.431 mean_proba=0.347 n_windows=130 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=1 window_acc=0.656 mean_proba=0.546 n_windows=578 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=1 window_acc=0.805 mean_proba=0.623 n_windows=594
+      authorized/2026-09-22/20260922_130435_anjali  y_true=1 majority_pred=1 window_acc=0.818 mean_proba=0.621 n_windows=2385
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=1 window_acc=0.891 mean_proba=0.568 n_windows=276
+      authorized/2026-09-22/20260922_141852_anjali  y_true=1 majority_pred=1 window_acc=0.892 mean_proba=0.687 n_windows=2580
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=1 window_acc=0.897 mean_proba=0.664 n_windows=262
+      authorized/2026-09-21/20260921_172059_anjali  y_true=1 majority_pred=1 window_acc=0.905 mean_proba=0.713 n_windows=2587
+      none/2026-09-15/20260915_152301               y_true=0 majority_pred=0 window_acc=0.936 mean_proba=0.056 n_windows=677
+      ... (12 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'sumanth': WINDOW auroc=0.846 eer=0.228 false_accept_unauth=0.779 false_accept_none=0.005
+    SESSION-LEVEL (not window-level): acc=0.821 auroc=0.760 (n_sessions=28)
+      unauthorized/2026-09-21/20260921_180826_sumanth y_true=0 majority_pred=1 window_acc=0.101 mean_proba=0.824 n_windows=1829
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.112 mean_proba=0.333 n_windows=277
+      unauthorized/2026-09-15/20260915_170719_sumanth y_true=0 majority_pred=1 window_acc=0.148 mean_proba=0.786 n_windows=298
+      unauthorized/2026-09-21/20260921_181037_sumanth y_true=0 majority_pred=1 window_acc=0.186 mean_proba=0.739 n_windows=689
+      unauthorized/2026-09-16/20260916_154429_sumanth y_true=0 majority_pred=1 window_acc=0.287 mean_proba=0.692 n_windows=286
+      unauthorized/2026-09-15/20260915_170508_sumanth y_true=0 majority_pred=0 window_acc=0.502 mean_proba=0.561 n_windows=269 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=1 window_acc=0.518 mean_proba=0.566 n_windows=276 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=1 window_acc=0.606 mean_proba=0.603 n_windows=594 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=1 window_acc=0.656 mean_proba=0.642 n_windows=578 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_130435_anjali  y_true=1 majority_pred=1 window_acc=0.672 mean_proba=0.659 n_windows=2385 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=1 window_acc=0.687 mean_proba=0.673 n_windows=604 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=1 window_acc=0.725 mean_proba=0.673 n_windows=262
+      ... (16 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'vishwa': WINDOW auroc=0.909 eer=0.180 false_accept_unauth=0.522 false_accept_none=0.035
+    SESSION-LEVEL (not window-level): acc=0.875 auroc=0.977 (n_sessions=24)
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.105 mean_proba=0.208 n_windows=277
+      unauthorized/2026-09-22/20260922_164720_vishwa y_true=0 majority_pred=1 window_acc=0.465 mean_proba=0.509 n_windows=1955 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-22/20260922_164502_vishwa y_true=0 majority_pred=1 window_acc=0.492 mean_proba=0.454 n_windows=1883 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=1 window_acc=0.652 mean_proba=0.569 n_windows=276 <-- window_accuracy far from majority vote
+      none/2026-09-21/20260921_161220_ac276ea2f278  y_true=0 majority_pred=0 window_acc=0.654 mean_proba=0.397 n_windows=130 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=1 window_acc=0.672 mean_proba=0.608 n_windows=594 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_130435_anjali  y_true=1 majority_pred=1 window_acc=0.717 mean_proba=0.644 n_windows=2385
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=1 window_acc=0.749 mean_proba=0.640 n_windows=578
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=1 window_acc=0.767 mean_proba=0.674 n_windows=262
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=1 window_acc=0.791 mean_proba=0.676 n_windows=604
+      authorized/2026-09-21/20260921_172059_anjali  y_true=1 majority_pred=1 window_acc=0.803 mean_proba=0.713 n_windows=2587
+      authorized/2026-09-15/20260915_160607_anjali  y_true=1 majority_pred=1 window_acc=0.818 mean_proba=0.735 n_windows=340
+      ... (12 more sessions, see full CSV)
+  MEAN across 9 held-out strangers: window_auroc=0.903 session_auroc=0.854 false_accept_unauth=0.749 false_accept_none=0.033
+
+=== SVM[binary_svc] cross-day: leave-one-day-out ===
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out day '2026-09-15': WINDOW auroc=0.784 eer=0.296 false_accept_unauth=0.645 false_accept_none=0.009
+    SESSION-LEVEL (not window-level): acc=0.706 auroc=0.789 (n_sessions=34)
+      unauthorized/2026-09-15/20260915_171532_abdul y_true=0 majority_pred=1 window_acc=0.069 mean_proba=0.682 n_windows=317
+      unauthorized/2026-09-15/20260915_175047_siva  y_true=0 majority_pred=1 window_acc=0.086 mean_proba=0.665 n_windows=315
+      unauthorized/2026-09-15/20260915_165524_divya y_true=0 majority_pred=1 window_acc=0.143 mean_proba=0.735 n_windows=293
+      unauthorized/2026-09-15/20260915_165742_divya y_true=0 majority_pred=1 window_acc=0.241 mean_proba=0.663 n_windows=291
+      unauthorized/2026-09-15/20260915_170719_sumanth y_true=0 majority_pred=1 window_acc=0.285 mean_proba=0.644 n_windows=298
+      authorized/2026-09-15/20260915_163456_anjali  y_true=1 majority_pred=0 window_acc=0.317 mean_proba=0.416 n_windows=356 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-15/20260915_175309_siva  y_true=0 majority_pred=1 window_acc=0.327 mean_proba=0.560 n_windows=303 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-15/20260915_170022_harshitha y_true=0 majority_pred=1 window_acc=0.356 mean_proba=0.606 n_windows=264 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-15/20260915_170244_harshitha y_true=0 majority_pred=1 window_acc=0.389 mean_proba=0.562 n_windows=303 <-- window_accuracy far from majority vote
+      authorized/2026-09-15/20260915_161212_anjali  y_true=1 majority_pred=0 window_acc=0.444 mean_proba=0.451 n_windows=482 <-- window_accuracy far from majority vote
+      authorized/2026-09-15/20260915_151030_anjali  y_true=1 majority_pred=1 window_acc=0.555 mean_proba=0.544 n_windows=521 <-- window_accuracy far from majority vote
+      authorized/2026-09-15/20260915_181508_barath  y_true=1 majority_pred=1 window_acc=0.579 mean_proba=0.561 n_windows=582 <-- window_accuracy far from majority vote
+      ... (22 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out day '2026-09-16': WINDOW auroc=0.911 eer=0.150 false_accept_unauth=0.596 false_accept_none=0.011
+    SESSION-LEVEL (not window-level): acc=0.815 auroc=0.883 (n_sessions=27)
+      unauthorized/2026-09-16/20260916_154429_sumanth y_true=0 majority_pred=1 window_acc=0.157 mean_proba=0.633 n_windows=286
+      unauthorized/2026-09-16/20260916_151702_divya y_true=0 majority_pred=1 window_acc=0.244 mean_proba=0.653 n_windows=578
+      unauthorized/2026-09-16/20260916_155503_kishore y_true=0 majority_pred=1 window_acc=0.249 mean_proba=0.583 n_windows=281
+      unauthorized/2026-09-16/20260916_154926_manas y_true=0 majority_pred=1 window_acc=0.297 mean_proba=0.646 n_windows=310
+      unauthorized/2026-09-16/20260916_155144_manas y_true=0 majority_pred=1 window_acc=0.304 mean_proba=0.567 n_windows=270 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-16/20260916_151236_divya y_true=0 majority_pred=0 window_acc=0.503 mean_proba=0.499 n_windows=587 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=1 window_acc=0.554 mean_proba=0.553 n_windows=276 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=1 window_acc=0.742 mean_proba=0.635 n_windows=594
+      unauthorized/2026-09-16/20260916_154656_sumanth y_true=0 majority_pred=0 window_acc=0.763 mean_proba=0.390 n_windows=270
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=1 window_acc=0.813 mean_proba=0.612 n_windows=262
+      authorized/2026-09-16/20260916_132313_anjali  y_true=1 majority_pred=1 window_acc=0.818 mean_proba=0.646 n_windows=603
+      unauthorized/2026-09-16/20260916_155718_kishore y_true=0 majority_pred=0 window_acc=0.819 mean_proba=0.491 n_windows=271
+      ... (15 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out day '2026-09-17': WINDOW auroc=0.845 eer=0.227 false_accept_unauth=0.728 false_accept_none=0.071
+    SESSION-LEVEL (not window-level): acc=0.650 auroc=0.690 (n_sessions=20)
+      unauthorized/2026-09-17/20260917_183730_manas y_true=0 majority_pred=1 window_acc=0.000 mean_proba=0.710 n_windows=248
+      unauthorized/2026-09-17/20260917_183958_divya y_true=0 majority_pred=1 window_acc=0.105 mean_proba=0.505 n_windows=295
+      unauthorized/2026-09-17/20260917_183506_manas y_true=0 majority_pred=1 window_acc=0.148 mean_proba=0.615 n_windows=263
+      unauthorized/2026-09-17/20260917_184432_divya y_true=0 majority_pred=1 window_acc=0.231 mean_proba=0.519 n_windows=294
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.300 mean_proba=0.225 n_windows=277
+      unauthorized/2026-09-17/20260917_190642_harshitha y_true=0 majority_pred=1 window_acc=0.371 mean_proba=0.394 n_windows=307 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-17/20260917_190415_harshitha y_true=0 majority_pred=1 window_acc=0.431 mean_proba=0.349 n_windows=288 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-17/20260917_184204_divya y_true=0 majority_pred=0 window_acc=0.562 mean_proba=0.299 n_windows=290 <-- window_accuracy far from majority vote
+      authorized/2026-09-17/20260917_182152_anjali  y_true=1 majority_pred=1 window_acc=0.689 mean_proba=0.400 n_windows=289 <-- window_accuracy far from majority vote
+      authorized/2026-09-17/20260917_181647_barath  y_true=1 majority_pred=1 window_acc=0.751 mean_proba=0.497 n_windows=293
+      authorized/2026-09-17/20260917_182354_anjali  y_true=1 majority_pred=1 window_acc=0.754 mean_proba=0.491 n_windows=289
+      authorized/2026-09-17/20260917_184714_anjali  y_true=1 majority_pred=1 window_acc=0.797 mean_proba=0.563 n_windows=256
+      ... (8 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out day '2026-09-21': WINDOW auroc=0.647 eer=0.383 false_accept_unauth=0.648 false_accept_none=0.146
+    SESSION-LEVEL (not window-level): acc=0.750 auroc=0.771 (n_sessions=20)
+      unauthorized/2026-09-21/20260921_173206_promoda y_true=0 majority_pred=1 window_acc=0.220 mean_proba=0.651 n_windows=1785
+      authorized/2026-09-21/20260921_175008_anjali  y_true=1 majority_pred=0 window_acc=0.366 mean_proba=0.345 n_windows=2448 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-21/20260921_173426_promoda y_true=0 majority_pred=1 window_acc=0.381 mean_proba=0.504 n_windows=1785 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-21/20260921_180826_sumanth y_true=0 majority_pred=1 window_acc=0.389 mean_proba=0.511 n_windows=1829 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_175315_anjali  y_true=1 majority_pred=0 window_acc=0.395 mean_proba=0.347 n_windows=2718 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_174349_anjali  y_true=1 majority_pred=1 window_acc=0.511 mean_proba=0.438 n_windows=2657 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_174702_anjali  y_true=1 majority_pred=1 window_acc=0.514 mean_proba=0.414 n_windows=2595 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-21/20260921_181037_sumanth y_true=0 majority_pred=0 window_acc=0.522 mean_proba=0.399 n_windows=689 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_180450_barath  y_true=1 majority_pred=1 window_acc=0.547 mean_proba=0.454 n_windows=2882 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_175654_barath  y_true=1 majority_pred=1 window_acc=0.622 mean_proba=0.510 n_windows=2804 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_180136_barath  y_true=1 majority_pred=1 window_acc=0.631 mean_proba=0.511 n_windows=2937 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_172059_anjali  y_true=1 majority_pred=1 window_acc=0.696 mean_proba=0.578 n_windows=2587 <-- window_accuracy far from majority vote
+      ... (8 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out day '2026-09-22': WINDOW auroc=0.830 eer=0.237 false_accept_unauth=0.633 false_accept_none=0.132
+    SESSION-LEVEL (not window-level): acc=0.762 auroc=0.815 (n_sessions=21)
+      unauthorized/2026-09-22/20260922_164942_divya y_true=0 majority_pred=1 window_acc=0.153 mean_proba=0.849 n_windows=1977
+      unauthorized/2026-09-22/20260922_165626_harshitha y_true=0 majority_pred=1 window_acc=0.218 mean_proba=0.823 n_windows=2056
+      unauthorized/2026-09-22/20260922_164720_vishwa y_true=0 majority_pred=1 window_acc=0.220 mean_proba=0.817 n_windows=1955
+      unauthorized/2026-09-22/20260922_164502_vishwa y_true=0 majority_pred=1 window_acc=0.459 mean_proba=0.725 n_windows=1883 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-22/20260922_165158_divya y_true=0 majority_pred=1 window_acc=0.478 mean_proba=0.695 n_windows=2161 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_131903_anjali  y_true=1 majority_pred=1 window_acc=0.500 mean_proba=0.707 n_windows=2629 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_141540_anjali  y_true=1 majority_pred=1 window_acc=0.514 mean_proba=0.690 n_windows=2550 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_140007_barath  y_true=1 majority_pred=1 window_acc=0.610 mean_proba=0.749 n_windows=2727 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-22/20260922_165414_harshitha y_true=0 majority_pred=0 window_acc=0.672 mean_proba=0.591 n_windows=1972 <-- window_accuracy far from majority vote
+      none/2026-09-22/20260922_125641               y_true=0 majority_pred=0 window_acc=0.675 mean_proba=0.608 n_windows=6406 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_131501_barath  y_true=1 majority_pred=1 window_acc=0.715 mean_proba=0.793 n_windows=2531
+      authorized/2026-09-22/20260922_141105_barath  y_true=1 majority_pred=1 window_acc=0.762 mean_proba=0.807 n_windows=2778
+      ... (9 more sessions, see full CSV)
+  MEAN across 5 held-out days: window_auroc=0.803 session_auroc=0.790
+
+=== SVM[binary_svc] closed-set sanity: session-disjoint 5-fold ===
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  MEAN across 5 folds: acc=0.607 auroc=0.833
+
+=== SVM[gmm_svm_wii] open-set: leave-one-unauthorized-person-out ===
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'abdul': WINDOW auroc=0.511 eer=0.535 false_accept_unauth=0.084 false_accept_none=0.567
+    SESSION-LEVEL (not window-level): acc=0.292 auroc=0.523 (n_sessions=24)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-97.652 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.008 mean_proba=222.904 n_windows=262
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.014 mean_proba=297.688 n_windows=586
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.024 mean_proba=245.788 n_windows=578
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.088 mean_proba=410.547 n_windows=570
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.108 mean_proba=375.739 n_windows=286
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.120 mean_proba=573.488 n_windows=301
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.158 mean_proba=459.238 n_windows=457
+      none/2026-09-15/20260915_155425               y_true=0 majority_pred=1 window_acc=0.177 mean_proba=497.699 n_windows=385
+      none/2026-09-15/20260915_152301               y_true=0 majority_pred=1 window_acc=0.186 mean_proba=475.552 n_windows=677
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.210 mean_proba=489.865 n_windows=594
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=0 window_acc=0.222 mean_proba=471.952 n_windows=604
+      ... (12 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'divya': WINDOW auroc=0.519 eer=0.521 false_accept_unauth=0.404 false_accept_none=0.609
+    SESSION-LEVEL (not window-level): acc=0.387 auroc=0.479 (n_sessions=31)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-97.652 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.008 mean_proba=222.904 n_windows=262
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.017 mean_proba=297.688 n_windows=586
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.031 mean_proba=245.788 n_windows=578
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.091 mean_proba=410.547 n_windows=570
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.115 mean_proba=375.739 n_windows=286
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.116 mean_proba=573.488 n_windows=301
+      none/2026-09-15/20260915_155425               y_true=0 majority_pred=1 window_acc=0.169 mean_proba=497.699 n_windows=385
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.177 mean_proba=459.238 n_windows=457
+      none/2026-09-15/20260915_152301               y_true=0 majority_pred=1 window_acc=0.179 mean_proba=475.552 n_windows=677
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.232 mean_proba=489.865 n_windows=594
+      none/2026-09-15/20260915_182121               y_true=0 majority_pred=1 window_acc=0.237 mean_proba=505.702 n_windows=295
+      ... (19 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'harshitha': WINDOW auroc=0.468 eer=0.549 false_accept_unauth=0.609 false_accept_none=0.513
+    SESSION-LEVEL (not window-level): acc=0.321 auroc=0.391 (n_sessions=28)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-97.652 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=222.904 n_windows=262
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.009 mean_proba=297.688 n_windows=586
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.017 mean_proba=245.788 n_windows=578
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.081 mean_proba=410.547 n_windows=570
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.101 mean_proba=375.739 n_windows=286
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.123 mean_proba=573.488 n_windows=301
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.142 mean_proba=459.238 n_windows=457
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.175 mean_proba=489.865 n_windows=594
+      none/2026-09-15/20260915_155425               y_true=0 majority_pred=1 window_acc=0.179 mean_proba=497.699 n_windows=385
+      unauthorized/2026-09-22/20260922_165414_harshitha y_true=0 majority_pred=1 window_acc=0.201 mean_proba=628.657 n_windows=1972
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=0 window_acc=0.202 mean_proba=471.952 n_windows=604
+      ... (16 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'kishore': WINDOW auroc=0.513 eer=0.535 false_accept_unauth=0.038 false_accept_none=0.566
+    SESSION-LEVEL (not window-level): acc=0.292 auroc=0.539 (n_sessions=24)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-97.652 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.008 mean_proba=222.904 n_windows=262
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.014 mean_proba=297.688 n_windows=586
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.024 mean_proba=245.788 n_windows=578
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.088 mean_proba=410.547 n_windows=570
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.108 mean_proba=375.739 n_windows=286
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.120 mean_proba=573.488 n_windows=301
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.158 mean_proba=459.238 n_windows=457
+      none/2026-09-15/20260915_155425               y_true=0 majority_pred=1 window_acc=0.179 mean_proba=497.699 n_windows=385
+      none/2026-09-15/20260915_152301               y_true=0 majority_pred=1 window_acc=0.186 mean_proba=475.552 n_windows=677
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.210 mean_proba=489.865 n_windows=594
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=0 window_acc=0.222 mean_proba=471.952 n_windows=604
+      ... (12 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'manas': WINDOW auroc=0.526 eer=0.529 false_accept_unauth=0.064 false_accept_none=0.586
+    SESSION-LEVEL (not window-level): acc=0.346 auroc=0.575 (n_sessions=26)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-97.652 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.008 mean_proba=222.904 n_windows=262
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.015 mean_proba=297.688 n_windows=586
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.028 mean_proba=245.788 n_windows=578
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.088 mean_proba=410.547 n_windows=570
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.112 mean_proba=375.739 n_windows=286
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.120 mean_proba=573.488 n_windows=301
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.162 mean_proba=459.238 n_windows=457
+      none/2026-09-15/20260915_155425               y_true=0 majority_pred=1 window_acc=0.177 mean_proba=497.699 n_windows=385
+      none/2026-09-15/20260915_152301               y_true=0 majority_pred=1 window_acc=0.183 mean_proba=475.552 n_windows=677
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.215 mean_proba=489.865 n_windows=594
+      none/2026-09-15/20260915_182121               y_true=0 majority_pred=1 window_acc=0.241 mean_proba=505.702 n_windows=295
+      ... (14 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'promoda': WINDOW auroc=0.496 eer=0.534 false_accept_unauth=0.448 false_accept_none=0.569
+    SESSION-LEVEL (not window-level): acc=0.292 auroc=0.438 (n_sessions=24)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-97.652 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.008 mean_proba=222.904 n_windows=262
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.015 mean_proba=297.688 n_windows=586
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.026 mean_proba=245.788 n_windows=578
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.088 mean_proba=410.547 n_windows=570
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.108 mean_proba=375.739 n_windows=286
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.120 mean_proba=573.488 n_windows=301
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.158 mean_proba=459.238 n_windows=457
+      none/2026-09-15/20260915_155425               y_true=0 majority_pred=1 window_acc=0.177 mean_proba=497.699 n_windows=385
+      none/2026-09-15/20260915_152301               y_true=0 majority_pred=1 window_acc=0.185 mean_proba=475.552 n_windows=677
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.210 mean_proba=489.865 n_windows=594
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=0 window_acc=0.225 mean_proba=471.952 n_windows=604
+      ... (12 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'siva': WINDOW auroc=0.512 eer=0.534 false_accept_unauth=0.036 false_accept_none=0.569
+    SESSION-LEVEL (not window-level): acc=0.292 auroc=0.523 (n_sessions=24)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-97.652 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.008 mean_proba=222.904 n_windows=262
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.015 mean_proba=297.688 n_windows=586
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.026 mean_proba=245.788 n_windows=578
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.088 mean_proba=410.547 n_windows=570
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.108 mean_proba=375.739 n_windows=286
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.120 mean_proba=573.488 n_windows=301
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.158 mean_proba=459.238 n_windows=457
+      none/2026-09-15/20260915_155425               y_true=0 majority_pred=1 window_acc=0.177 mean_proba=497.699 n_windows=385
+      none/2026-09-15/20260915_152301               y_true=0 majority_pred=1 window_acc=0.185 mean_proba=475.552 n_windows=677
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.210 mean_proba=489.865 n_windows=594
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=0 window_acc=0.225 mean_proba=471.952 n_windows=604
+      ... (12 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'sumanth': WINDOW auroc=0.495 eer=0.536 false_accept_unauth=0.475 false_accept_none=0.561
+    SESSION-LEVEL (not window-level): acc=0.286 auroc=0.453 (n_sessions=28)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-97.652 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.008 mean_proba=222.904 n_windows=262
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.012 mean_proba=297.688 n_windows=586
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.022 mean_proba=245.788 n_windows=578
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.088 mean_proba=410.547 n_windows=570
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.108 mean_proba=375.739 n_windows=286
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.120 mean_proba=573.488 n_windows=301
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.158 mean_proba=459.238 n_windows=457
+      none/2026-09-15/20260915_155425               y_true=0 majority_pred=1 window_acc=0.179 mean_proba=497.699 n_windows=385
+      none/2026-09-15/20260915_152301               y_true=0 majority_pred=1 window_acc=0.188 mean_proba=475.552 n_windows=677
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.202 mean_proba=489.865 n_windows=594
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=0 window_acc=0.220 mean_proba=471.952 n_windows=604
+      ... (16 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out 'vishwa': WINDOW auroc=0.525 eer=0.523 false_accept_unauth=0.334 false_accept_none=0.604
+    SESSION-LEVEL (not window-level): acc=0.333 auroc=0.461 (n_sessions=24)
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-97.652 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.008 mean_proba=222.904 n_windows=262
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.015 mean_proba=297.688 n_windows=586
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.031 mean_proba=245.788 n_windows=578
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.089 mean_proba=410.547 n_windows=570
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.115 mean_proba=375.739 n_windows=286
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.120 mean_proba=573.488 n_windows=301
+      none/2026-09-15/20260915_155425               y_true=0 majority_pred=1 window_acc=0.169 mean_proba=497.699 n_windows=385
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.175 mean_proba=459.238 n_windows=457
+      none/2026-09-15/20260915_152301               y_true=0 majority_pred=1 window_acc=0.180 mean_proba=475.552 n_windows=677
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.226 mean_proba=489.865 n_windows=594
+      none/2026-09-15/20260915_182121               y_true=0 majority_pred=1 window_acc=0.237 mean_proba=505.702 n_windows=295
+      ... (12 more sessions, see full CSV)
+  MEAN across 9 held-out strangers: window_auroc=0.507 session_auroc=0.487 false_accept_unauth=0.277 false_accept_none=0.571
+
+=== SVM[gmm_svm_wii] cross-day: leave-one-day-out ===
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out day '2026-09-15': WINDOW auroc=0.261 eer=0.658 false_accept_unauth=0.329 false_accept_none=0.928
+    SESSION-LEVEL (not window-level): acc=0.294 auroc=0.257 (n_sessions=34)
+      none/2026-09-15/20260915_150333               y_true=0 majority_pred=1 window_acc=0.027 mean_proba=361.159 n_windows=260
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.033 mean_proba=446.677 n_windows=301
+      none/2026-09-15/20260915_180705               y_true=0 majority_pred=1 window_acc=0.039 mean_proba=238.333 n_windows=285
+      none/2026-09-15/20260915_150550               y_true=0 majority_pred=1 window_acc=0.046 mean_proba=288.238 n_windows=238
+      none/2026-09-15/20260915_182340               y_true=0 majority_pred=1 window_acc=0.047 mean_proba=365.435 n_windows=301
+      none/2026-09-15/20260915_155425               y_true=0 majority_pred=1 window_acc=0.065 mean_proba=181.067 n_windows=385
+      none/2026-09-15/20260915_155941               y_true=0 majority_pred=1 window_acc=0.067 mean_proba=361.812 n_windows=431
+      none/2026-09-15/20260915_182121               y_true=0 majority_pred=1 window_acc=0.081 mean_proba=303.323 n_windows=295
+      none/2026-09-15/20260915_152301               y_true=0 majority_pred=1 window_acc=0.086 mean_proba=96.923 n_windows=677
+      authorized/2026-09-15/20260915_155004_barath  y_true=1 majority_pred=0 window_acc=0.138 mean_proba=-1917.571 n_windows=363
+      none/2026-09-15/20260915_152825               y_true=0 majority_pred=1 window_acc=0.161 mean_proba=-109.751 n_windows=447
+      authorized/2026-09-15/20260915_162230_barath  y_true=1 majority_pred=0 window_acc=0.176 mean_proba=-1823.668 n_windows=482
+      ... (22 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out day '2026-09-16': WINDOW auroc=0.132 eer=0.802 false_accept_unauth=0.217 false_accept_none=0.994
+    SESSION-LEVEL (not window-level): acc=0.333 auroc=0.394 (n_sessions=27)
+      none/2026-09-16/20260916_133907               y_true=0 majority_pred=1 window_acc=0.005 mean_proba=380.647 n_windows=7232
+      none/2026-09-16/20260916_131825               y_true=0 majority_pred=1 window_acc=0.007 mean_proba=332.036 n_windows=599
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.007 mean_proba=-14210.221 n_windows=276
+      none/2026-09-16/20260916_131548               y_true=0 majority_pred=1 window_acc=0.008 mean_proba=288.403 n_windows=243
+      none/2026-09-16/20260916_131138               y_true=0 majority_pred=1 window_acc=0.014 mean_proba=238.243 n_windows=578
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.065 mean_proba=-10893.833 n_windows=262
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.065 mean_proba=-10269.058 n_windows=570
+      authorized/2026-09-16/20260916_133308_barath  y_true=1 majority_pred=0 window_acc=0.091 mean_proba=-9033.537 n_windows=613
+      authorized/2026-09-16/20260916_144821_barath  y_true=1 majority_pred=0 window_acc=0.094 mean_proba=-9157.430 n_windows=555
+      authorized/2026-09-16/20260916_152145_barath  y_true=1 majority_pred=0 window_acc=0.120 mean_proba=-9569.063 n_windows=574
+      authorized/2026-09-16/20260916_150336_anjali  y_true=1 majority_pred=0 window_acc=0.140 mean_proba=-5205.913 n_windows=584
+      authorized/2026-09-16/20260916_132829_barath  y_true=1 majority_pred=0 window_acc=0.145 mean_proba=-8389.947 n_windows=602
+      ... (15 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out day '2026-09-17': WINDOW auroc=0.183 eer=0.729 false_accept_unauth=0.235 false_accept_none=0.882
+    SESSION-LEVEL (not window-level): acc=0.450 auroc=0.340 (n_sessions=20)
+      none/2026-09-17/20260917_134430               y_true=0 majority_pred=1 window_acc=0.000 mean_proba=550.900 n_windows=5
+      authorized/2026-09-17/20260917_181923_barath  y_true=1 majority_pred=0 window_acc=0.010 mean_proba=-2374.936 n_windows=300
+      authorized/2026-09-17/20260917_181647_barath  y_true=1 majority_pred=0 window_acc=0.051 mean_proba=-970.071 n_windows=293
+      authorized/2026-09-17/20260917_182152_anjali  y_true=1 majority_pred=0 window_acc=0.052 mean_proba=-682.152 n_windows=289
+      none/2026-09-17/20260917_181241               y_true=0 majority_pred=1 window_acc=0.099 mean_proba=254.806 n_windows=142
+      none/2026-09-17/20260917_134508               y_true=0 majority_pred=1 window_acc=0.119 mean_proba=407.705 n_windows=6270
+      authorized/2026-09-17/20260917_182354_anjali  y_true=1 majority_pred=0 window_acc=0.125 mean_proba=-221.320 n_windows=289
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.129 mean_proba=-408.963 n_windows=286
+      authorized/2026-09-17/20260917_185506_barath  y_true=1 majority_pred=0 window_acc=0.152 mean_proba=-375.564 n_windows=277
+      unauthorized/2026-09-17/20260917_184432_divya y_true=0 majority_pred=1 window_acc=0.493 mean_proba=150.939 n_windows=294 <-- window_accuracy far from majority vote
+      authorized/2026-09-17/20260917_183129_anjali  y_true=1 majority_pred=0 window_acc=0.494 mean_proba=160.433 n_windows=259 <-- window_accuracy far from majority vote
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=1 window_acc=0.505 mean_proba=40.162 n_windows=277 <-- window_accuracy far from majority vote
+      ... (8 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out day '2026-09-21': WINDOW auroc=0.487 eer=0.506 false_accept_unauth=0.400 false_accept_none=0.601
+    SESSION-LEVEL (not window-level): acc=0.500 auroc=0.677 (n_sessions=20)
+      none/2026-09-21/20260921_171508               y_true=0 majority_pred=1 window_acc=0.362 mean_proba=487.210 n_windows=1839 <-- window_accuracy far from majority vote
+      none/2026-09-21/20260921_170052               y_true=0 majority_pred=1 window_acc=0.388 mean_proba=494.392 n_windows=4735 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_172447_barath  y_true=1 majority_pred=0 window_acc=0.401 mean_proba=457.775 n_windows=2754 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_172757_barath  y_true=1 majority_pred=0 window_acc=0.404 mean_proba=454.157 n_windows=2569 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_173647_barath  y_true=1 majority_pred=0 window_acc=0.406 mean_proba=454.562 n_windows=2724 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_175654_barath  y_true=1 majority_pred=0 window_acc=0.440 mean_proba=410.856 n_windows=2804 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_174702_anjali  y_true=1 majority_pred=0 window_acc=0.441 mean_proba=303.739 n_windows=2595 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_180136_barath  y_true=1 majority_pred=0 window_acc=0.447 mean_proba=442.875 n_windows=2937 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_180450_barath  y_true=1 majority_pred=0 window_acc=0.454 mean_proba=444.176 n_windows=2882 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-21/20260921_180826_sumanth y_true=0 majority_pred=1 window_acc=0.469 mean_proba=486.400 n_windows=1829 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_175008_anjali  y_true=1 majority_pred=1 window_acc=0.525 mean_proba=406.331 n_windows=2448 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_172059_anjali  y_true=1 majority_pred=1 window_acc=0.561 mean_proba=491.495 n_windows=2587 <-- window_accuracy far from majority vote
+      ... (8 more sessions, see full CSV)
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  held out day '2026-09-22': WINDOW auroc=0.336 eer=0.589 false_accept_unauth=0.357 false_accept_none=0.650
+    SESSION-LEVEL (not window-level): acc=0.381 auroc=0.389 (n_sessions=21)
+      authorized/2026-09-22/20260922_143709_barath  y_true=1 majority_pred=0 window_acc=0.260 mean_proba=247.928 n_windows=2522
+      authorized/2026-09-22/20260922_140742_barath  y_true=1 majority_pred=0 window_acc=0.268 mean_proba=271.404 n_windows=2610
+      authorized/2026-09-22/20260922_130957_barath  y_true=1 majority_pred=0 window_acc=0.318 mean_proba=291.872 n_windows=2591 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_140007_barath  y_true=1 majority_pred=0 window_acc=0.337 mean_proba=260.559 n_windows=2727 <-- window_accuracy far from majority vote
+      none/2026-09-22/20260922_120632               y_true=0 majority_pred=1 window_acc=0.345 mean_proba=479.143 n_windows=36552 <-- window_accuracy far from majority vote
+      none/2026-09-22/20260922_125324               y_true=0 majority_pred=1 window_acc=0.351 mean_proba=491.022 n_windows=2630 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_141105_barath  y_true=1 majority_pred=0 window_acc=0.358 mean_proba=273.319 n_windows=2778 <-- window_accuracy far from majority vote
+      none/2026-09-22/20260922_125641               y_true=0 majority_pred=1 window_acc=0.378 mean_proba=415.312 n_windows=6406 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_131501_barath  y_true=1 majority_pred=0 window_acc=0.384 mean_proba=290.521 n_windows=2531 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-22/20260922_165414_harshitha y_true=0 majority_pred=1 window_acc=0.389 mean_proba=428.327 n_windows=1972 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_142313_anjali  y_true=1 majority_pred=0 window_acc=0.466 mean_proba=348.122 n_windows=2614 <-- window_accuracy far from majority vote
+      authorized/2026-09-22/20260922_140359_anjali  y_true=1 majority_pred=0 window_acc=0.476 mean_proba=351.119 n_windows=2752 <-- window_accuracy far from majority vote
+      ... (9 more sessions, see full CSV)
+  MEAN across 5 held-out days: window_auroc=0.280 session_auroc=0.412
+
+=== SVM[gmm_svm_wii] closed-set sanity: session-disjoint 5-fold ===
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/mixture/_base.py:293: ConvergenceWarning: Best performing initialization did not converge. Try different init parameters, or increase max_iter, tol, or check for degenerate data.
+  warnings.warn(
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+/home/bn3273/.local/lib/python3.14/site-packages/sklearn/svm/_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+  MEAN across 5 folds: acc=0.390 auroc=0.509
+
+Done. Results -> /home/bn3273/test/dd/wifi-csi-presence-collector/ml_2/evaluation/results/svm_gait_log.csv

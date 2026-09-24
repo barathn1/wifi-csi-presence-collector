@@ -1,0 +1,239 @@
+full manifest: 275 (session,receiver) rows across 199 sessions
+channel distribution (rows): {6: 198, 11: 40, 1: 37}
+channel distribution (by date):
+date
+2026-09-09           {1: 37}
+2026-09-10          {11: 37}
+2026-09-15    {6: 34, 11: 3}
+2026-09-16           {6: 27}
+2026-09-17           {6: 20}
+2026-09-21           {6: 54}
+2026-09-22           {6: 63}
+Name: channel, dtype: object
+
+channel-6-only, >= 50 packets: 198 (session,receiver) rows across 122 sessions, dates=['2026-09-15', '2026-09-16', '2026-09-17', '2026-09-21', '2026-09-22']
+label counts: {'authorized': 111, 'unauthorized': 53, 'none': 34}
+dominant_csi_len distribution: {256: 198}
+caching (session, receiver) decoded arrays...
+window index: 178040 windows from 122 sessions
+computing per-(date, receiver) empty-room baselines...
+  9 baselines: [('2026-09-15', 'ac:27:6e:a5:5b:c8'), ('2026-09-16', 'ac:27:6e:a5:5b:c8'), ('2026-09-17', 'ac:27:6e:a5:5b:c8'), ('2026-09-21', 'a4:cb:8f:d4:52:b0'), ('2026-09-21', 'ac:27:6e:a2:f2:78'), ('2026-09-21', 'ac:27:6e:a5:5b:c8'), ('2026-09-22', 'a4:cb:8f:d4:52:b0'), ('2026-09-22', 'ac:27:6e:a2:f2:78'), ('2026-09-22', 'ac:27:6e:a5:5b:c8')]
+taskF classes: ['anjali', 'barath', 'non_auth'] (178040 windows, aligned 1:1 with window_index)
+
+=== ArcFace open-set: leave-one-unauthorized-person-out (parallel across 2 device(s)) ===
+  held out 'abdul': WINDOW auroc=0.500 eer=0.501 calibrated_accept_rate=1.000 false_accept_unauth=0.028 false_accept_none=0.000
+    SESSION-LEVEL (not window-level): acc=0.333 auroc=0.578 (n_sessions=24)
+      authorized/2026-09-15/20260915_160607_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=340
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=457
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=578
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=604
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=594
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=570
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=586
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=262
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=277
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=286
+      authorized/2026-09-21/20260921_172059_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2587
+      ... (12 more sessions, see full CSV)
+  held out 'divya': WINDOW auroc=0.518 eer=0.489 calibrated_accept_rate=0.953 false_accept_unauth=0.610 false_accept_none=0.529
+    SESSION-LEVEL (not window-level): acc=0.355 auroc=0.294 (n_sessions=31)
+      none/2026-09-15/20260915_152301               y_true=0 majority_pred=1 window_acc=0.186 mean_proba=-1.000 n_windows=677
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.218 mean_proba=-1.000 n_windows=586
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.219 mean_proba=-1.000 n_windows=301
+      none/2026-09-15/20260915_182121               y_true=0 majority_pred=1 window_acc=0.220 mean_proba=-1.000 n_windows=295
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.232 mean_proba=-1.000 n_windows=578
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.243 mean_proba=-1.000 n_windows=276
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.261 mean_proba=-1.000 n_windows=570
+      unauthorized/2026-09-22/20260922_164942_divya y_true=0 majority_pred=1 window_acc=0.262 mean_proba=-1.000 n_windows=1977
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.291 mean_proba=-1.000 n_windows=457
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.298 mean_proba=-1.000 n_windows=262
+      unauthorized/2026-09-22/20260922_165158_divya y_true=0 majority_pred=1 window_acc=0.317 mean_proba=-1.000 n_windows=2161 <-- window_accuracy far from majority vote
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.318 mean_proba=-1.000 n_windows=286 <-- window_accuracy far from majority vote
+      ... (19 more sessions, see full CSV)
+  held out 'harshitha': WINDOW auroc=0.500 eer=0.500 calibrated_accept_rate=1.000 false_accept_unauth=0.000 false_accept_none=0.000
+    SESSION-LEVEL (not window-level): acc=0.429 auroc=0.438 (n_sessions=28)
+      authorized/2026-09-15/20260915_160607_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=340
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=457
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=578
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=604
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=594
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=570
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=586
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=262
+      authorized/2026-09-22/20260922_130435_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2385
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=277
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=286
+      authorized/2026-09-21/20260921_172059_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2587
+      ... (16 more sessions, see full CSV)
+  held out 'kishore': WINDOW auroc=0.500 eer=0.500 calibrated_accept_rate=1.000 false_accept_unauth=0.000 false_accept_none=0.000
+    SESSION-LEVEL (not window-level): acc=0.333 auroc=0.617 (n_sessions=24)
+      authorized/2026-09-15/20260915_160607_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=340
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=457
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=578
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=604
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=594
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=570
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=586
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=262
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=277
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=286
+      authorized/2026-09-21/20260921_172059_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2587
+      ... (12 more sessions, see full CSV)
+  held out 'manas': WINDOW auroc=0.500 eer=0.500 calibrated_accept_rate=1.000 false_accept_unauth=0.000 false_accept_none=0.000
+    SESSION-LEVEL (not window-level): acc=0.385 auroc=0.478 (n_sessions=26)
+      authorized/2026-09-15/20260915_160607_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=340
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=457
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=578
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=604
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=594
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=570
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=586
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=262
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=277
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=286
+      authorized/2026-09-21/20260921_172059_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2587
+      ... (14 more sessions, see full CSV)
+  held out 'promoda': WINDOW auroc=0.500 eer=0.500 calibrated_accept_rate=1.000 false_accept_unauth=0.000 false_accept_none=0.001
+    SESSION-LEVEL (not window-level): acc=0.333 auroc=0.582 (n_sessions=24)
+      authorized/2026-09-15/20260915_160607_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=340
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=457
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=578
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=604
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=594
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=570
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=586
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=262
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=277
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=286
+      authorized/2026-09-21/20260921_172059_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2587
+      ... (12 more sessions, see full CSV)
+  held out 'siva': WINDOW auroc=0.500 eer=0.500 calibrated_accept_rate=1.000 false_accept_unauth=0.000 false_accept_none=0.000
+    SESSION-LEVEL (not window-level): acc=0.333 auroc=0.633 (n_sessions=24)
+      authorized/2026-09-15/20260915_160607_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=340
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=457
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=578
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=604
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=594
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=570
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=586
+      authorized/2026-09-16/20260916_170839_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=276
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=262
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=277
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=286
+      authorized/2026-09-22/20260922_130435_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2385
+      ... (12 more sessions, see full CSV)
+  held out 'sumanth': WINDOW auroc=0.500 eer=0.500 calibrated_accept_rate=1.000 false_accept_unauth=0.000 false_accept_none=0.000
+    SESSION-LEVEL (not window-level): acc=0.429 auroc=0.464 (n_sessions=28)
+      authorized/2026-09-15/20260915_160607_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=340
+      authorized/2026-09-15/20260915_161737_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=457
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=578
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=604
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=594
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=570
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=586
+      authorized/2026-09-16/20260916_171125_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=262
+      authorized/2026-09-22/20260922_141852_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2580
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=277
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=286
+      authorized/2026-09-22/20260922_130435_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2385
+      ... (16 more sessions, see full CSV)
+  held out 'vishwa': WINDOW auroc=0.534 eer=0.469 calibrated_accept_rate=0.969 false_accept_unauth=0.637 false_accept_none=0.503
+    SESSION-LEVEL (not window-level): acc=0.500 auroc=0.609 (n_sessions=24)
+      unauthorized/2026-09-22/20260922_164502_vishwa y_true=0 majority_pred=1 window_acc=0.355 mean_proba=-1.000 n_windows=1883 <-- window_accuracy far from majority vote
+      none/2026-09-15/20260915_152301               y_true=0 majority_pred=1 window_acc=0.362 mean_proba=-1.000 n_windows=677 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-22/20260922_164720_vishwa y_true=0 majority_pred=1 window_acc=0.370 mean_proba=-1.000 n_windows=1955 <-- window_accuracy far from majority vote
+      none/2026-09-15/20260915_182121               y_true=0 majority_pred=1 window_acc=0.424 mean_proba=-1.000 n_windows=295 <-- window_accuracy far from majority vote
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.458 mean_proba=-1.000 n_windows=277 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.460 mean_proba=-1.000 n_windows=594 <-- window_accuracy far from majority vote
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.472 mean_proba=-1.000 n_windows=286 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=0 window_acc=0.474 mean_proba=-1.000 n_windows=604 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_153337_barath  y_true=1 majority_pred=0 window_acc=0.478 mean_proba=-1.000 n_windows=586 <-- window_accuracy far from majority vote
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.486 mean_proba=-1.000 n_windows=570 <-- window_accuracy far from majority vote
+      authorized/2026-09-15/20260915_160607_anjali  y_true=1 majority_pred=0 window_acc=0.497 mean_proba=-1.000 n_windows=340 <-- window_accuracy far from majority vote
+      none/2026-09-16/20260916_133907               y_true=0 majority_pred=1 window_acc=0.500 mean_proba=-1.000 n_windows=7232 <-- window_accuracy far from majority vote
+      ... (12 more sessions, see full CSV)
+  MEAN window_auroc=0.506  MEAN session_auroc=0.521
+
+=== ArcFace cross-day: leave-one-day-out (parallel across 2 device(s)) ===
+  held out day '2026-09-15': WINDOW auroc=0.551 eer=0.457 calibrated_accept_rate=0.976
+    SESSION-LEVEL (not window-level): acc=0.529 auroc=0.579 (n_sessions=34)
+      unauthorized/2026-09-15/20260915_175047_siva  y_true=0 majority_pred=1 window_acc=0.308 mean_proba=-1.000 n_windows=315 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-15/20260915_171532_abdul y_true=0 majority_pred=1 window_acc=0.322 mean_proba=-1.000 n_windows=317 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-15/20260915_165742_divya y_true=0 majority_pred=1 window_acc=0.340 mean_proba=-1.000 n_windows=291 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-15/20260915_170244_harshitha y_true=0 majority_pred=1 window_acc=0.350 mean_proba=-1.000 n_windows=303 <-- window_accuracy far from majority vote
+      none/2026-09-15/20260915_155941               y_true=0 majority_pred=1 window_acc=0.362 mean_proba=-1.000 n_windows=431 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-15/20260915_170022_harshitha y_true=0 majority_pred=1 window_acc=0.364 mean_proba=-1.000 n_windows=264 <-- window_accuracy far from majority vote
+      none/2026-09-15/20260915_155425               y_true=0 majority_pred=1 window_acc=0.371 mean_proba=-1.000 n_windows=385 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-15/20260915_171755_abdul y_true=0 majority_pred=1 window_acc=0.381 mean_proba=-1.000 n_windows=315 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-15/20260915_170508_sumanth y_true=0 majority_pred=1 window_acc=0.387 mean_proba=-1.000 n_windows=269 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-15/20260915_170719_sumanth y_true=0 majority_pred=1 window_acc=0.409 mean_proba=-1.000 n_windows=298 <-- window_accuracy far from majority vote
+      none/2026-09-15/20260915_180705               y_true=0 majority_pred=1 window_acc=0.414 mean_proba=-1.000 n_windows=285 <-- window_accuracy far from majority vote
+      none/2026-09-15/20260915_175702               y_true=0 majority_pred=1 window_acc=0.415 mean_proba=-1.000 n_windows=301 <-- window_accuracy far from majority vote
+      ... (22 more sessions, see full CSV)
+  held out day '2026-09-16': WINDOW auroc=0.500 eer=0.500 calibrated_accept_rate=1.000
+    SESSION-LEVEL (not window-level): acc=0.444 auroc=0.700 (n_sessions=27)
+      authorized/2026-09-16/20260916_132313_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=603
+      authorized/2026-09-16/20260916_132829_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=602
+      authorized/2026-09-16/20260916_133308_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=613
+      authorized/2026-09-16/20260916_142654_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=578
+      authorized/2026-09-16/20260916_144318_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=604
+      authorized/2026-09-16/20260916_144821_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=555
+      authorized/2026-09-16/20260916_145304_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=625
+      authorized/2026-09-16/20260916_145921_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=594
+      authorized/2026-09-16/20260916_150336_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=584
+      authorized/2026-09-16/20260916_152145_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=574
+      authorized/2026-09-16/20260916_152556_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=570
+      authorized/2026-09-16/20260916_153821_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=584
+      ... (15 more sessions, see full CSV)
+  held out day '2026-09-17': WINDOW auroc=0.503 eer=0.498 calibrated_accept_rate=0.999
+    SESSION-LEVEL (not window-level): acc=0.500 auroc=0.495 (n_sessions=20)
+      authorized/2026-09-17/20260917_181415_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=277
+      authorized/2026-09-17/20260917_182152_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=289
+      authorized/2026-09-17/20260917_183129_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=259
+      authorized/2026-09-17/20260917_182354_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=289
+      authorized/2026-09-17/20260917_184714_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=256
+      authorized/2026-09-17/20260917_184937_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=287
+      authorized/2026-09-17/20260917_185506_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=277
+      authorized/2026-09-17/20260917_185221_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=286
+      authorized/2026-09-17/20260917_181923_barath  y_true=1 majority_pred=0 window_acc=0.017 mean_proba=-1.000 n_windows=300
+      authorized/2026-09-17/20260917_181647_barath  y_true=1 majority_pred=0 window_acc=0.024 mean_proba=-1.000 n_windows=293
+      none/2026-09-17/20260917_134430               y_true=0 majority_pred=0 window_acc=1.000 mean_proba=-1.000 n_windows=5
+      none/2026-09-17/20260917_134508               y_true=0 majority_pred=0 window_acc=1.000 mean_proba=-1.000 n_windows=6270
+      ... (8 more sessions, see full CSV)
+  held out day '2026-09-21': WINDOW auroc=0.511 eer=0.489 calibrated_accept_rate=0.970
+    SESSION-LEVEL (not window-level): acc=0.600 auroc=0.417 (n_sessions=20)
+      none/2026-09-21/20260921_161220_ac276ea2f278  y_true=0 majority_pred=1 window_acc=0.277 mean_proba=-1.000 n_windows=130
+      unauthorized/2026-09-21/20260921_181037_sumanth y_true=0 majority_pred=1 window_acc=0.353 mean_proba=-1.000 n_windows=689 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-21/20260921_173206_promoda y_true=0 majority_pred=1 window_acc=0.364 mean_proba=-1.000 n_windows=1785 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-21/20260921_173426_promoda y_true=0 majority_pred=1 window_acc=0.365 mean_proba=-1.000 n_windows=1785 <-- window_accuracy far from majority vote
+      unauthorized/2026-09-21/20260921_180826_sumanth y_true=0 majority_pred=1 window_acc=0.377 mean_proba=-1.000 n_windows=1829 <-- window_accuracy far from majority vote
+      none/2026-09-21/20260921_171508               y_true=0 majority_pred=1 window_acc=0.402 mean_proba=-1.000 n_windows=1839 <-- window_accuracy far from majority vote
+      none/2026-09-21/20260921_170052               y_true=0 majority_pred=1 window_acc=0.417 mean_proba=-1.000 n_windows=4735 <-- window_accuracy far from majority vote
+      none/2026-09-21/20260921_161221_ac276ea55bc8  y_true=0 majority_pred=1 window_acc=0.485 mean_proba=-1.000 n_windows=134 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_172757_barath  y_true=1 majority_pred=1 window_acc=0.605 mean_proba=-1.000 n_windows=2569 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_171752_anjali  y_true=1 majority_pred=1 window_acc=0.612 mean_proba=-1.000 n_windows=2654 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_173647_barath  y_true=1 majority_pred=1 window_acc=0.616 mean_proba=-1.000 n_windows=2724 <-- window_accuracy far from majority vote
+      authorized/2026-09-21/20260921_174349_anjali  y_true=1 majority_pred=1 window_acc=0.616 mean_proba=-1.000 n_windows=2657 <-- window_accuracy far from majority vote
+      ... (8 more sessions, see full CSV)
+  held out day '2026-09-22': WINDOW auroc=0.500 eer=0.500 calibrated_accept_rate=1.000
+    SESSION-LEVEL (not window-level): acc=0.429 auroc=0.417 (n_sessions=21)
+      authorized/2026-09-22/20260922_130957_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2591
+      authorized/2026-09-22/20260922_131501_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2531
+      authorized/2026-09-22/20260922_131903_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2629
+      authorized/2026-09-22/20260922_140007_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2727
+      authorized/2026-09-22/20260922_140742_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2610
+      authorized/2026-09-22/20260922_140359_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2752
+      authorized/2026-09-22/20260922_141105_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2778
+      authorized/2026-09-22/20260922_141540_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2550
+      authorized/2026-09-22/20260922_142313_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2614
+      authorized/2026-09-22/20260922_141852_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2580
+      authorized/2026-09-22/20260922_143709_barath  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2522
+      authorized/2026-09-22/20260922_130435_anjali  y_true=1 majority_pred=0 window_acc=0.000 mean_proba=-1.000 n_windows=2385
+      ... (9 more sessions, see full CSV)
+  MEAN window_auroc=0.513  MEAN session_auroc=0.521
+
+Done. Results -> /home/bn3273/test/dd/wifi-csi-presence-collector/ml_2/evaluation/results/arcface_log.csv

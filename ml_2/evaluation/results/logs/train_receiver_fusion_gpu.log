@@ -1,0 +1,21 @@
+training on device: cuda
+full manifest: 275 (session,receiver) rows across 199 sessions
+channel distribution (rows): {6: 198, 11: 40, 1: 37}
+channel distribution (by date):
+date
+2026-09-09           {1: 37}
+2026-09-10          {11: 37}
+2026-09-15    {6: 34, 11: 3}
+2026-09-16           {6: 27}
+2026-09-17           {6: 20}
+2026-09-21           {6: 54}
+2026-09-22           {6: 63}
+Name: channel, dtype: object
+
+channel-6-only, >= 50 packets: 198 (session,receiver) rows across 122 sessions, dates=['2026-09-15', '2026-09-16', '2026-09-17', '2026-09-21', '2026-09-22']
+label counts: {'authorized': 111, 'unauthorized': 53, 'none': 34}
+dominant_csi_len distribution: {256: 198}
+3-receiver sessions: 38, receivers=['a4:cb:8f:d4:52:b0', 'ac:27:6e:a2:f2:78', 'ac:27:6e:a5:5b:c8'], dates=['2026-09-21', '2026-09-22']
+fused window index: 41046 windows
+
+=== 3-receiver fusion (GPU) open-set: leave-one-unauthorized-person-out (parallel across 2 device(s)) ===
