@@ -19,12 +19,17 @@ import numpy as np
 import torch
 
 from features import window_features
-from models import CnnAttention
+from models import CnnAttention, CnnLstm
 
 CHECKPOINT_DIR = Path(__file__).resolve().parent / "checkpoints"
 
 REVEAL_AFTER_S = 35.0  # middle of the recommended 30-45s window -- see DEPLOYMENT.md
 PRESENCE_THRESHOLD = 0.5
+
+# Which identity model to run -- see DEPLOYMENT.md for why cnn_attention is the recommended default
+# (strongest or tied-strongest at nearly every checkpoint in the timing table); svm/cnn_bilstm are
+# here so you can compare them live, not because either beats it.
+IDENTITY_MODEL_CLASSES = {"cnn_attention": CnnAttention, "cnn_bilstm": CnnLstm}  # "svm" handled separately
 
 # Debounce: require a rolling MAJORITY of the last N presence votes to agree before confirming OR
 # dropping presence, rather than trusting any single window. Found necessary by testing, not
@@ -39,12 +44,21 @@ def load_presence_model():
     return joblib.load(CHECKPOINT_DIR / "presence_final.joblib")
 
 
-def load_identity_model():
-    ckpt = torch.load(CHECKPOINT_DIR / "cnn_attention_final.pt", weights_only=False)
-    model = CnnAttention(n_subcarriers=ckpt["n_subcarriers"])
+def load_identity_model(model_name: str = "cnn_attention"):
+    """Returns (kind, model, extra) where kind is "svm" or "torch" -- LiveIdentitySession dispatches
+    on it since the SVM pipeline and the two torch models take different inputs (handcrafted stats
+    vector vs. raw amplitude window)."""
+    if model_name == "svm":
+        pipeline = joblib.load(CHECKPOINT_DIR / "svm_final.joblib")
+        return "svm", pipeline, {"label_meaning": {0: "anjali", 1: "barath"}}
+    if model_name not in IDENTITY_MODEL_CLASSES:
+        raise ValueError(f"model_name must be one of {['svm', *IDENTITY_MODEL_CLASSES]}, got {model_name!r}")
+    ckpt = torch.load(CHECKPOINT_DIR / f"{model_name}_final.pt", weights_only=False)
+    model = IDENTITY_MODEL_CLASSES[model_name](n_subcarriers=ckpt["n_subcarriers"])
     model.load_state_dict(ckpt["state_dict"])
     model.eval()
-    return model, ckpt["sub_mean"], ckpt["sub_std"], ckpt["label_meaning"]
+    return "torch", model, {"sub_mean": ckpt["sub_mean"], "sub_std": ckpt["sub_std"],
+                             "label_meaning": ckpt["label_meaning"]}
 
 
 @dataclass
@@ -62,17 +76,23 @@ class LiveIdentitySession:
     """One instance per continuous presence-tracking session. Feed windows via `on_window`; call
     `status()` any time for what should currently be on screen."""
 
-    def __init__(self, reveal_after_s: float = REVEAL_AFTER_S):
+    def __init__(self, reveal_after_s: float = REVEAL_AFTER_S, identity_model_name: str = "cnn_attention"):
         self.reveal_after_s = reveal_after_s
+        self.identity_model_name = identity_model_name
         self.presence_model = load_presence_model()
-        self.identity_model, self.sub_mean, self.sub_std, self.label_meaning = load_identity_model()
+        self.identity_kind, self.identity_model, extra = load_identity_model(identity_model_name)
+        self.label_meaning = extra["label_meaning"]
+        if self.identity_kind == "torch":
+            self.sub_mean, self.sub_std = extra["sub_mean"], extra["sub_std"]
         self.state = _State()
         self.presence_votes: deque = deque(maxlen=PRESENCE_VOTE_WINDOW)
 
     def _presence_proba(self, stats_feat: np.ndarray) -> float:
         return float(self.presence_model.predict_proba(stats_feat[None, :])[0, 1])
 
-    def _identity_proba(self, raw_amp_window: np.ndarray) -> float:
+    def _identity_proba(self, stats_feat: np.ndarray, raw_amp_window: np.ndarray) -> float:
+        if self.identity_kind == "svm":
+            return float(self.identity_model.predict_proba(stats_feat[None, :])[0, 1])
         x = ((raw_amp_window - self.sub_mean[0]) / self.sub_std[0]).astype(np.float32)
         with torch.no_grad():
             logit = self.identity_model(torch.from_numpy(x[None, ...]))
@@ -100,7 +120,7 @@ class LiveIdentitySession:
             self.state.presence_confirmed = True
             self.state.presence_start_s = elapsed_s
 
-        identity_p = self._identity_proba(amplitude)
+        identity_p = self._identity_proba(stats_feat, amplitude)
         self.state.window_probas.append((elapsed_s, identity_p))
         self.state.last_elapsed_s = elapsed_s
 
