@@ -148,27 +148,45 @@ end-to-end: `python replay_demo.py <path-to-samples.npz> [reveal_after_s]`.
 | Empty room (~269s) | stays idle almost throughout; one brief flicker near the end correctly suppressed by the debounce before it could reveal | -- | yes |
 | Stranger (abdul), walking | confirmed ~1s in | "barath", 74.5% -> 71.5% | **confidently wrong -- expected.** This is the open-set limitation from `FINDINGS.md` section 2, now visible in the live engine too: presence correctly fires on anyone, but the identity model is a strict binary classifier and WILL pick one of the two known people no matter who's actually there. Do not treat this output as authentication. |
 
-## Open-set rejection: tested, doesn't work yet (`openset.py`)
+## Open-set rejection: tested four ways, none work yet (`openset.py`)
 
-The stranger-misclassified-as-Barath behavior above is real and reproducible. Two standard fixes were
-tried and tested honestly (thresholds picked on half the strangers, evaluated on the OTHER, never-seen
+The stranger-misclassified-as-Barath behavior above is real and reproducible. Four approaches were
+tried and tested honestly (thresholds/models fit using only half the strangers -- and, for the
+one-class methods, a session-disjoint slice of Anjali/Barath -- evaluated on the OTHER, never-seen
 half):
 
-| approach | calibration AUC (known vs. calibration-strangers) | held-out stranger reject rate |
-|---|---|---|
-| Confidence-band (reject if P(barath) stays near 0.5) | 0.549 | 7.6% |
-| Distance-to-centroid, in the CNN+Attention model's own learned embedding | 0.573 | 9.6% |
+| approach | representation | calibration AUC | held-out stranger reject rate |
+|---|---|---|---|
+| Confidence-band (reject if P(barath) stays near 0.5) | model's own output | 0.549 | 7.6% |
+| Distance-to-centroid | CNN+Attention embedding | 0.573 | 9.6% |
+| OneClassSVM | raw handcrafted stats | 0.524 | 5.3% |
+| OneClassSVM | CNN+Attention embedding | 0.518 | 7.2% |
+| IsolationForest | raw handcrafted stats | 0.519 | 4.9% |
+| IsolationForest | CNN+Attention embedding | 0.523 | 7.0% |
 
-Both are barely above chance and reject under 10% of held-out strangers' windows -- **neither is
-reliable enough to use.** This isn't a sign the wrong technique was tried; it's the expected failure
-mode of a classifier trained only to distinguish two known people -- it never learned what "neither"
-looks like, so it produces confident-looking outputs for any input, in-distribution or not. The
-embedding-distance approach was specifically worth checking (a discriminatively-trained internal
-representation could in principle separate better than raw features do), and it didn't.
-**Conclusion: this needs more/better stranger data (ideally multiple sessions per stranger across
-multiple days, matching how Anjali/Barath were collected), not a cleverer algorithm on the current
-data.** See `openset.py` for the full calibration/evaluation code if more stranger data becomes
-available -- the same script, just with a real calibration set, is the right next step.
+Every single one lands at AUC ~0.52-0.57 (essentially chance) and rejects under 10% of held-out
+strangers. **None is reliable enough to use**, and the consistency across four very different
+techniques on two different feature representations is itself informative, not just a repeated
+failure:
+
+- Approaches 1-2 fail because a classifier trained only to distinguish two known people never
+  learned what "neither" looks like -- it produces confident-looking outputs for any input.
+- Approaches 3-4 (one-class/anomaly detection) are specifically designed to NOT need that -- they
+  only need to model "normal," no stranger data required to fit. They fail anyway, and for a
+  different, more informative reason: presence detection works great (77-96%) because "someone
+  walking" vs "empty room" really are different broad distributions; but "Anjali walking" vs "a
+  random stranger walking" are both instances of the SAME broad distribution ("a human is walking
+  near this sensor"). An anomaly detector correctly finds nothing distributionally unusual about a
+  stranger, because there isn't anything -- the Anjali-vs-Barath identity signal is a fine-grained
+  difference *within* that shared distribution, not an outlier from it. That's structurally not what
+  one-class methods detect, however much data they get.
+
+**Conclusion: this needs a discriminative 3rd class (or genuinely more/better stranger data for
+whichever approach), not a cleverer unsupervised technique on the current data** -- the fine-grained
+nature of the identity signal means only a method that directly learns the boundary between "known"
+and "not known" from labeled examples of both is likely to work; anomaly detection is the wrong tool
+family for this specific problem, not merely under-tuned. See `openset.py` for the full
+calibration/evaluation code to re-run once more stranger data exists.
 
 ## What would most improve this before a real deployment
 

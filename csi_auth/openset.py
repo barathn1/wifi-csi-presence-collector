@@ -1,20 +1,30 @@
 """Open-set rejection: can we tell "this is neither Anjali nor Barath" instead of always forcing a
-binary pick? Two approaches, tested honestly against strangers NOT used to pick any threshold:
+binary pick? Three approaches, all tested honestly against strangers NOT used to pick any
+threshold/fit any model:
 
 1. Confidence-band rejection: reject if the identity model's own P(barath) stays near 0.5.
 2. Distance-to-enrolled-centroid rejection: reject if a window's CNN+Attention embedding is far from
    BOTH Anjali's and Barath's centroid, in the model's actual learned embedding space (not the raw
    handcrafted features FINDINGS.md already found weren't well-separated by distance).
+3. One-class anomaly detection (OneClassSVM, IsolationForest): fit on Anjali+Barath pooled as one
+   "known" class (doesn't need a labeled 3rd/stranger class the way a discriminative classifier would),
+   flag low-likelihood windows as unknown. Tried on both the raw handcrafted stats features AND the
+   CNN+Attention embedding, to see which representation the anomaly detector does better on.
 
 Strangers are split by PERSON into a calibration half (used only to pick thresholds) and a held-out
 test half (used only to report how well those thresholds generalize) -- with ~11 distinct strangers
-total this is a small, noisy split, treat the numbers as directional, not definitive.
+total this is a small, noisy split, treat the numbers as directional, not definitive. The "known"
+(Anjali/Barath) side of approach 3 also gets its own session-disjoint fit/eval split, so its
+known-accept rate isn't just the model recognizing data it was fit on.
 """
 from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from sklearn.ensemble import IsolationForest
 from sklearn.metrics import roc_auc_score, roc_curve
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import OneClassSVM
 
 from dataset import build_dataset
 from models import CnnAttention, torch_model_embed, torch_model_predict_proba
@@ -39,8 +49,47 @@ def split_strangers(window_table: pd.DataFrame, seed: int = 0):
     return set(shuffled[:half]), set(shuffled[half:])  # (calibration, held-out test)
 
 
+def session_disjoint_split(window_table: pd.DataFrame, mask: np.ndarray, fit_frac: float = 0.7,
+                            seed: int = 1):
+    """Split the True-masked rows of window_table into a fit set and an eval set, by SESSION (not
+    window) -- so the one-class model's "known-accept rate" is measured on sessions it never saw
+    fit, the same leakage guard used everywhere else in this package."""
+    sessions = window_table.loc[mask, "session_dir"].unique()
+    rng = np.random.default_rng(seed)
+    shuffled = rng.permutation(sessions)
+    n_fit = int(round(len(shuffled) * fit_frac))
+    fit_sessions = set(shuffled[:n_fit])
+    is_fit = mask & window_table["session_dir"].isin(fit_sessions).values
+    is_eval = mask & ~window_table["session_dir"].isin(fit_sessions).values
+    return is_fit, is_eval
+
+
+def evaluate_oneclass(name: str, X_fit, X_eval_known, X_calib_stranger, X_test_stranger) -> None:
+    scaler = StandardScaler().fit(X_fit)
+    Xf, Xk, Xc, Xt = (scaler.transform(a) for a in (X_fit, X_eval_known, X_calib_stranger, X_test_stranger))
+
+    for clf_name, clf in [
+        ("OneClassSVM", OneClassSVM(kernel="rbf", nu=0.05, gamma="scale")),
+        ("IsolationForest", IsolationForest(contamination=0.05, random_state=0, n_jobs=-1)),
+    ]:
+        clf.fit(Xf)
+        score_known = clf.decision_function(Xk)   # higher = more "normal"/inlier, for both classes
+        score_calib = clf.decision_function(Xc)
+        score_test = clf.decision_function(Xt)
+
+        y_calib = np.concatenate([np.ones(len(score_known)), np.zeros(len(score_calib))])
+        s_calib = np.concatenate([score_known, score_calib])
+        auc = roc_auc_score(y_calib, s_calib)
+
+        threshold = np.percentile(score_known, 5)  # keep ~95% of held-out known windows
+        known_accept = (score_known >= threshold).mean()
+        stranger_reject = (score_test < threshold).mean()
+        print(f"  [{name} / {clf_name}] calib AUC={auc:.3f}  known_accept={known_accept:.3f}  "
+              f"held_out_stranger_reject={stranger_reject:.3f}")
+
+
 def main():
-    window_table, _, X_seq = build_dataset()
+    window_table, X_stats, X_seq = build_dataset()
     model, sub_mean, sub_std = load_cnn_attention()
     seq_norm = ((X_seq - sub_mean) / sub_std).astype(np.float32)
 
@@ -109,6 +158,19 @@ def main():
         mask = window_table["person_id"].values == person
         print(f"  {person}: n={mask.sum():4d}  conf-band={( conf_band[mask] <= conf_threshold).mean():.3f}  "
               f"dist={(dist[mask] >= dist_threshold).mean():.3f}")
+
+    print("\n=== approach 3: one-class anomaly detection (fit on Anjali+Barath pooled as one class) ===")
+    is_known = is_anjali | is_barath
+    is_fit, is_eval_known = session_disjoint_split(window_table, is_known)
+    print(f"known-class fit/eval split: {is_fit.sum()} fit windows, {is_eval_known.sum()} held-out-session "
+          f"eval windows")
+
+    print("-- on raw handcrafted stats features (874-dim) --")
+    evaluate_oneclass("stats", X_stats[is_fit], X_stats[is_eval_known],
+                       X_stats[is_calib_stranger], X_stats[is_test_stranger])
+    print("-- on CNN+Attention embedding (64-dim) --")
+    evaluate_oneclass("embed", embed[is_fit], embed[is_eval_known],
+                       embed[is_calib_stranger], embed[is_test_stranger])
 
 
 if __name__ == "__main__":
