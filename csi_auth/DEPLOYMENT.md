@@ -148,6 +148,28 @@ end-to-end: `python replay_demo.py <path-to-samples.npz> [reveal_after_s]`.
 | Empty room (~269s) | stays idle almost throughout; one brief flicker near the end correctly suppressed by the debounce before it could reveal | -- | yes |
 | Stranger (abdul), walking | confirmed ~1s in | "barath", 74.5% -> 71.5% | **confidently wrong -- expected.** This is the open-set limitation from `FINDINGS.md` section 2, now visible in the live engine too: presence correctly fires on anyone, but the identity model is a strict binary classifier and WILL pick one of the two known people no matter who's actually there. Do not treat this output as authentication. |
 
+## Open-set rejection: tested, doesn't work yet (`openset.py`)
+
+The stranger-misclassified-as-Barath behavior above is real and reproducible. Two standard fixes were
+tried and tested honestly (thresholds picked on half the strangers, evaluated on the OTHER, never-seen
+half):
+
+| approach | calibration AUC (known vs. calibration-strangers) | held-out stranger reject rate |
+|---|---|---|
+| Confidence-band (reject if P(barath) stays near 0.5) | 0.549 | 7.6% |
+| Distance-to-centroid, in the CNN+Attention model's own learned embedding | 0.573 | 9.6% |
+
+Both are barely above chance and reject under 10% of held-out strangers' windows -- **neither is
+reliable enough to use.** This isn't a sign the wrong technique was tried; it's the expected failure
+mode of a classifier trained only to distinguish two known people -- it never learned what "neither"
+looks like, so it produces confident-looking outputs for any input, in-distribution or not. The
+embedding-distance approach was specifically worth checking (a discriminatively-trained internal
+representation could in principle separate better than raw features do), and it didn't.
+**Conclusion: this needs more/better stranger data (ideally multiple sessions per stranger across
+multiple days, matching how Anjali/Barath were collected), not a cleverer algorithm on the current
+data.** See `openset.py` for the full calibration/evaluation code if more stranger data becomes
+available -- the same script, just with a real calibration set, is the right next step.
+
 ## What would most improve this before a real deployment
 
 1. **More non-auth sessions per stranger**, if open-set rejection is ever needed -- the current

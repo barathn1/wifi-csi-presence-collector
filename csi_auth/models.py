@@ -92,7 +92,7 @@ class CnnAttention(nn.Module):
             nn.Linear(hidden, 32), nn.ReLU(), nn.Dropout(0.3), nn.Linear(32, 1),
         )
 
-    def forward(self, x):  # x: (batch, time, subcarriers)
+    def embed(self, x):  # x: (batch, time, subcarriers) -> (batch, hidden) pre-classifier embedding
         x = x.transpose(1, 2)
         x = self.conv(x)
         x = x.transpose(1, 2)                       # (batch, T, hidden)
@@ -100,8 +100,10 @@ class CnnAttention(nn.Module):
         attn_out, _ = self.self_attn(x, x, x)
         x = self.norm(x + attn_out)
         weights = torch.softmax(self.pool_attn(x).squeeze(-1), dim=1)
-        pooled = (x * weights.unsqueeze(-1)).sum(dim=1)
-        return self.head(pooled).squeeze(-1)
+        return (x * weights.unsqueeze(-1)).sum(dim=1)
+
+    def forward(self, x):  # x: (batch, time, subcarriers) -> (batch,) logits
+        return self.head(self.embed(x)).squeeze(-1)
 
 
 def train_torch_model(model_cls, X_train: np.ndarray, y_train: np.ndarray, X_val: np.ndarray | None = None,
@@ -145,6 +147,14 @@ def torch_model_predict_proba(model, X: np.ndarray) -> np.ndarray:
     with torch.no_grad():
         logits = model(torch.from_numpy(X))
         return torch.sigmoid(logits).numpy()
+
+
+def torch_model_embed(model: CnnAttention, X: np.ndarray) -> np.ndarray:
+    """The 64-dim pre-classifier embedding -- CnnAttention only (CnnLstm doesn't expose one; add an
+    analogous .embed() there if the open-set approach ends up needing it too)."""
+    model.eval()
+    with torch.no_grad():
+        return model.embed(torch.from_numpy(X)).numpy()
 
 
 # backward-compatible aliases (permutation_test.py / identity_permutation.py call these by name)
