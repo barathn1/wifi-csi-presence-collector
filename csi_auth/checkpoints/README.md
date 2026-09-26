@@ -30,3 +30,13 @@ svm = joblib.load('svm_final.joblib')  # scaler+SVM pipeline, call .predict_prob
 ckpt = torch.load('cnn_attention_final.pt')  # or cnn_bilstm_final.pt
 # reconstruct with models.CnnAttention(n_subcarriers=ckpt['n_subcarriers']), load_state_dict(ckpt['state_dict']), normalize inputs with ckpt['sub_mean']/['sub_std']
 ```
+
+## `presence_final.joblib` (`train_presence.py`)
+
+Occupied-vs-empty-room gate used by `live_inference.py` to decide WHEN to start the identity clock --
+trained on all 6 days pooled (any walking session, either person or a stranger, vs. `label == "none"`
+empty-room sessions), same "pooled-set number, not a cross-day estimate" caveat (0.995 pooled;
+see `analysis/*_ch6/environment_control.py` for the honest leave-one-day-out presence numbers,
+77-96%, that justify shipping this). Load with `joblib.load('presence_final.joblib')`, call
+`.predict_proba(X_stats)[:, 1]` -- same 874-dim handcrafted feature vector as the identity SVM.
+**Do not trust a single window's presence vote live** -- see `DEPLOYMENT.md`'s debounce discussion.

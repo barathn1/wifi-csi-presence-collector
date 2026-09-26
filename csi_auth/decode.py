@@ -51,6 +51,19 @@ def decode_dominant_bucket(npz: dict) -> dict:
     }
 
 
+def monotonic_elapsed_seconds(device_time_us: np.ndarray) -> np.ndarray:
+    """Cumulative elapsed seconds from device_time_us, guarded against the known ESP32 clock-reset
+    quirk (the counter occasionally jumps backward mid-session -- seen in ~6 of 44 sessions in this
+    dataset, e.g. a -6703s "elapsed time" if used naively). A backward jump is treated as zero elapsed
+    time for that one step rather than a huge negative delta -- doesn't recover the lost timing
+    precision around the reset, but keeps a live elapsed-time display from breaking (going negative or
+    exploding), which is what actually matters for something like live_inference.py's reveal-timer."""
+    diffs = np.diff(device_time_us.astype(np.int64))
+    diffs = np.clip(diffs, 0, None)
+    cumulative = np.concatenate([[0], np.cumsum(diffs)])
+    return cumulative / 1e6
+
+
 def dominant_channel(npz: dict) -> tuple[int, int]:
     """(channel_primary, cwb) of whichever combo most packets share -- cwb 0=20MHz, 1=40MHz."""
     combos, counts = np.unique(

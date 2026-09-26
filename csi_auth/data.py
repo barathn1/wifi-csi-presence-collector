@@ -37,14 +37,19 @@ def find_fixed_board(manifest: pd.DataFrame) -> str:
     return macs[0]
 
 
-def build_session_table(motion: str = "walking") -> pd.DataFrame:
+def build_session_table(motion: str = "walking", include_empty_room: bool = False) -> pd.DataFrame:
+    """`include_empty_room=True` also pulls in `label == "none"` sessions (no `motion` value at all --
+    nobody's there to be walking or standing) for training a presence gate. Their `person_id` is NaN
+    and `auth` is 0, same as any other non-auth row -- callers that need to tell "empty room" apart
+    from "a stranger is here" should use `label == "none"` directly, not `auth`."""
     manifest = pd.read_csv(DATA_ROOT / "manifest.csv")
     manifest["date"] = manifest["session_dir"].str.split("/").str[1]
     board = find_fixed_board(manifest)
 
-    candidates = manifest[
-        (manifest["board_mac"] == board) & (manifest["motion"] == motion)
-    ].reset_index(drop=True)
+    motion_mask = manifest["motion"] == motion
+    if include_empty_room:
+        motion_mask = motion_mask | (manifest["label"] == "none")
+    candidates = manifest[(manifest["board_mac"] == board) & motion_mask].reset_index(drop=True)
 
     rows = []
     for _, row in candidates.iterrows():

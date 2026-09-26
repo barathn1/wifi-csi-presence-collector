@@ -114,6 +114,40 @@ bucket (`decode.py`), Hampel-filter spikes (`cleaning.py`), drop the 19 null sub
 raw 200-packet x 109-subcarrier amplitude array directly (for the CNN models, after the saved
 mean/std normalization above).
 
+## Reference implementation (`live_inference.py` + `replay_demo.py`)
+
+`live_inference.py` implements exactly the architecture above as a transport-agnostic state machine
+(`LiveIdentitySession`) -- feed it one already-decoded, already-cleaned, already-masked window at a
+time via `on_window(amplitude, phase, rssi, elapsed_s)`, it returns what should be on screen.
+`replay_demo.py` drives it against a REAL recorded session (no hardware needed) to validate it
+end-to-end: `python replay_demo.py <path-to-samples.npz> [reveal_after_s]`.
+
+**Two real bugs building this that are worth knowing about, not just the design:**
+
+1. **A single misclassified window is not a rare event -- debounce, don't trust one window.**
+   The presence gate's headline 99.5% (`train_presence.py`) is a POOLED training-set number, not a
+   per-window guarantee. Replaying a real empty-room recording window-by-window without any
+   smoothing produced a false "presence confirmed" from literally the first window. Fix: require a
+   rolling majority (4 of the last 5 windows) to agree before confirming OR dropping presence, not any
+   single window's vote (`PRESENCE_VOTE_WINDOW`/`PRESENCE_VOTE_MIN_POSITIVE` in `live_inference.py`).
+
+2. **Board consistency isn't optional, and multi-board session folders make it easy to get wrong.**
+   2026-09-21 onward, every session directory has 3 files (one per receiver board). Loading the wrong
+   one for a quick manual test produced a *sustained, high-confidence* (86-92%) false-positive across
+   an entire ~4.5-minute empty-room recording -- not a flaky edge case, a systematically wrong answer,
+   because the presence/identity models were trained exclusively on `ac:27:6e:a5:5b:c8`
+   (`FIXED_BOARD` in `data.py`) and know nothing about the other two boards' noise floor. Any live
+   feed MUST come from that specific receiver.
+
+### Validated behavior (after both fixes, correct board)
+
+| session | presence | reveal (at ~35s) | correct? |
+|---|---|---|---|
+| Anjali, walking | confirmed ~1s in | "anjali", 76.2% -> 74.5% | yes |
+| Barath, walking | confirmed ~1s in | "barath", 84.6% -> 80.7% | yes |
+| Empty room (~269s) | stays idle almost throughout; one brief flicker near the end correctly suppressed by the debounce before it could reveal | -- | yes |
+| Stranger (abdul), walking | confirmed ~1s in | "barath", 74.5% -> 71.5% | **confidently wrong -- expected.** This is the open-set limitation from `FINDINGS.md` section 2, now visible in the live engine too: presence correctly fires on anyone, but the identity model is a strict binary classifier and WILL pick one of the two known people no matter who's actually there. Do not treat this output as authentication. |
+
 ## What would most improve this before a real deployment
 
 1. **More non-auth sessions per stranger**, if open-set rejection is ever needed -- the current
