@@ -1,0 +1,7 @@
+timestamp,stage,identity,auroc,eer,genuine_accept_rate,correct_identity_rate,false_accept_rate,n_recal,n_test,notes
+2026-09-19T11:17:53.120978+00:00,recal_overall,,0.49491761525588923,0.4952041842132686,1.0,0.3772504091653028,1.0,304,2290,"recal_sessions={'anjali': 'authorized/2026-09-17/20260917_181415_anjali', 'barath': 'authorized/2026-09-17/20260917_181647_barath'}"
+2026-09-19T11:17:53.120978+00:00,recal_per_enrolled,anjali,,,1.0,0.00784313725490196,,,765,2026-09-17
+2026-09-19T11:17:53.120978+00:00,recal_per_enrolled,barath,,,1.0,0.9956236323851203,,,457,2026-09-17
+2026-09-19T11:17:53.120978+00:00,recal_per_stranger,divya,,,,,1.0,,461,seen_in_train
+2026-09-19T11:17:53.120978+00:00,recal_per_stranger,harshtiha,,,,,1.0,,304,novel
+2026-09-19T11:17:53.120978+00:00,recal_per_stranger,manas,,,,,1.0,,303,seen_in_train
