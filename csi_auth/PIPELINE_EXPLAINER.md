@@ -136,6 +136,30 @@ person's does. Every piece of this architecture follows from that:
    Barath apart with real, cross-day-confirmed accuracy (`FINDINGS.md`: 3.6-4.6 std above a
    permutation chance floor at the window level, 82-90% at the session/live-reveal level).
 
+## What the learned signature actually looks like (`visualize_learned_signature.py`)
+
+![PCA of every window's 64-dim learned embedding, colored by person](figures/learned_embedding_scatter.png)
+
+This is the most direct visual evidence in this whole repo: colored by person, the model's learned
+64-dim embedding (PCA'd down to 2D) shows **clean visual separation along PC1 alone** -- Anjali
+mostly left, Barath mostly right. Compare this to `FINDINGS.md`'s raw-feature PCA/UMAP plots, which
+show **no** visible clustering at all on the same two people. That contrast is the whole point of
+training a model instead of eyeballing a scatterplot: the raw data doesn't visibly separate them, but
+a representation trained specifically to tell them apart does.
+
+![Each person's mean embedding (z-scored, sorted by how much it differs) and their difference](figures/learned_signature_heatmap.png)
+
+Each person's average embedding vector, side by side, plus the difference row -- literally "what the
+model thinks Anjali typically looks like" vs Barath, dimension by dimension.
+
+![Attention-pooling weight across the window's ~50 timesteps, one example window per person](figures/learned_attention_profile.png)
+
+Which moments in the window the self-attention pooling step (section 6, step 3) weighted most heavily
+for one example window each -- Anjali's example spikes sharply near the end of the window; Barath's
+spreads across several moderate peaks earlier on. This is from a single representative window per
+person, illustrating that the model genuinely weights different moments differently (not just
+averaging blindly) -- not a claim that either person has one fixed, always-the-same attention pattern.
+
 ## 7. End-to-end shape summary
 
 | stage | input | output | file |
