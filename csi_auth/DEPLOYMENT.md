@@ -188,6 +188,34 @@ and "not known" from labeled examples of both is likely to work; anomaly detecti
 family for this specific problem, not merely under-tuned. See `openset.py` for the full
 calibration/evaluation code to re-run once more stranger data exists.
 
+### A 5th attempt: frequency-domain (Doppler) features -- also fails (`stft_features.py`, `train_stft.py`)
+
+Every representation above is time-domain. The identity signal's actual physical mechanism (gait
+dynamics) is inherently frequency-domain (stride rate, limb-swing harmonics), so a proper Doppler
+spectrum feature was built and tested as a genuinely different, mechanistically-motivated
+representation -- not just another model on the same inputs. Windowed over 1000 packets (>=2s,
+long enough to resolve ~1-2 Hz stride content -- the usual 200-packet window is only ~0.3-0.4s at
+this dataset's faster capture rates, nowhere near enough), resampled onto a uniform time grid per
+window (capture rate varies 200-500 Hz across sessions), FFT'd per subcarrier, averaged across
+subcarriers, and interpolated onto a fixed 0.5-19.5 Hz grid so every window is comparable regardless
+of its native rate:
+
+| model | granularity | real balanced accuracy | shuffled-label balanced accuracy |
+|---|---|---|---|
+| SVM | window / session | 0.499 / 0.500 | 0.502 / 0.501 |
+| Random Forest | window / session | 0.484 / 0.533 | 0.512 / 0.505 |
+
+SVM collapsed to predicting the majority class outright (exactly 0.500 balanced accuracy, real and
+shuffled indistinguishable); Random Forest is noisier but still fully overlaps its own shuffled
+control. **This is the sixth fundamentally different approach to fail identically** (time-domain
+stats, raw-sequence CNN+BiLSTM, CNN+Attention embedding-distance, OneClassSVM, IsolationForest, now
+Doppler spectrum) across classical ML, deep learning, anomaly detection, and a physically-motivated
+frequency feature. That consistency across so many different techniques is itself the evidence: at
+this point it's very unlikely to be a feature-representation problem at all. One untested variant --
+per-subcarrier Doppler spectra instead of averaging across all 109 first -- could in principle
+preserve information the averaging washes out, but given how uniformly everything else has failed,
+the higher-probability path forward is still more/more-diverse stranger data, not another feature.
+
 ## What would most improve this before a real deployment
 
 1. **More non-auth sessions per stranger**, if open-set rejection is ever needed -- the current
