@@ -51,6 +51,16 @@ def decode_dominant_bucket(npz: dict) -> dict:
     }
 
 
+def decode_one_packet_bytes(csi_data: bytes) -> tuple[np.ndarray, np.ndarray]:
+    """Decode ONE live packet's raw CSI bytes (same (imag,real) int8-pair layout as the batched
+    decoder above, just for a single already-arrived packet instead of a whole recorded session's
+    array) -- used by the live bridge, where packets arrive one at a time rather than as one big
+    array already in memory."""
+    raw = np.frombuffer(csi_data, dtype=np.int8).astype(np.float32)
+    imag, real = raw[0::2], raw[1::2]
+    return np.hypot(real, imag).astype(np.float32), np.arctan2(imag, real).astype(np.float32)
+
+
 def monotonic_elapsed_seconds(device_time_us: np.ndarray) -> np.ndarray:
     """Cumulative elapsed seconds from device_time_us, guarded against the known ESP32 clock-reset
     quirk (the counter occasionally jumps backward mid-session -- seen in ~6 of 44 sessions in this
